@@ -316,8 +316,11 @@ button{font-family:inherit}
   .corner .ticon{display:block;width:18px;height:18px}
   .corner .cl{font-size:10px}
   .corner .cs{display:none}
-  .side-b .band,.side-t .band{flex-basis:12px}
-  .side-l .band,.side-r .band{flex-basis:16px}
+  .side-b .band,.side-t .band{flex-basis:10px}
+  .side-l .band,.side-r .band{flex-basis:10px}
+  .side-t .tinfo,.side-b .tinfo{justify-content:center;gap:2px}
+  .side-t .tname,.side-b .tname{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .side-t .tinfo:has(.tprice) .ticon,.side-b .tinfo:has(.tprice) .ticon{display:none}
   .side-b .own,.side-t .own{height:3px}
   .side-l .own,.side-r .own{width:3px}
   .houses{gap:1px}
