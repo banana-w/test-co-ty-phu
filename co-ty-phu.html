@@ -139,6 +139,19 @@ button{font-family:inherit}
 .card-pop{background:var(--b-bg);border:2px solid var(--b-accent);border-radius:10px;padding:max(8px,1.3cqi) max(12px,2cqi);max-width:min(100%,58cqi);animation:pop .28s ease-out;box-shadow:0 4px 0 color-mix(in srgb,var(--b-accent) 30%,transparent)}
 .card-k{font:800 max(12px,1.6cqi)/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--b-accent)}
 .card-pop p{margin:.35em 0 0;font-size:max(12px,1.7cqi);line-height:1.35}
+.cardfx{position:fixed;inset:0;z-index:60;display:grid;place-items:center;pointer-events:none;background:rgba(8,12,10,.35);animation:fade .2s ease-out;perspective:900px}
+.cardfx.out{animation:fxout .3s ease-in forwards}
+@keyframes fxout{to{opacity:0}}
+.cf-card{width:min(260px,60vw,52vh);aspect-ratio:5/7;position:relative;transform-style:preserve-3d;animation:cfin .9s cubic-bezier(.3,1.3,.5,1) forwards}
+@keyframes cfin{0%{transform:translateY(60vh) rotateY(0) scale(.5)}45%{transform:translateY(0) rotateY(0) scale(1)}100%{transform:rotateY(180deg)}}
+.cf-face{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;display:grid;place-items:center;text-align:center;box-shadow:0 18px 40px -10px rgba(0,0,0,.6);border:3px solid #fff}
+.cf-back{background:repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0 10px,transparent 10px 20px),var(--cfc);color:#fff}
+.cf-back svg{width:45%;height:45%;fill:currentColor}
+.cf-front{transform:rotateY(180deg);background:#FFFBEF;color:#2A2118;align-content:center;gap:10px;padding:16px;border-color:var(--cfc)}
+.cf-front .ck{font:800 clamp(14px,4vh,20px)/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--cfc)}
+.cf-front .ci{width:44px;height:44px;color:var(--cfc);margin:0 auto}.cf-front .ci svg{width:100%;height:100%;fill:currentColor}
+.cf-front p{margin:0;font-size:clamp(13px,3.6vh,16px);line-height:1.35}
+
 @keyframes pop{from{transform:scale(.85) rotate(-2deg);opacity:0}}
 .c-actions{display:flex;gap:max(6px,1.1cqi);flex-wrap:wrap;justify-content:center}
 .center .btn{font-size:max(13px,1.75cqi);background:var(--b-bg);color:var(--b-ink);border-color:var(--b-line)}
@@ -320,7 +333,7 @@ button{font-family:inherit}
   .side-l .band,.side-r .band{flex-basis:10px}
   .side-t .tinfo,.side-b .tinfo{justify-content:center;gap:2px}
   .side-t .tname,.side-b .tname{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .side-t .tinfo:has(.tprice) .ticon,.side-b .tinfo:has(.tprice) .ticon{display:none}
+  .side-t .tinfo:has(.tprice:not(:empty)) .ticon,.side-b .tinfo:has(.tprice:not(:empty)) .ticon{display:none}
   .side-b .own,.side-t .own{height:3px}
   .side-l .own,.side-r .own{width:3px}
   .houses{gap:1px}
@@ -690,10 +703,17 @@ const CARDS={
     {t:()=>`Nhận thừa kế: ${money(100)}.`,f:async p=>{await gain(p,100);}},
     {t:()=>`Lì xì đầu năm: nhận ${money(25)}.`,f:async p=>{await gain(p,25);}}]
 };
+async function showCardFx(deck,dn,text){
+  const ic=deck==='chance'?IC.q:IC.star,col=deck==='chance'?'#D9472B':'#2F7FC1';
+  const fx=document.createElement('div');fx.className='cardfx';fx.style.setProperty('--cfc',col);
+  fx.innerHTML=`<div class="cf-card"><div class="cf-face cf-back">${ic}</div><div class="cf-face cf-front"><span class="ci">${ic}</span><span class="ck">${esc(dn)}</span><p>${esc(text)}</p></div></div>`;
+  document.body.appendChild(fx);
+  await wait(900+Math.max(1400,readMs()));
+  fx.classList.add('out');await wait(300);fx.remove();}
 async function drawCard(p,deck,sum){const c=CARDS[deck][Math.floor(Math.random()*CARDS[deck].length)];
   const text=c.t();const dn=deck==='chance'?SK().chance:SK().chest;
   S.card={deck,text};log(`${p.name} rút thẻ ${dn}: ${text}`,S.cur);renderCenter();
-  await wait(readMs());
+  await showCardFx(deck,dn,text);
   const again=await c.f(p);renderPlayers();
   if(again){await land(p,sum);return;}
   settle();}
