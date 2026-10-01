@@ -175,6 +175,10 @@ button{font-family:inherit}
 .dice-row .die.digit{font-size:max(24px,5.4cqi)}
 .dice-row.rolling .die{animation:shake .14s linear infinite}
 .dice-row.landed .die{animation:land .3s ease-out}
+.dsum{align-self:center;font:800 max(20px,4.6cqi)/1 var(--f-display);color:var(--b-accent);animation:sumpop .45s cubic-bezier(.3,1.6,.5,1);white-space:nowrap}
+@keyframes sumpop{from{transform:scale(0);opacity:0}}
+.tile.dest{z-index:2;animation:destblink .5s ease-in-out infinite alternate}
+@keyframes destblink{from{box-shadow:inset 0 0 0 max(2px,.35cqi) #F5C542}to{box-shadow:inset 0 0 0 max(4px,.7cqi) #F5C542,inset 0 0 3cqi rgba(245,197,66,.85);filter:brightness(1.15)}}
 @keyframes shake{25%{transform:rotate(-14deg) translateY(-8%)}75%{transform:rotate(12deg) translateY(4%)}}
 @keyframes land{40%{transform:scale(1.12)}}
 [data-dice="classic"] .die{background:#FBFAF6;--pip:#1B1B1B;color:#1B1B1B;border:1px solid #D3CFC4}
@@ -656,10 +660,16 @@ function settle(){const p=cp();if(S.phase==='gameover')return;
   else{S.debt=null;S.phase=(S.extra&&!p.jail)?'again':'end';}}
 
 async function moveSteps(p,n){const dir=n>0?1:-1;
+  const dest=tileEl((p.pos+n+400)%40);
+  document.querySelectorAll('#board .tile.dest').forEach(e=>e.classList.remove('dest'));
+  if(dest)dest.classList.add('dest');
+  try{
   for(let k=0;k<Math.abs(n);k++){p.pos=(p.pos+dir+40)%40;
     renderDynamic();
     if(dir>0&&p.pos===0){log(`${p.name} đi qua Xuất phát, nhận ${money(S.rules.salary)}.`,idx(p));xfer(null,idx(p),S.rules.salary);}
-    await wait(stepMs());}}
+    await wait(stepMs());}
+  if(dest)await wait(400);
+  }finally{if(dest)dest.classList.remove('dest');}}
 async function moveTo(p,target){await moveSteps(p,(target-p.pos+40)%40||40);}
 
 async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;
@@ -729,8 +739,8 @@ async function drawCard(p,deck,sum){const c=CARDS[deck][Math.floor(Math.random()
   settle();}
 
 async function doRoll(){if(busy||!S||!(S.phase==='roll'||S.phase==='again'))return;buildMode=false;
-  busy=true;S.card=null;renderCenter();const p=cp();
-  const d=[rand6(),rand6()];await animateDice(d);S.dice=d;const sum=d[0]+d[1],dbl=d[0]===d[1];
+  busy=true;S.card=null;S.showSum=false;renderCenter();const p=cp();
+  const d=[rand6(),rand6()];await animateDice(d);S.dice=d;S.showSum=true;const sum=d[0]+d[1],dbl=d[0]===d[1];
   if(p.jail){
     if(dbl){p.jail=false;p.jt=0;S.extra=false;log(`${p.name} đổ được đôi ${d[0]}–${d[1]} và ra tù.`,S.cur);await moveSteps(p,sum);await land(p,sum);}
     else{p.jt++;
@@ -747,7 +757,7 @@ async function animateDice(d){const row=$('#dice');const ms=diceMs();
   if(row&&ms>0){row.classList.remove('landed');row.classList.add('rolling');const t0=performance.now();
     while(performance.now()-t0<ms){row.innerHTML=dieHTML(rand6())+dieHTML(rand6());await wait(70);}
     row.classList.remove('rolling');}
-  if(row){row.innerHTML=dieHTML(d[0])+dieHTML(d[1]);row.classList.add('landed');}}
+  if(row){row.innerHTML=dieHTML(d[0])+dieHTML(d[1])+`<b class="dsum">= ${d[0]+d[1]}</b>`;row.classList.add("landed");}}
 
 function doBuy(){if(S.phase!=='buy')return;const p=cp(),i=S.pending;S.own[i]={o:S.cur,lv:0,m:false};
   log(`${p.name} mua ${tname(i)} với giá ${money(T[i].price)}.`,S.cur);
@@ -762,7 +772,7 @@ function doBuy(){if(S.phase!=='buy')return;const p=cp(),i=S.pending;S.own[i]={o:
 const tileEl = i=>document.querySelector(`#board .tile[data-i="${i}"]`);
 const VIS={hideOwn:{},hideLv:{},drop:{}};
 function doSkip(){if(S.phase!=='buy')return;const p=cp(),i=S.pending;log(`${p.name} bỏ qua ${tname(i)}.`,S.cur);S.pending=null;settle();renderAll();save();}
-function endTurn(){if(busy||S.phase!=='end')return;S.card=null;S.dbl=0;S.extra=false;nextPlayer();}
+function endTurn(){if(busy||S.phase!=='end')return;S.card=null;S.showSum=false;S.dbl=0;S.extra=false;nextPlayer();}
 function nextPlayer(){let n=S.cur;do{n=(n+1)%S.players.length;}while(S.players[n].bankrupt);
   S.cur=n;S.turnNo++;S.cred=null;buildMode=false;const p=cp();
   if(p.money<0){S.phase='debt';S.debt={to:null,after:'roll'};log(`${p.name} đang âm ${money(-p.money)}, cần xoay tiền trước khi đổ.`,n);}
@@ -877,7 +887,7 @@ function renderCenter(){const c=$('#center');if(!c)return;const s=SK(),over=S.ph
   if(S.phase==='debt')msg+=`<p class="c-warn">Đang âm ${money(-cp().money)}. Bấm vào ô đất của ${esc(cp().name)} để bán nhà hoặc cầm cố.</p>`;
   c.innerHTML=`<div class="c-title"><span class="c-kicker">Cờ Tỷ Phú</span><span class="c-name">${s.name}</span></div>
    <div class="c-turn"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span><span class="c-who"><b>${over?'Người thắng: ':''}${esc(p.name)}</b>${over?`<span>${money(worth(S.winner))}</span>`:mspan(idx(p))}</span>${!over&&p.jail?'<span class="tag">Ở tù</span>':''}</div>
-   <div class="dice-row" id="dice" data-dice="${CFG.dice}">${dieHTML(S.dice[0])}${dieHTML(S.dice[1])}</div>
+   <div class="dice-row" id="dice" data-dice="${CFG.dice}">${dieHTML(S.dice[0])}${dieHTML(S.dice[1])}${S.showSum?`<b class="dsum">= ${S.dice[0]+S.dice[1]}</b>`:""}</div>
    <div class="c-msgs">${msg}</div><div class="c-actions">${actionsHTML()}</div><div class="cpl" id="cpl">${cplHTML()}</div>`;}
 function cplHTML(){if(!S)return '';
   return `<div class="cpl-h"><span>Lượt ${S.turnNo}</span><button class="btn sm" data-act="menu">Sổ đỏ · Menu</button></div>`+
