@@ -216,6 +216,13 @@ button{font-family:inherit}
 .deed-head{padding:10px 12px;display:grid;gap:3px;text-align:center}
 .deed-head span{font:700 10.5px/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;opacity:.85}
 .deed-head b{font:800 23px/1.05 var(--f-display)}
+.buydlg{max-width:340px;gap:12px;animation:pop .3s cubic-bezier(.3,1.4,.5,1)}
+.buydlg .deed{box-shadow:0 10px 24px -12px rgba(0,0,0,.45)}
+.buy-k{margin:0;text-align:center;font:700 13px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.buy-m{margin:0;text-align:center;font-size:13px;color:var(--muted)}
+.buydlg .dlg-act .btn{flex:1}
+.buydlg .dnote{display:none}
+@media (orientation:landscape) and (max-height:540px){.buydlg{padding:12px;gap:8px;max-width:320px}.buydlg .deed table{font-size:11.5px}.buydlg .deed td{padding:2px 10px}}
 .deed table{width:100%;border-collapse:collapse;font-size:13px}
 .deed td{padding:4px 12px}
 .deed td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
@@ -675,7 +682,7 @@ async function moveTo(p,target){await moveSteps(p,(target-p.pos+40)%40||40);}
 
 async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;
   if(t.type==='prop'||t.type==='station'||t.type==='util'){const o=S.own[i];
-    if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);return;}
+    if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);setTimeout(showBuyCard,350);return;}
       log(`${p.name} đến ${tname(i)} nhưng không đủ tiền mua.`,me);}
     else if(o.o===me)log(`${p.name} về ${tname(i)} của mình.`,me);
     else if(o.m)log(`${tname(i)} đang cầm cố nên ${p.name} không phải trả tiền thuê.`,me);
@@ -760,7 +767,7 @@ async function animateDice(d){const row=$('#dice');const ms=diceMs();
     row.classList.remove('rolling');}
   if(row){row.innerHTML=dieHTML(d[0])+dieHTML(d[1])+`<b class="dsum">= ${d[0]+d[1]}</b>`;row.classList.add("landed");}}
 
-function doBuy(){if(S.phase!=='buy')return;const p=cp(),i=S.pending;S.own[i]={o:S.cur,lv:0,m:false};
+function doBuy(){if(S.phase!=='buy')return;if(modalKind==='buy')closeModal();const p=cp(),i=S.pending;S.own[i]={o:S.cur,lv:0,m:false};
   log(`${p.name} mua ${tname(i)} với giá ${money(T[i].price)}.`,S.cur);
   const full=T[i].type==='prop'&&ownsGroup(i);
   if(full)log(`${p.name} đã có trọn bộ màu! Tiền thuê nhóm này tăng gấp đôi và giờ có thể xây nhà.`,S.cur);
@@ -772,7 +779,12 @@ function doBuy(){if(S.phase!=='buy')return;const p=cp(),i=S.pending;S.own[i]={o:
   S.pending=null;settle();renderAll();save();}
 const tileEl = i=>document.querySelector(`#board .tile[data-i="${i}"]`);
 const VIS={hideOwn:{},hideLv:{},drop:{}};
-function doSkip(){if(S.phase!=='buy')return;const p=cp(),i=S.pending;log(`${p.name} bỏ qua ${tname(i)}.`,S.cur);S.pending=null;settle();renderAll();save();}
+function doSkip(){if(S.phase!=='buy')return;if(modalKind==="buy")closeModal();const p=cp(),i=S.pending;log(`${p.name} bỏ qua ${tname(i)}.`,S.cur);S.pending=null;settle();renderAll();save();}
+function showBuyCard(){if(!S||S.phase!=='buy'||S.pending==null)return;const i=S.pending,p=cp(),prev=sel;
+  sel=i;renderDetail();const d=$('#detail .deed');const deed=d?d.outerHTML:'';sel=prev;renderDetail();
+  showModal(`<div class="dlg buydlg" role="dialog" aria-label="Mua ${esc(tname(i))}"><p class="buy-k">${esc(p.name)} đến ô trống</p>${deed}
+    <p class="buy-m">Tiền hiện có: <b>${money(p.money)}</b> → còn <b>${money(p.money-T[i].price)}</b></p>
+    <div class="dlg-act"><button class="btn" data-act="skip">Bỏ qua</button><button class="btn primary" data-act="buy">Mua · ${money(T[i].price)}</button></div></div>`,'buy');}
 function endTurn(){if(busy||S.phase!=='end')return;S.card=null;S.showSum=false;S.dbl=0;S.extra=false;nextPlayer();}
 function nextPlayer(){let n=S.cur;do{n=(n+1)%S.players.length;}while(S.players[n].bankrupt);
   S.cur=n;S.turnNo++;S.cred=null;buildMode=false;const p=cp();
