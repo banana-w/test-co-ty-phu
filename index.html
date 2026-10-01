@@ -682,7 +682,7 @@ async function moveTo(p,target){await moveSteps(p,(target-p.pos+40)%40||40);}
 
 async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;
   if(t.type==='prop'||t.type==='station'||t.type==='util'){const o=S.own[i];
-    if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);setTimeout(showBuyCard,350);return;}
+    if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);showBuyCard();return;}
       log(`${p.name} đến ${tname(i)} nhưng không đủ tiền mua.`,me);}
     else if(o.o===me)log(`${p.name} về ${tname(i)} của mình.`,me);
     else if(o.m)log(`${tname(i)} đang cầm cố nên ${p.name} không phải trả tiền thuê.`,me);
@@ -782,7 +782,7 @@ const VIS={hideOwn:{},hideLv:{},drop:{}};
 function doSkip(){if(S.phase!=='buy')return;if(modalKind==="buy")closeModal();const p=cp(),i=S.pending;log(`${p.name} bỏ qua ${tname(i)}.`,S.cur);S.pending=null;settle();renderAll();save();}
 function showBuyCard(){if(!S||S.phase!=='buy'||S.pending==null)return;const i=S.pending,p=cp(),prev=sel;
   sel=i;renderDetail();const d=$('#detail .deed');const deed=d?d.outerHTML:'';sel=prev;renderDetail();
-  showModal(`<div class="dlg buydlg" role="dialog" aria-label="Mua ${esc(tname(i))}"><p class="buy-k">${esc(p.name)} đến ô trống</p>${deed}
+  showModal(`<div class="dlg buydlg" role="dialog" aria-label="Mua ${esc(tname(i))}">${deed}
     <p class="buy-m">Tiền hiện có: <b>${money(p.money)}</b> → còn <b>${money(p.money-T[i].price)}</b></p>
     <div class="dlg-act"><button class="btn" data-act="skip">Bỏ qua</button><button class="btn primary" data-act="buy">Mua · ${money(T[i].price)}</button></div></div>`,'buy');}
 function endTurn(){if(busy||S.phase!=='end')return;S.card=null;S.showSum=false;S.dbl=0;S.extra=false;nextPlayer();}
@@ -887,7 +887,7 @@ function actionsCore(p,dis){
     case 'roll':if(p.jail)return `<button class="btn primary" data-act="roll" ${dis}>Đổ tìm đôi</button><button class="btn" data-act="payjail" ${busy||p.money<50?'disabled':''}>Nộp ${money(50)} ra tù</button>${p.cards?`<button class="btn" data-act="usecard" ${dis}>Dùng thẻ ra tù (${p.cards})</button>`:''}`;
       return `<button class="btn primary" data-act="roll" ${dis}>Đổ xúc xắc</button>`;
     case 'again':return `<button class="btn primary" data-act="roll" ${dis}>Được đôi, đổ tiếp</button>`;
-    case 'buy':return `<button class="btn primary" data-act="buy">Mua ${esc(tname(S.pending))} · ${money(T[S.pending].price)}</button><button class="btn" data-act="skip">Bỏ qua</button>`;
+    case 'buy':return modalKind==='buy'?'':`<button class="btn primary" data-act="showbuy">Xem sổ đỏ</button>`;
     case 'end':return `<button class="btn primary" data-act="end" ${dis}>Kết thúc lượt</button>`;
     case 'debt':return `<button class="btn primary" data-act="paydebt" ${p.money<0?'disabled':''}>Đã đủ tiền, tiếp tục</button><button class="btn danger" data-act="askbankrupt">Phá sản</button>`;
     case 'gameover':return `<button class="btn primary" data-act="newgame">Ván mới</button><button class="btn" data-act="rank">Bảng xếp hạng</button>`;}
@@ -1011,7 +1011,7 @@ function afterCustomize(){saveCfg();if(modalKind==='drawer')renderDrawer();if(vi
 
 /* ================= events ================= */
 const ACT={
-  roll:doRoll,buy:doBuy,skip:doSkip,end:endTurn,
+  roll:doRoll,buy:doBuy,skip:doSkip,showbuy:showBuyCard,end:endTurn,
   payjail(){const p=cp();if(busy||S.phase!=='roll'||!p.jail||p.money<50)return;pay(p,null,50,'tax');p.jail=false;p.jt=0;log(`${p.name} nộp ${money(50)} để ra tù. Giờ đổ xúc xắc.`,S.cur);renderAll();save();},
   usecard(){const p=cp();if(busy||S.phase!=='roll'||!p.jail||!p.cards)return;p.cards--;p.jail=false;p.jt=0;log(`${p.name} dùng thẻ ra tù miễn phí.`,S.cur);renderAll();save();},
   paydebt(){const p=cp();if(S.phase!=='debt'||p.money<0)return;S.phase=S.debt.after;S.debt=null;log(`${p.name} đã xoay đủ tiền.`,S.cur);renderAll();save();},
@@ -1042,7 +1042,7 @@ const ACT={
   startgame:startGame
 };
 document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
-  const a=el.dataset.act;if(a==='backdrop'){if(e.target===el)closeModal();return;}
+  const a=el.dataset.act;if(a==='backdrop'){if(e.target===el&&modalKind!=='buy')closeModal();return;}
   const f=ACT[a];if(f)f(el.dataset);});
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&modalKind){closeModal();return;}
