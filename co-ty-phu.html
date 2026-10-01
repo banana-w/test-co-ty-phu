@@ -10,6 +10,9 @@
 </head>
 <body>
 <title>Cờ Tỷ Phú</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-512.png">
+<meta name="apple-mobile-web-app-title" content="Cờ Tỷ Phú">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
@@ -324,7 +327,11 @@ button{font-family:inherit}
   .side-l .tinfo,.side-r .tinfo{justify-content:center;gap:0}
   .side-l .tname,.side-r .tname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .ticon{width:13px;height:13px}
-  .side-l .ticon,.side-r .ticon{display:none}
+  .side-l .tinfo,.side-r .tinfo{display:grid;grid-template-columns:auto minmax(0,auto);justify-content:center;align-content:center;column-gap:4px;justify-items:center}
+  .side-l .tname,.side-r .tname{grid-column:2;grid-row:1}
+  .side-l .tprice,.side-r .tprice{grid-column:2;grid-row:2}
+  .side-l .tprice:empty,.side-r .tprice:empty{display:none}
+  .side-l .ticon,.side-r .ticon{display:block;grid-column:1;grid-row:1/3;width:13px;height:13px}
   .corner{gap:2px;padding:3px}
   .corner .ticon{display:block;width:18px;height:18px}
   .corner .cl{font-size:10px}
