@@ -42,7 +42,7 @@ button{font-family:inherit}
 /* ---------- header ---------- */
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;max-width:1260px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
 .brand{display:flex;align-items:center;gap:10px;font:800 26px/1 var(--f-display);letter-spacing:-.01em}
-.brand .die{width:28px;padding:5px}
+.brand .die{width:28px}
 .top nav{display:flex;gap:6px;flex-wrap:wrap}
 
 /* ---------- buttons ---------- */
@@ -166,10 +166,10 @@ button{font-family:inherit}
 
 /* dice */
 .dice-row{display:flex;gap:max(8px,2cqi);justify-content:center}
-.die{width:max(38px,8.4cqi);aspect-ratio:1;border-radius:20%;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:13%;
+.die{width:max(38px,8.4cqi);aspect-ratio:1;border-radius:20%;display:block;padding:0;box-sizing:border-box;
   box-shadow:inset 0 -3px 0 rgba(0,0,0,.14),0 3px 8px rgba(0,0,0,.25);flex:none}
-.pip{border-radius:50%;margin:13%}
-.pip.on{background:var(--pip)}
+.die svg{display:block;width:100%;height:100%;overflow:visible}
+.pip.on{fill:var(--pip)}
 .die.digit{display:grid;place-items:center;grid-template:none;padding:0}
 .die.digit b{font:800 calc(1em + 0px) var(--f-display);font-size:inherit}
 .dice-row .die.digit{font-size:max(24px,5.4cqi)}
@@ -186,7 +186,7 @@ button{font-family:inherit}
 [data-dice="jade"] .die{background:linear-gradient(145deg,#86D0B7,#3C9075);--pip:#F4FFF9;color:#F4FFF9;border:1px solid #2F725D}
 [data-dice="wood"] .die{background:linear-gradient(145deg,#E0B37A,#AF7A42);--pip:#3A2210;color:#3A2210;border:1px solid #87592C}
 [data-dice="neon"] .die{background:#0C0E1B;--pip:#39FFB0;color:#39FFB0;border:1.5px solid #39FFB0;box-shadow:0 0 12px rgba(57,255,176,.45)}
-[data-dice="neon"] .pip.on{box-shadow:0 0 6px #39FFB0}
+[data-dice="neon"] .pip.on{filter:drop-shadow(0 0 2px #39FFB0)}
 [data-dice="digit"] .die{background:#FBFAF6;color:#1B1B1B;border:1px solid #D3CFC4}
 
 /* ---------- side ledger ---------- */
@@ -371,7 +371,7 @@ button{font-family:inherit}
   .c-who b{font-size:13px}
   .c-who span{font-size:12px}
   #dice{grid-area:dice}
-  .dice-row .die{width:36px}
+  .dice-row .die{width:44px}
   .dice-row .die.digit{font-size:22px}
   .c-msgs{grid-area:msg;gap:4px;max-width:100%;min-height:0;overflow:auto}
   .c-msg{font-size:12px;min-height:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
@@ -813,7 +813,7 @@ function sellTo(i){if(busy||!S)return;const o=S.own[i];if(!o||groupHasHouses(i))
 
 /* ================= rendering ================= */
 function dieHTML(v,skin=CFG.dice){if(skin==='digit')return `<span class="die digit"><b>${v}</b></span>`;
-  let h='<span class="die">';for(let j=0;j<9;j++)h+=`<i class="pip${PIPS[v].includes(j)?' on':''}"></i>`;return h+'</span>';}
+  let h='<span class="die"><svg viewBox="-3 -3 36 36" aria-label="'+v+'">';PIPS[v].forEach(j=>{h+=`<circle class="pip on" cx="${5+(j%3)*10}" cy="${5+Math.floor(j/3)*10}" r="3.3"/>`;});return h+'</svg></span>';}
 function gridPos(i){if(i<=10)return[11,11-i];if(i<=20)return[11-(i-10),1];if(i<=30)return[1,1+(i-20)];return[1+(i-30),11];}
 function tileHTML(i){const t=T[i],[r,c]=gridPos(i),st=`grid-row:${r};grid-column:${c}`,nm=esc(tname(i));
   if(i%10===0){const m={go:[IC.go,'Xuất phát',`Qua ô nhận ${money(S.rules.salary)}`],jail:[IC.jail,'Nhà tù','Hoặc chỉ ghé thăm'],
