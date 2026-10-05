@@ -548,8 +548,28 @@ document.head.insertAdjacentHTML('beforeend','<style>'+Object.entries(SKINS).map
 
 /* ================= state ================= */
 let CFG = {skin:'vn',dice:'classic',speed:'normal',mute:false};
+/* soft background music: a slow generative pentatonic loop */
+const BGM=(()=>{let ac=null,out=null,timer=null,next=0,step=0;
+  const CH=[[220,277.2,329.6],[196,246.9,293.7],[174.6,220,261.6],[196,246.9,329.6]];
+  const MEL=[659.3,587.3,523.3,440,392,329.6,293.7];
+  function note(f,t,d,vol,type='sine'){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.06);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(out);o.start(t);o.stop(t+d+.05);}
+  function tick(){const beat=.5;while(next<ac.currentTime+.6){const bar=Math.floor(step/8)%4,b=step%8,ch=CH[bar];
+      if(b===0){ch.forEach(f=>note(f,next,beat*8,.05,'triangle'));note(ch[0]/2,next,beat*8,.07);}
+      if(b%2===0)note(ch[(b/2)%3]*2,next,beat*1.6,.035);
+      if(Math.random()<.35)note(MEL[Math.floor(Math.random()*MEL.length)],next+beat/2,beat*2,.03);
+      next+=beat;step++;}}
+  return {
+    start(){if(timer||CFG.mute||CFG.music===false)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+      if(ac.state==='suspended')ac.resume();if(!out){out=ac.createGain();out.connect(ac.destination);}
+      out.gain.cancelScheduledValues(ac.currentTime);out.gain.setValueAtTime(0,ac.currentTime);out.gain.linearRampToValueAtTime(.6,ac.currentTime+2);
+      next=ac.currentTime+.1;timer=setInterval(tick,200);}catch(e){}},
+    stop(){if(!timer)return;clearInterval(timer);timer=null;try{out.gain.cancelScheduledValues(ac.currentTime);out.gain.setValueAtTime(out.gain.value,ac.currentTime);out.gain.linearRampToValueAtTime(0,ac.currentTime+.4);}catch(e){}},
+    sync(){(view==='game'&&!CFG.mute&&CFG.music!==false)?this.start():this.stop();}
+  };})();
+document.addEventListener('visibilitychange',()=>{document.hidden?BGM.stop():BGM.sync();});
 /* sound effects: synthesized with Web Audio, no files */
-document.addEventListener("pointerdown",()=>{try{SFX.unlock();}catch(e){}},{once:true});
+document.addEventListener("pointerdown",()=>{try{SFX.unlock();BGM.sync();}catch(e){}},{once:true});
 const SFX=(()=>{let ac=null,master=null;
   function ctx(){if(CFG.mute)return null;try{if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination);}
     if(ac.state==='suspended')ac.resume();}catch(e){return null;}return ac;}
@@ -868,10 +888,10 @@ function tileHTML(i){const t=T[i],[r,c]=gridPos(i),st=`grid-row:${r};grid-column
 
 function renderTop(){const t=$('#top');
   let nav='';
-  if(view==='game')nav=`<button class="btn ghost sm" data-act="mute" aria-label="Bật/tắt âm thanh">${CFG.mute?'🔇':'🔊'}</button><button class="btn ghost sm" data-act="open-drawer">Tùy chỉnh</button><button class="btn ghost sm" data-act="rank">Xếp hạng</button>${S.phase!=='gameover'?'<button class="btn ghost sm" data-act="endgame">Kết thúc ván</button>':''}<button class="btn ghost sm" data-act="newgame">Ván mới</button>`;
+  if(view==='game')nav=`<button class="btn ghost sm" data-act="mute" aria-label="Bật/tắt âm thanh">${CFG.mute?'🔇':'🔊'}</button><button class="btn ghost sm" data-act="music" aria-label="Bật/tắt nhạc nền" style="${CFG.music===false||CFG.mute?'opacity:.45':''}">🎵</button><button class="btn ghost sm" data-act="open-drawer">Tùy chỉnh</button><button class="btn ghost sm" data-act="rank">Xếp hạng</button>${S.phase!=='gameover'?'<button class="btn ghost sm" data-act="endgame">Kết thúc ván</button>':''}<button class="btn ghost sm" data-act="newgame">Ván mới</button>`;
   else if(S&&S.phase!=='gameover')nav=`<button class="btn ghost sm" data-act="resume">Quay lại ván đang chơi</button>`;
   t.innerHTML=`<div class="brand"><span class="dice-row" data-dice="${CFG.dice}">${dieHTML(5)}</span>Cờ Tỷ Phú</div><nav>${nav}</nav>`;
-  document.body.dataset.view=view;
+  document.body.dataset.view=view;try{BGM.sync();}catch(e){}
   const m=$('#mini');if(m&&view==='game')m.innerHTML=`<span class="mini-name">${SK().name}</span><nav>${nav.replace(/Kết thúc ván/,'Kết thúc')}<button class="btn primary sm x-sheet" data-act="close-sheet">Đóng</button></nav>`;
   if(view!=='game')closeSheet();}
 
@@ -1040,6 +1060,7 @@ function afterCustomize(){saveCfg();if(modalKind==='drawer')renderDrawer();if(vi
 
 /* ================= events ================= */
 const ACT={
+  music:()=>{CFG.music=CFG.music===false;saveCfg();renderTop();},
   mute:()=>{CFG.mute=!CFG.mute;saveCfg();if(!CFG.mute)SFX.click();renderTop();},
   roll:doRoll,buy:doBuy,skip:doSkip,showbuy:showBuyCard,end:endTurn,
   payjail(){const p=cp();if(busy||S.phase!=='roll'||!p.jail||p.money<50)return;pay(p,null,50,'tax');p.jail=false;p.jt=0;log(`${p.name} nộp ${money(50)} để ra tù. Giờ đổ xúc xắc.`,S.cur);renderAll();save();},
