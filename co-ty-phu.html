@@ -547,7 +547,34 @@ document.head.insertAdjacentHTML('beforeend','<style>'+Object.entries(SKINS).map
   `[data-skin="${id}"]{--b-bg:${s.bg};--b-center:${s.center};--b-line:${s.line};--b-ink:${s.ink};--b-accent:${s.accent};--b-accent-ink:${s.accentInk};${s.g.map((c,i)=>`--g${i}:${c}`).join(';')}}`).join('')+'</style>');
 
 /* ================= state ================= */
-let CFG = {skin:'vn',dice:'classic',speed:'normal'};
+let CFG = {skin:'vn',dice:'classic',speed:'normal',mute:false};
+/* sound effects: synthesized with Web Audio, no files */
+document.addEventListener("pointerdown",()=>{try{SFX.unlock();}catch(e){}},{once:true});
+const SFX=(()=>{let ac=null,master=null;
+  function ctx(){if(CFG.mute)return null;try{if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.5;master.connect(ac.destination);}
+    if(ac.state==='suspended')ac.resume();}catch(e){return null;}return ac;}
+  function tone(f,d,{type='sine',vol=.3,t=0,slide=0}={}){const a=ctx();if(!a)return;const t0=a.currentTime+t,o=a.createOscillator(),g=a.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(vol,t0+.008);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+    o.connect(g);g.connect(master);o.start(t0);o.stop(t0+d+.02);}
+  function noise(d,{vol=.25,t=0,freq=2500,q=1}={}){const a=ctx();if(!a)return;const t0=a.currentTime+t,n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),c=b.getChannelData(0);
+    for(let i=0;i<n;i++)c[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();
+    s.buffer=b;f.type='bandpass';f.frequency.value=freq;f.Q.value=q;g.gain.value=vol;s.connect(f);f.connect(g);g.connect(master);s.start(t0);}
+  return {
+    unlock(){ctx();},
+    rattle(){noise(.05,{vol:.35,freq:1800+Math.random()*1500,q:2});tone(500+Math.random()*400,.04,{type:'triangle',vol:.08});},
+    land(){noise(.08,{vol:.5,freq:900,q:1.5});noise(.07,{vol:.4,freq:1200,q:1.5,t:.09});},
+    step(){tone(720,.06,{type:'triangle',vol:.14});noise(.03,{vol:.12,freq:3000,q:3});},
+    coinIn(){tone(1320,.09,{type:'square',vol:.07});tone(1760,.25,{type:'square',vol:.07,t:.07});},
+    coinOut(){tone(520,.12,{type:'triangle',vol:.18,slide:-200});tone(390,.18,{type:'triangle',vol:.15,t:.09,slide:-150});},
+    buy(){[0,.08,.16].forEach((t,k)=>tone([784,988,1319][k],.18,{type:'square',vol:.06,t}));noise(.15,{vol:.2,freq:6000,q:.8,t:.2});tone(2093,.4,{vol:.1,t:.22});},
+    card(){noise(.25,{vol:.3,freq:2500,q:.6});tone(660,.15,{vol:.12,t:.35});tone(990,.3,{vol:.12,t:.45});},
+    jail(){tone(196,.35,{type:'sawtooth',vol:.12});tone(147,.5,{type:'sawtooth',vol:.12,t:.3});noise(.12,{vol:.4,freq:400,t:.75});},
+    go(){[523,659,784,1047].forEach((f,k)=>tone(f,.22,{type:'triangle',vol:.16,t:k*.08}));},
+    build(){noise(.06,{vol:.4,freq:700,q:2});noise(.06,{vol:.4,freq:700,q:2,t:.12});tone(880,.15,{type:'triangle',vol:.12,t:.24});},
+    win(){[523,659,784,1047,784,1047].forEach((f,k)=>tone(f,.3,{type:'triangle',vol:.18,t:k*.13}));},
+    click(){tone(900,.03,{type:'triangle',vol:.08});}
+  };})();
 let S = null, view = 'setup', busy = false, sel = null, pickOpen = null, modalKind = null;
 let draft = {players:[
   {name:'Lan',token:'tiger',color:COLORS[0]},
@@ -652,6 +679,7 @@ function fxMoney(from,to,amt){
 /* from/to: player index, null = ngân hàng, 'pot' = quỹ Bãi đỗ xe, {tile:i} = ngân hàng nhưng tiền bay về ô i */
 function xfer(from,to,amt,opt={}){amt=Math.round(amt);if(!S||!(amt>0))return Promise.resolve();
   const old={};[from,to].forEach(k=>{if(isP(k)||k==='pot')old[k]=shown(k);});
+  if(isP(to))SFX.coinIn();else SFX.coinOut();
   if(isP(from))S.players[from].money-=amt;else if(from==='pot')S.pot-=amt;
   if(isP(to))S.players[to].money+=amt;else if(to==='pot')S.pot+=amt;
   if(opt.debt&&isP(from))S.cred=isP(to)?to:null;
@@ -661,7 +689,7 @@ function xfer(from,to,amt,opt={}){amt=Math.round(amt);if(!S||!(amt>0))return Pro
   renderPlayers();
   return fxMoney(from,to,amt);}
 function pay(p,to,amt,kind){return xfer(idx(p),to!=null?to:(kind==='tax'&&S.rules.parking?'pot':null),amt,{debt:true});}
-function goJail(p){p.pos=10;p.jail=true;p.jt=0;S.extra=false;S.dbl=0;renderDynamic();}
+function goJail(p){SFX.jail();p.pos=10;p.jail=true;p.jt=0;S.extra=false;S.dbl=0;renderDynamic();}
 function settle(){const p=cp();if(S.phase==='gameover')return;
   if(p.money<0){S.debt={to:S.cred??null,after:(S.extra&&!p.jail)?'again':'end'};S.phase='debt';
     log(`${p.name} bị âm ${money(-p.money)}. Cần bán nhà hoặc cầm cố để trả nợ.`,S.cur);}
@@ -674,7 +702,8 @@ async function moveSteps(p,n){const dir=n>0?1:-1;
   try{
   for(let k=0;k<Math.abs(n);k++){p.pos=(p.pos+dir+40)%40;
     renderDynamic();
-    if(dir>0&&p.pos===0){log(`${p.name} đi qua Xuất phát, nhận ${money(S.rules.salary)}.`,idx(p));xfer(null,idx(p),S.rules.salary);}
+    SFX.step();
+    if(dir>0&&p.pos===0){SFX.go();log(`${p.name} đi qua Xuất phát, nhận ${money(S.rules.salary)}.`,idx(p));xfer(null,idx(p),S.rules.salary);}
     await wait(stepMs());}
   if(dest)await wait(400);
   }finally{if(dest)dest.classList.remove('dest');}}
@@ -735,7 +764,7 @@ async function showCardFx(deck,dn,text){
   const ic=deck==='chance'?IC.q:IC.star,col=deck==='chance'?'#D9472B':'#2F7FC1';
   const fx=document.createElement('div');fx.className='cardfx';fx.style.setProperty('--cfc',col);
   fx.innerHTML=`<div class="cf-card"><div class="cf-face cf-back">${ic}</div><div class="cf-face cf-front"><span class="ci">${ic}</span><span class="ck">${esc(dn)}</span><p>${esc(text)}</p></div></div>`;
-  document.body.appendChild(fx);
+  document.body.appendChild(fx);SFX.card();
   await wait(900+Math.max(1400,readMs()));
   fx.classList.add('out');await wait(300);fx.remove();}
 async function drawCard(p,deck,sum){const c=CARDS[deck][Math.floor(Math.random()*CARDS[deck].length)];
@@ -763,11 +792,11 @@ async function doRoll(){if(busy||!S||!(S.phase==='roll'||S.phase==='again'))retu
 
 async function animateDice(d){const row=$('#dice');const ms=diceMs();
   if(row&&ms>0){row.classList.remove('landed');row.classList.add('rolling');const t0=performance.now();
-    while(performance.now()-t0<ms){row.innerHTML=dieHTML(rand6())+dieHTML(rand6());await wait(70);}
+    while(performance.now()-t0<ms){row.innerHTML=dieHTML(rand6())+dieHTML(rand6());SFX.rattle();await wait(70);}
     row.classList.remove('rolling');}
-  if(row){row.innerHTML=dieHTML(d[0])+dieHTML(d[1])+`<b class="dsum">= ${d[0]+d[1]}</b>`;row.classList.add("landed");}}
+  if(row){row.innerHTML=dieHTML(d[0])+dieHTML(d[1])+`<b class="dsum">= ${d[0]+d[1]}</b>`;row.classList.add("landed");}SFX.land();}
 
-function doBuy(){if(S.phase!=='buy')return;if(modalKind==='buy')closeModal();const p=cp(),i=S.pending;S.own[i]={o:S.cur,lv:0,m:false};
+function doBuy(){if(S.phase!=='buy')return;SFX.buy();if(modalKind==='buy')closeModal();const p=cp(),i=S.pending;S.own[i]={o:S.cur,lv:0,m:false};
   log(`${p.name} mua ${tname(i)} với giá ${money(T[i].price)}.`,S.cur);
   const full=T[i].type==='prop'&&ownsGroup(i);
   if(full)log(`${p.name} đã có trọn bộ màu! Tiền thuê nhóm này tăng gấp đôi và giờ có thể xây nhà.`,S.cur);
@@ -798,14 +827,14 @@ function declareBankrupt(){const me=S.cur,p=cp(),to=S.debt?S.debt.to:null;
   p.money=0;p.bankrupt=true;p.jail=false;p.cards=0;S.debt=null;S.card=null;
   log(`${p.name} tuyên bố phá sản.${to!=null?` Toàn bộ đất chuyển cho ${S.players[to].name}.`:' Đất trả về ngân hàng.'}`,me);
   const alive=S.players.filter(q=>!q.bankrupt);
-  if(alive.length===1){S.phase='gameover';S.winner=S.players.indexOf(alive[0]);log(`${alive[0].name} thắng ván này!`,S.winner);renderAll();save();showRanking('Có người thắng rồi');return;}
+  if(alive.length===1){SFX.win();S.phase='gameover';S.winner=S.players.indexOf(alive[0]);log(`${alive[0].name} thắng ván này!`,S.winner);renderAll();save();showRanking('Có người thắng rồi');return;}
   S.extra=false;S.dbl=0;nextPlayer();}
 function finishByWorth(){let best=-1,bw=-Infinity;S.players.forEach((p,i)=>{if(!p.bankrupt&&worth(i)>bw){bw=worth(i);best=i;}});
-  S.phase='gameover';S.winner=best;S.card=null;log(`Ván kết thúc. ${S.players[best].name} giàu nhất với ${money(bw)}.`,best);renderAll();save();showRanking('Kết thúc ván');}
+  SFX.win();S.phase='gameover';S.winner=best;S.card=null;log(`Ván kết thúc. ${S.players[best].name} giàu nhất với ${money(bw)}.`,best);renderAll();save();showRanking('Kết thúc ván');}
 
 /* property management */
 function manage(kind,i){if(busy||!S||S.phase==='gameover')return;const o=S.own[i];if(!o)return;const p=S.players[o.o],t=T[i],pi=o.o;
-  if(kind==='build'&&canBuild(i)){o.lv++;const lv=o.lv;
+  if(kind==='build'&&canBuild(i)){SFX.build();o.lv++;const lv=o.lv;
     log(`${p.name} ${lv===5?'nâng khách sạn':'xây nhà thứ '+lv} ở ${tname(i)} (−${money(t.hc)}).`,pi);
     if(fxOn())VIS.hideLv[i]=(VIS.hideLv[i]||0)+1;
     xfer(pi,{tile:i},t.hc);
@@ -839,7 +868,7 @@ function tileHTML(i){const t=T[i],[r,c]=gridPos(i),st=`grid-row:${r};grid-column
 
 function renderTop(){const t=$('#top');
   let nav='';
-  if(view==='game')nav=`<button class="btn ghost sm" data-act="open-drawer">Tùy chỉnh</button><button class="btn ghost sm" data-act="rank">Xếp hạng</button>${S.phase!=='gameover'?'<button class="btn ghost sm" data-act="endgame">Kết thúc ván</button>':''}<button class="btn ghost sm" data-act="newgame">Ván mới</button>`;
+  if(view==='game')nav=`<button class="btn ghost sm" data-act="mute" aria-label="Bật/tắt âm thanh">${CFG.mute?'🔇':'🔊'}</button><button class="btn ghost sm" data-act="open-drawer">Tùy chỉnh</button><button class="btn ghost sm" data-act="rank">Xếp hạng</button>${S.phase!=='gameover'?'<button class="btn ghost sm" data-act="endgame">Kết thúc ván</button>':''}<button class="btn ghost sm" data-act="newgame">Ván mới</button>`;
   else if(S&&S.phase!=='gameover')nav=`<button class="btn ghost sm" data-act="resume">Quay lại ván đang chơi</button>`;
   t.innerHTML=`<div class="brand"><span class="dice-row" data-dice="${CFG.dice}">${dieHTML(5)}</span>Cờ Tỷ Phú</div><nav>${nav}</nav>`;
   document.body.dataset.view=view;
@@ -1011,6 +1040,7 @@ function afterCustomize(){saveCfg();if(modalKind==='drawer')renderDrawer();if(vi
 
 /* ================= events ================= */
 const ACT={
+  mute:()=>{CFG.mute=!CFG.mute;saveCfg();if(!CFG.mute)SFX.click();renderTop();},
   roll:doRoll,buy:doBuy,skip:doSkip,showbuy:showBuyCard,end:endTurn,
   payjail(){const p=cp();if(busy||S.phase!=='roll'||!p.jail||p.money<50)return;pay(p,null,50,'tax');p.jail=false;p.jt=0;log(`${p.name} nộp ${money(50)} để ra tù. Giờ đổ xúc xắc.`,S.cur);renderAll();save();},
   usecard(){const p=cp();if(busy||S.phase!=='roll'||!p.jail||!p.cards)return;p.cards--;p.jail=false;p.jt=0;log(`${p.name} dùng thẻ ra tù miễn phí.`,S.cur);renderAll();save();},
