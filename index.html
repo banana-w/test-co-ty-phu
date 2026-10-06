@@ -857,7 +857,7 @@ function fxMoney(from,to,amt){
     const t=isP(to)?anchorEl(to):null;if(t){t.classList.remove('recv');void t.offsetWidth;t.classList.add('recv');}});
   return wait(D+(n-1)*48);}
 /* from/to: player index, null = ngân hàng, 'pot' = quỹ Bãi đỗ xe, {tile:i} = ngân hàng nhưng tiền bay về ô i */
-function xfer(from,to,amt,opt={}){amt=Math.round(amt);if(!S||!(amt>0))return Promise.resolve();
+function xfer(from,to,amt,opt={}){amt=Math.round(amt);if(!S||!(amt>0))return Promise.resolve();emit("xfer",[from,to,amt,opt]);
   const old={};[from,to].forEach(k=>{if(isP(k)||k==='pot')old[k]=shown(k);});
   if(isP(to))SFX.coinIn();else SFX.coinOut();
   if(isP(from))S.players[from].money-=amt;else if(from==='pot')S.pot-=amt;
@@ -869,13 +869,13 @@ function xfer(from,to,amt,opt={}){amt=Math.round(amt);if(!S||!(amt>0))return Pro
   renderPlayers();
   return fxMoney(from,to,amt);}
 function pay(p,to,amt,kind){return xfer(idx(p),to!=null?to:(kind==='tax'&&S.rules.parking?'pot':null),amt,{debt:true});}
-function goJail(p){SFX.jail();p.pos=10;p.jail=true;p.jt=0;S.extra=false;S.dbl=0;renderDynamic();}
+function goJail(p){emit("jail",idx(p));SFX.jail();p.pos=10;p.jail=true;p.jt=0;S.extra=false;S.dbl=0;renderDynamic();}
 function settle(){const p=cp();if(S.phase==='gameover')return;
   if(p.money<0){S.debt={to:S.cred??null,after:(S.extra&&!p.jail)?'again':'end'};S.phase='debt';
     log(`${p.name} bị âm ${money(-p.money)}. Cần bán nhà hoặc cầm cố để trả nợ.`,S.cur);}
   else{S.debt=null;S.phase=(S.extra&&!p.jail)?'again':'end';}}
 
-async function moveSteps(p,n){const dir=n>0?1:-1;
+async function moveSteps(p,n){emit("move",[idx(p),n]);const dir=n>0?1:-1;
   const dest=tileEl((p.pos+n+400)%40);
   document.querySelectorAll('#board .tile.dest').forEach(e=>e.classList.remove('dest'));
   if(dest)dest.classList.add('dest');
@@ -883,7 +883,8 @@ async function moveSteps(p,n){const dir=n>0?1:-1;
   for(let k=0;k<Math.abs(n);k++){p.pos=(p.pos+dir+40)%40;
     renderDynamic();
     SFX.step();
-    if(dir>0&&p.pos===0){SFX.go();ST().go[idx(p)]++;log(`${p.name} đi qua Xuất phát, nhận ${money(S.rules.salary)}.`,idx(p));xfer(null,idx(p),S.rules.salary);}
+    if(dir>0&&p.pos===0&&REPLAY)SFX.go();
+    else if(dir>0&&p.pos===0){SFX.go();ST().go[idx(p)]++;log(`${p.name} đi qua Xuất phát, nhận ${money(S.rules.salary)}.`,idx(p));xfer(null,idx(p),S.rules.salary);}
     await wait(stepMs());}
   if(dest)await wait(400);
   }finally{if(dest)dest.classList.remove('dest');}}
@@ -896,7 +897,7 @@ async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;ST().lands[i]=(ST().lan
     else if(o.o===me)log(`${p.name} về ${tname(i)} của mình.`,me);
     else if(o.m)log(`${tname(i)} đang cầm cố nên ${p.name} không phải trả tiền thuê.`,me);
     else{const r=rentOf(i,sum),st=ST();st.rentIn[o.o]+=r;st.rentOut[me]+=r;if(!st.bigRent||r>st.bigRent.a)st.bigRent={p:me,a:r,i};
-      if(r>=200){shake();burstAt(tileEl(i));}log(`${p.name} trả ${money(r)} tiền thuê ${tname(i)} cho ${S.players[o.o].name}.`,me);renderCenter();await pay(p,o.o,r);}
+      if(r>=200){emit("hit",i);shake();burstAt(tileEl(i));}log(`${p.name} trả ${money(r)} tiền thuê ${tname(i)} cho ${S.players[o.o].name}.`,me);renderCenter();await pay(p,o.o,r);}
   }else if(t.type==='chance'||t.type==='chest'){await drawCard(p,t.type,sum);return;}
   else if(t.type==='tax'){log(`${p.name} nộp ${t.n.toLowerCase()} ${money(t.amt)}.`,me);renderCenter();await pay(p,null,t.amt,'tax');}
   else if(t.type==='gojail'){log(`${p.name} dừng ở ô Vào tù và bị đưa thẳng vào tù.`,me);renderCenter();await wait(stepMs()*3);goJail(p);}
@@ -941,7 +942,7 @@ const CARDS={
     {t:()=>`Nhận thừa kế: ${money(100)}.`,f:async p=>{await gain(p,100);}},
     {t:()=>`Lì xì đầu năm: nhận ${money(25)}.`,f:async p=>{await gain(p,25);}}]
 };
-async function showCardFx(deck,dn,text){
+async function showCardFx(deck,dn,text){emit("card",[deck,dn,text]);
   const ic=deck==='chance'?IC.q:IC.star,col=deck==='chance'?'#D9472B':'#2F7FC1';
   const fx=document.createElement('div');fx.className='cardfx';fx.style.setProperty('--cfc',col);
   fx.innerHTML=`<div class="cf-card"><div class="cf-face cf-back">${ic}</div><div class="cf-face cf-front"><span class="ci">${ic}</span><span class="ck">${esc(dn)}</span><p>${esc(text)}</p></div></div>`;
@@ -972,7 +973,7 @@ async function doRoll(){if(busy||!S||!(S.phase==='roll'||S.phase==='again'))retu
     await moveSteps(p,sum);await land(p,sum);}
   busy=false;renderAll();save();}
 
-async function animateDice(d){const row=$('#dice');const ms=diceMs();
+async function animateDice(d){emit("dice",d);const row=$("#dice");const ms=diceMs();
   if(row&&ms>0){row.classList.remove('landed');row.classList.add('rolling');const t0=performance.now();
     while(performance.now()-t0<ms){row.innerHTML=dieHTML(rand6())+dieHTML(rand6());SFX.rattle();await wait(70);}
     row.classList.remove('rolling');}
@@ -981,14 +982,21 @@ async function animateDice(d){const row=$('#dice');const ms=diceMs();
 function doBuy(){if(S.phase!=='buy')return;SFX.buy();if(modalKind==='buy')closeModal();const p=cp(),i=S.pending;S.own[i]={o:S.cur,lv:0,m:false};
   log(`${p.name} mua ${tname(i)} với giá ${money(T[i].price)}.`,S.cur);
   const full=T[i].type==='prop'&&ownsGroup(i);
-  ST().bought[S.cur]++;if(full){confetti();SFX.win();}
+  ST().bought[S.cur]++;
   if(full)log(`${p.name} đã có trọn bộ màu! Tiền thuê nhóm này tăng gấp đôi và giờ có thể xây nhà.`,S.cur);
-  if(fxOn())VIS.hideOwn[i]=true;
+  emit('buy',[i,S.cur,full]);fxBought(i,full);
   xfer(S.cur,{tile:i},T[i].price);
+  S.pending=null;settle();renderAll();save();}
+function fxBought(i,full){if(full){confetti();SFX.win();}
+  if(fxOn())VIS.hideOwn[i]=true;
   later(fxDur()*.85,()=>{delete VIS.hideOwn[i];renderDynamic();const el=tileEl(i);
     if(el){el.classList.remove('bought');void el.offsetWidth;el.classList.add('bought');setTimeout(()=>el.classList.remove('bought'),600);
-      if(full)floatOn(el,'Trọn bộ màu!','info',150);}});
-  S.pending=null;settle();renderAll();save();}
+      if(full)floatOn(el,'Trọn bộ màu!','info',150);}});}
+function fxBuilt(i,lv){SFX.build();setTimeout(()=>burstAt(tileEl(i),16),200);
+  if(fxOn())VIS.hideLv[i]=(VIS.hideLv[i]||0)+1;
+  later(fxDur()*.85,()=>{if(VIS.hideLv[i])VIS.hideLv[i]--;VIS.drop[i]=true;renderDynamic();delete VIS.drop[i];
+    const el=tileEl(i);if(el){el.classList.remove('thud');void el.offsetWidth;el.classList.add('thud');
+      floatOn(el,lv===5?'Khách sạn!':`Nhà ${lv}`,'info',380);}});}
 const tileEl = i=>document.querySelector(`#board .tile[data-i="${i}"]`);
 const VIS={hideOwn:{},hideLv:{},drop:{}};
 function doSkip(){if(S.phase!=='buy')return;if(modalKind==="buy")closeModal();const p=cp(),i=S.pending;log(`${p.name} bỏ qua ${tname(i)}.`,S.cur);S.pending=null;settle();renderAll();save();}
@@ -1010,10 +1018,10 @@ function declareBankrupt(){const me=S.cur,p=cp(),to=S.debt?S.debt.to:null;
   p.money=0;p.bankrupt=true;p.jail=false;p.cards=0;S.debt=null;S.card=null;
   log(`${p.name} tuyên bố phá sản.${to!=null?` Toàn bộ đất chuyển cho ${S.players[to].name}.`:' Đất trả về ngân hàng.'}`,me);
   const alive=S.players.filter(q=>!q.bankrupt);
-  if(alive.length===1){SFX.win();S.phase='gameover';S.winner=S.players.indexOf(alive[0]);log(`${alive[0].name} thắng ván này!`,S.winner);renderAll();save();confetti(140);showRanking('Có người thắng rồi');return;}
+  if(alive.length===1){SFX.win();S.phase='gameover';S.winner=S.players.indexOf(alive[0]);log(`${alive[0].name} thắng ván này!`,S.winner);renderAll();save();emit("win",0);confetti(140);showRanking('Có người thắng rồi');return;}
   S.extra=false;S.dbl=0;nextPlayer();}
 function finishByWorth(){let best=-1,bw=-Infinity;S.players.forEach((p,i)=>{if(!p.bankrupt&&worth(i)>bw){bw=worth(i);best=i;}});
-  SFX.win();S.phase='gameover';S.winner=best;S.card=null;log(`Ván kết thúc. ${S.players[best].name} giàu nhất với ${money(bw)}.`,best);renderAll();save();confetti(140);showRanking('Kết thúc ván');}
+  SFX.win();S.phase='gameover';S.winner=best;S.card=null;log(`Ván kết thúc. ${S.players[best].name} giàu nhất với ${money(bw)}.`,best);renderAll();save();emit("win",0);confetti(140);showRanking('Kết thúc ván');}
 /* stats, time limit, celebration effects */
 function newStats(n){const z=()=>Array(n).fill(0);return {rentIn:z(),rentOut:z(),go:z(),dbl:z(),bought:z(),built:z(),lands:{},bigRent:null};}
 function ST(){if(!S.stats)S.stats=newStats(S.players.length);return S.stats;}
@@ -1043,13 +1051,10 @@ function statsHTML(){if(!S.stats)return '';const st=S.stats,P=S.players,best=a=>
 
 /* property management */
 function manage(kind,i){if(busy||!S||S.phase==='gameover')return;const o=S.own[i];if(!o)return;const p=S.players[o.o],t=T[i],pi=o.o;
-  if(kind==='build'&&canBuild(i)){SFX.build();ST().built[pi]++;setTimeout(()=>burstAt(tileEl(i),16),200);o.lv++;const lv=o.lv;
+  if(kind==='build'&&canBuild(i)){ST().built[pi]++;o.lv++;const lv=o.lv;
     log(`${p.name} ${lv===5?'nâng khách sạn':'xây nhà thứ '+lv} ở ${tname(i)} (−${money(t.hc)}).`,pi);
-    if(fxOn())VIS.hideLv[i]=(VIS.hideLv[i]||0)+1;
-    xfer(pi,{tile:i},t.hc);
-    later(fxDur()*.85,()=>{if(VIS.hideLv[i])VIS.hideLv[i]--;VIS.drop[i]=true;renderDynamic();delete VIS.drop[i];
-      const el=tileEl(i);if(el){el.classList.remove('thud');void el.offsetWidth;el.classList.add('thud');
-        floatOn(el,lv===5?'Khách sạn!':`Nhà ${lv}`,'info',380);}});}
+    emit('build',[i,lv]);fxBuilt(i,lv);
+    xfer(pi,{tile:i},t.hc);}
   else if(kind==='sellh'&&canSellHouse(i)){o.lv--;log(`${p.name} bán bớt nhà ở ${tname(i)} (+${money(t.hc/2)}).`,pi);xfer({tile:i},pi,t.hc/2);}
   else if(kind==='mort'&&canMortgage(i)){o.m=true;log(`${p.name} cầm cố ${tname(i)} (+${money(t.price/2)}).`,pi);xfer({tile:i},pi,t.price/2);}
   else if(kind==='unmort'&&canUnmort(i)){const c=unmortCost(i);o.m=false;log(`${p.name} chuộc lại ${tname(i)} (−${money(c)}).`,pi);xfer(pi,{tile:i},c);}
@@ -1306,6 +1311,9 @@ document.addEventListener('change',e=>{if(e.target.id==='opt-parking')draft.park
    One device hosts the room and runs the rules; guests send action requests and mirror the host's state. */
 const NET={mode:'local',peer:null,conns:{},code:'',cid:'',lobby:null,hostConn:null,started:false,syncT:0,status:''};
 const PEER_PREFIX='cotyphu-v1-';
+let REPLAY=false;
+/* host: announce an effect so guests can play it too (state follows separately) */
+function emit(type,data){if(NET.mode==='host'&&NET.started&&!REPLAY)broadcast({t:'ev',e:[type,data]});}
 const GAME_ACTS=new Set(['roll','buy','skip','end','payjail','usecard','paydebt','bankrupt','build','sellh','mort','unmort','sellto','endgame-go']);
 const OWNER_ACTS=new Set(['build','sellh','mort','unmort','sellto']);
 function myCid(){if(NET.cid)return NET.cid;try{NET.cid=localStorage.getItem('ctp-cid')||'';}catch(e){}
@@ -1393,10 +1401,29 @@ function guestOnData(m){if(!m||typeof m!=='object')return;
   if(m.t==='deny'){toast(m.msg,'warn');return;}
   if(m.t==='lobby'){NET.lobby=m.L;if(m.L.skin&&CFG.skin!==m.L.skin)CFG.skin=m.L.skin;if(m.L.dice)CFG.dice=m.L.dice;
     if(view!=='lobby'){view='lobby';setStatus('');render();}else renderLobby();return;}
-  if(m.t==='state'){const first=!S||!S.online||view!=='game';S=m.S;if(m.skin)CFG.skin=m.skin;if(m.dice)CFG.dice=m.dice;NET.started=true;
-    if(first){view='game';busy=false;render();}else renderAll();
-    if(S.phase==='buy'&&myTurn()&&modalKind!=='buy')showBuyCard();
-    else if(modalKind==='buy'&&(S.phase!=='buy'||!myTurn()))closeModal();}}
+  if(m.t==='ev'){if(view==='game'&&S&&S.online){EVQ.push(m.e);playEvents();}return;}
+  if(m.t==='state'){if(EVQ.length||EVQ.running){EVQ.pending=m;return;}applyState(m);}}
+function applyState(m){const first=!S||!S.online||view!=='game';S=m.S;if(m.skin)CFG.skin=m.skin;if(m.dice)CFG.dice=m.dice;NET.started=true;
+  if(first){view='game';busy=false;render();}else renderAll();
+  if(S.phase==='buy'&&myTurn()&&modalKind!=='buy')showBuyCard();
+  else if(modalKind==='buy'&&(S.phase!=='buy'||!myTurn()))closeModal();}
+/* guest: replay the host's effects in order on the local copy, then take the host's snapshot */
+const EVQ=[];
+async function playEvents(){if(EVQ.running)return;EVQ.running=true;busy=true;renderCenter();
+  while(EVQ.length){const [type,d]=EVQ.shift();REPLAY=true;
+    try{await playEvent(type,d);}catch(e){console.warn('replay',type,e);}REPLAY=false;}
+  EVQ.running=false;busy=false;const m=EVQ.pending;EVQ.pending=null;if(m)applyState(m);else renderAll();}
+async function playEvent(type,d){
+  switch(type){
+    case 'dice':S.card=null;S.showSum=false;renderCenter();await animateDice(d);S.dice=d;S.showSum=true;break;
+    case 'move':await moveSteps(S.players[d[0]],d[1]);break;
+    case 'xfer':await xfer(d[0],d[1],d[2],d[3]||{});break;
+    case 'card':await showCardFx(d[0],d[1],d[2]);break;
+    case 'jail':goJail(S.players[d]);break;
+    case 'buy':SFX.buy();S.own[d[0]]={o:d[1],lv:0,m:false};fxBought(d[0],d[2]);renderDynamic();break;
+    case 'build':if(S.own[d[0]])S.own[d[0]].lv=d[1];fxBuilt(d[0],d[1]);break;
+    case 'hit':shake();burstAt(tileEl(d));break;
+    case 'win':confetti(140);SFX.win();break;}}
 function guestMe(patch){if(NET.mode!=='guest')return;const me=NET.lobby&&NET.lobby.players.find(p=>p.cid===myCid());if(me)Object.assign(me,patch);
   send(NET.hostConn,Object.assign({t:'me'},patch));}
 
