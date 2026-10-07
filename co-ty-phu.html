@@ -514,6 +514,15 @@ button{font-family:inherit}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;z-index:70;background:#1E2A22;color:#fff;font:600 14px var(--f-body);padding:10px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35);transition:.25s;pointer-events:none;max-width:calc(100vw - 32px);text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.warn{background:#9E2A1F}
+.ndot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2E9D5B;margin-left:6px;vertical-align:1px;box-shadow:0 0 0 2px color-mix(in srgb,#2E9D5B 25%,transparent)}
+.ndot.off{background:#C62828;box-shadow:0 0 0 2px color-mix(in srgb,#C62828 25%,transparent);animation:waitp 1.2s ease-in-out infinite}
+.wait.off{animation:none;color:#C62828;opacity:1}
+.on-resume{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:color-mix(in srgb,var(--accent) 10%,var(--surface));border:1.5px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.on-resume>div:first-child{display:grid;gap:3px;min-width:0}
+.on-ra{display:flex;gap:8px;align-items:center}
+#netbar{position:fixed;left:0;right:0;top:0;z-index:65;display:none;gap:10px;align-items:center;justify-content:center;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;background:#9E2A1F;color:#fff;font:600 14px var(--f-body);box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#netbar.show{display:flex}
+#netbar .btn{background:#fff;color:#9E2A1F;border-color:#fff}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 
@@ -1127,7 +1136,7 @@ function renderDynamic(){if(!$('#board'))return;if(NET.mode==='host')queueSync()
         else h.innerHTML=Array.from({length:lv},(_,k)=>`<i class="house${d&&k===lv-1?' drop':''}"></i>`).join('');}}
     el.querySelector('.toks').innerHTML=order.map(k=>{const p=S.players[k];return (!p.bankrupt&&p.pos===i)?`<span class="tok${k===S.cur&&S.phase!=='gameover'?' cur':''}${p.jail?' jailed':''}" data-p="${k}" style="--pc:${p.color}" title="${esc(p.name)}">${tokEmoji(p.token)}</span>`:'';}).join('');});}
 function actionsHTML(){const p=cp(),dis=busy?'disabled':'';
-  if(online()&&!myTurn()&&S.phase!=='gameover')return `<p class="wait">Đang chờ <b>${esc(p.name)}</b>…</p>`;
+  if(online()&&!myTurn()&&S.phase!=='gameover')return isOn(p)?`<p class="wait">Đang chờ <b>${esc(p.name)}</b>…</p>`:`<p class="wait off"><b>${esc(p.name)}</b> đang mất kết nối…</p>${NET.mode==='host'&&!busy?'<button class="btn sm" data-act="net-skip">Bỏ qua lượt này</button>':''}`;
   if(buildMode&&S.phase!=='gameover')return `<button class="btn primary" data-act="buildmode">Xây xong</button>`;
   const bbtn=!busy&&['roll','again','end','debt'].includes(S.phase)&&S.phase!=='debt'&&buildable(S.cur).length?`<button class="btn" data-act="buildmode">Xây nhà</button>`:'';
   return actionsCore(p,dis)+bbtn;}
@@ -1153,7 +1162,7 @@ function renderCenter(){const c=$('#center');if(!c)return;const s=SK(),over=S.ph
    <div class="c-msgs">${msg}</div><div class="c-actions">${actionsHTML()}</div><div class="cpl" id="cpl">${cplHTML()}</div>`;}
 function cplHTML(){if(!S)return '';
   return `<div class="cpl-h"><span>Lượt ${S.turnNo}${S.rules.limit?` · ⏱ <b id="tleft" class="tleft">${fmtLeft(timeLeft())}</b>`:""}</span><button class="btn sm" data-act="menu">Sổ đỏ · Menu</button></div>`+
-    S.players.map((p,i)=>`<div class="cpl-row${i===S.cur&&S.phase!=='gameover'?' cur':''}${p.bankrupt?' out':''}" data-p="${i}"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span><span><b>${esc(p.name)}</b>${p.jail&&!p.bankrupt?'<span class="tag">Tù</span>':''}</span>${p.bankrupt?'<span>Phá sản</span>':mspan(i)}</div>`).join('')+
+    S.players.map((p,i)=>`<div class="cpl-row${i===S.cur&&S.phase!=='gameover'?' cur':''}${p.bankrupt?' out':''}" data-p="${i}"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span><span><b>${esc(p.name)}</b>${netDot(p)}${p.jail&&!p.bankrupt?'<span class="tag">Tù</span>':''}</span>${p.bankrupt?'<span>Phá sản</span>':mspan(i)}</div>`).join('')+
     (S.rules.parking?`<div class="cpl-pot">Quỹ bãi đỗ: ${mspan('pot')}</div>`:'');}
 const landMq=window.matchMedia?matchMedia('(orientation: landscape) and (max-height: 540px)'):{matches:false};
 function openSheet(){document.body.classList.add('sheet');}
@@ -1164,7 +1173,7 @@ function renderPlayers(){const c=$('#cpl');if(c)c.innerHTML=cplHTML();const el=$
     const props=Object.keys(S.own).map(Number).filter(k=>S.own[k].o===i).sort((a,b)=>a-b);
     const chips=props.map(k=>`<i class="${S.own[k].m?'m':''}" style="background:${chipColor(k)}" title="${esc(tname(k))}${S.own[k].m?' (cầm cố)':''}"></i>`).join('');
     const st=p.bankrupt?'Phá sản':[p.jail?'Đang ở tù':'',p.cards?`${p.cards} thẻ ra tù`:'',props.length?`${props.length} tài sản`:'Chưa có đất'].filter(Boolean).join(' · ');
-    return `<li data-p="${i}" class="${i===S.cur&&S.phase!=='gameover'?'cur':''}${p.bankrupt?' out':''}"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span><div class="pmeta"><b>${esc(p.name)}</b><span class="pstat">${st}</span>${chips?`<div class="chips">${chips}</div>`:''}</div>${mspan(i,'pmoney')}</li>`;}).join('')+'</ul>'+
+    return `<li data-p="${i}" class="${i===S.cur&&S.phase!=='gameover'?'cur':''}${p.bankrupt?' out':''}"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span><div class="pmeta"><b>${esc(p.name)}${netDot(p)}</b><span class="pstat">${st}</span>${chips?`<div class="chips">${chips}</div>`:''}</div>${mspan(i,'pmoney')}</li>`;}).join('')+'</ul>'+
     (S.rules.parking?`<div class="pot">Quỹ Bãi đỗ xe: <b>${mspan('pot')}</b></div>`:'');}
 function renderLog(){const el=$('#log');if(el)el.innerHTML=S.log.slice(0,60).map(l=>`<li><i style="${l.c?`background:${l.c}`:''}"></i><span>${esc(l.t)}</span></li>`).join('');}
 function renderDetail(){const el=$('#detail');if(!el)return;
@@ -1335,30 +1344,50 @@ function broadcast(msg){Object.values(NET.conns).forEach(c=>send(c,msg));}
 function setStatus(s){NET.status=s;const el=$('#net-status');if(el)el.textContent=s;}
 
 /* ---------- host ---------- */
-async function hostRoom(){setStatus('Đang tạo phòng…');renderOnline();
+function savedOnline(){try{const o=JSON.parse(localStorage.getItem('ctp-online-v1')||'null');if(o&&o.S&&o.code&&o.S.phase!=='gameover')return o;}catch(e){}return null;}
+function dropSavedOnline(){try{localStorage.removeItem('ctp-online-v1');}catch(e){}}
+async function hostRoom(resume){setStatus(resume?'Đang mở lại phòng '+resume.code+'…':'Đang tạo phòng…');renderOnline();
   try{await loadPeer();}catch(e){setStatus(e.message);renderOnline();return;}
-  const tryOpen=n=>{const code=String(1000+Math.floor(Math.random()*9000));const peer=new Peer(PEER_PREFIX+code);
-    peer.on('open',()=>{NET.mode='host';NET.peer=peer;NET.code=code;NET.started=false;
+  const tryOpen=n=>{const code=resume?resume.code:String(1000+Math.floor(Math.random()*9000));const peer=new Peer(PEER_PREFIX+code);
+    peer.on('open',()=>{NET.mode='host';NET.peer=peer;NET.code=code;
+      if(resume){NET.started=true;NET.lobby=null;S=resume.S;if(resume.skin)CFG.skin=resume.skin;if(resume.dice)CFG.dice=resume.dice;
+        busy=false;buildMode=false;sel=null;if(S.phase==='buy'&&S.pending==null)S.phase='end';view='game';setStatus('');render();
+        toast(`Đã mở lại phòng ${code}. Mọi người vào lại bằng mã cũ.`);return;}
+      NET.started=false;
       const me=draft.players[0]||{name:'Chủ phòng',token:'tiger',color:COLORS[0]};
       NET.lobby={code,players:[{cid:myCid(),name:me.name,token:me.token,color:me.color,host:true,on:true}]};
       view='lobby';setStatus('');render();});
-    peer.on('error',e=>{if(e.type==='unavailable-id'&&n<5){peer.destroy();tryOpen(n+1);return;}
+    peer.on('error',e=>{if(e.type==='unavailable-id'&&resume){peer.destroy();
+        if(n<6){setStatus(`Mã ${code} vẫn đang được giữ, thử lại sau vài giây… (${n+1}/6)`);renderOnline();setTimeout(()=>tryOpen(n+1),5000);}
+        else{setStatus(`Chưa mở lại được phòng ${code}. Đợi 1 phút rồi thử lại.`);renderOnline();}return;}
+      if(e.type==='unavailable-id'&&n<5){peer.destroy();tryOpen(n+1);return;}
       if(NET.mode==='host'&&e.type==='peer-unavailable')return;
       setStatus('Lỗi kết nối: '+(e.type||e.message));if(view!=='lobby'&&view!=='game')renderOnline();});
     peer.on('connection',c=>hostAccept(c));
     peer.on('disconnected',()=>{if(NET.mode==='host'){setStatus('Mất kết nối máy chủ trung gian, đang thử lại…');try{peer.reconnect();}catch(e){}}});};
   tryOpen(0);}
-function hostAccept(c){c.on('data',m=>hostOnData(c,m));
+function hostAccept(c){c.on('data',m=>{c._seen=Date.now();if(m&&m.t==='pong')return;hostOnData(c,m);});
   c.on('close',()=>{const cid=c._cid;if(!cid)return;delete NET.conns[cid];
     if(!NET.started){NET.lobby.players=NET.lobby.players.filter(p=>p.cid!==cid);lobbySync();}
-    else{const k=S.players.findIndex(p=>p.cid===cid);if(k>=0)toast(`${S.players[k].name} mất kết nối.`,'warn');}});}
+    else{const k=S.players.findIndex(p=>p.cid===cid);if(k>=0)toast(`${S.players[k].name} mất kết nối.`,'warn');presenceChanged();}});}
+function onlineSet(){return NET.mode==='host'?[myCid(),...Object.keys(NET.conns).filter(k=>Date.now()-(NET.conns[k]._seen||0)<8000)]:(NET.on||[]);}
+/* heartbeat: WebRTC can sit "open" for a long time after a phone sleeps or closes the tab */
+setInterval(()=>{
+  if(NET.mode==='host'){broadcast({t:'ping'});const now=onlineSet().join();if(now!==NET.lastOn){NET.lastOn=now;if(NET.started)presenceChanged();}
+    for(const k in NET.conns){const c=NET.conns[k];if(Date.now()-(c._seen||0)>30000){try{c.close();}catch(e){}delete NET.conns[k];}}}
+  else if(NET.mode==='guest'&&!NET.lost&&NET.hostConn&&NET.hostSeen&&Date.now()-NET.hostSeen>9000){const c=NET.hostConn;NET.hostConn=null;try{c.close();}catch(e){}
+    NET.lost=true;NET.on=[];netBar('Mất kết nối với chủ phòng, đang thử nối lại…');if(view==='game')renderPlayers();guestRetry(NET.code);}
+},2500);
+function isOn(p){return !online()||!p.cid||onlineSet().includes(p.cid);}
+function netDot(p){return online()&&!p.bankrupt?`<i class="ndot${isOn(p)?'':' off'}" title="${isOn(p)?'Đang kết nối':'Mất kết nối'}"></i>`:'';}
+function presenceChanged(){queueSync();if(view==='game'){renderPlayers();renderCenter();}}
 function freeToken(list,want){return want&&!list.some(p=>p.token===want)?want:Object.keys(TOK).find(id=>!list.some(p=>p.token===id));}
 function freeColor(list,want){return want&&!list.some(p=>p.color===want)?want:COLORS.find(c=>!list.some(p=>p.color===c));}
 function hostOnData(c,m){if(!m||typeof m!=='object')return;
   if(m.t==='hello'){const cid=String(m.cid||'').slice(0,20);if(!cid)return;c._cid=cid;
     if(NET.started){const k=S.players.findIndex(p=>p.cid===cid);
       if(k<0){send(c,{t:'err',msg:'Ván đã bắt đầu, không vào thêm được.'});setTimeout(()=>c.close(),300);return;}
-      NET.conns[cid]=c;toast(`${S.players[k].name} đã vào lại.`);send(c,{t:'state',S,skin:CFG.skin,dice:CFG.dice});return;}
+      NET.conns[cid]=c;toast(`${S.players[k].name} đã vào lại.`);presenceChanged();send(c,{t:'state',S,skin:CFG.skin,dice:CFG.dice,on:onlineSet()});return;}
     const L=NET.lobby.players;let p=L.find(q=>q.cid===cid);
     if(!p){if(L.length>=6){send(c,{t:'err',msg:'Phòng đã đủ 6 người.'});setTimeout(()=>c.close(),300);return;}
       p={cid,name:String(m.name||'Khách').slice(0,16),token:freeToken(L,m.token),color:freeColor(L,m.color),on:true};L.push(p);}
@@ -1383,33 +1412,44 @@ function hostApply(seat,a,d){if(seat<0||!GAME_ACTS.has(a))return 'Không hợp l
   else if(OWNER_ACTS.has(a)){const o=S.own[+d.i];if(!o||o.o!==seat)return 'Đây không phải đất của bạn.';}
   else if(seat!==S.cur)return 'Chưa đến lượt bạn.';
   if(busy)return 'Đang chạy hiệu ứng, thử lại.';
-  if(a==='sellto'){sellTo(+d.i,+d.b,+d.price);return '';}
+  if(a==='sellto'){if(d.b==null||d.b===''||d.price==null||d.price==='')return 'Thiếu người mua hoặc giá bán.';sellTo(+d.i,+d.b,+d.price);return '';}
   const f=ACT[a];if(f)f(d);return '';}
-function queueSync(){if(NET.mode!=='host'||!NET.started)return;clearTimeout(NET.syncT);NET.syncT=setTimeout(()=>broadcast({t:'state',S,skin:CFG.skin,dice:CFG.dice}),40);}
+function queueSync(){if(NET.mode!=='host'||!NET.started)return;clearTimeout(NET.syncT);NET.syncT=setTimeout(()=>{broadcast({t:'state',S,skin:CFG.skin,dice:CFG.dice,on:onlineSet()});
+  try{if(S.phase==='gameover')dropSavedOnline();else localStorage.setItem('ctp-online-v1',JSON.stringify({S,code:NET.code,skin:CFG.skin,dice:CFG.dice,at:Date.now()}));}catch(e){}},40);}
 
 /* ---------- guest ---------- */
 async function joinRoom(code){code=String(code||'').replace(/\D/g,'').slice(0,4);if(code.length!==4){setStatus('Mã phòng gồm 4 chữ số.');renderOnline();return;}
   setStatus('Đang kết nối tới phòng '+code+'…');renderOnline();
   try{await loadPeer();}catch(e){setStatus(e.message);renderOnline();return;}
-  const peer=new Peer();NET.peer=peer;
-  peer.on('open',()=>{const c=peer.connect(PEER_PREFIX+code,{reliable:true});NET.hostConn=c;
-    const to=setTimeout(()=>{if(!c.open){setStatus('Không kết nối được. Kiểm tra mã phòng, hoặc thử cùng Wi-Fi.');renderOnline();}},15000);
-    c.on('open',()=>{clearTimeout(to);NET.mode='guest';NET.code=code;const me=draft.players[0]||{};
-      send(c,{t:'hello',cid:myCid(),name:me.name||'Khách',token:me.token,color:me.color});});
-    c.on('data',m=>guestOnData(m));
-    c.on('close',()=>{if(NET.mode!=='guest')return;toast('Mất kết nối với chủ phòng.','warn');setStatus('Mất kết nối với chủ phòng.');
-      if(view==='lobby'){leaveRoom(true);}});});
-  peer.on('error',e=>{setStatus(e.type==='peer-unavailable'?'Không tìm thấy phòng '+code+'.':'Lỗi kết nối: '+(e.type||e.message));
+  const peer=new Peer();NET.peer=peer;NET.code=code;
+  peer.on('open',()=>guestConnect(code));
+  peer.on('disconnected',()=>{if(NET.mode==='guest')setTimeout(()=>{try{if(NET.peer===peer&&peer.disconnected&&!peer.destroyed)peer.reconnect();}catch(e){}},1500);});
+  peer.on('error',e=>{if(NET.lost){return;}
+    setStatus(e.type==='peer-unavailable'?'Không tìm thấy phòng '+code+'.':'Lỗi kết nối: '+(e.type||e.message));
     if(view!=='game'){NET.mode='local';renderOnline();}});}
+function guestConnect(code){const peer=NET.peer;if(!peer||peer.destroyed)return;
+  const c=peer.connect(PEER_PREFIX+code,{reliable:true});NET.hostConn=c;
+  const to=setTimeout(()=>{if(c.open)return;if(NET.lost)return;setStatus('Không kết nối được. Kiểm tra mã phòng, hoặc thử cùng Wi-Fi.');renderOnline();},15000);
+  c.on('open',()=>{clearTimeout(to);NET.mode='guest';NET.hostSeen=Date.now();const was=NET.lost;NET.lost=false;netBar('');if(was)toast('Đã kết nối lại.');
+    const me=draft.players[0]||{};send(c,{t:'hello',cid:myCid(),name:me.name||'Khách',token:me.token,color:me.color});});
+  c.on('data',m=>{if(NET.hostConn!==c)return;NET.hostSeen=Date.now();if(m&&m.t==='ping'){send(c,{t:'pong'});return;}guestOnData(m);});
+  c.on('close',()=>{if(NET.mode!=='guest'||NET.hostConn!==c)return;
+    if(view==='lobby'){toast('Mất kết nối với chủ phòng.','warn');leaveRoom(true);return;}
+    NET.lost=true;NET.on=[];netBar('Mất kết nối với chủ phòng, đang thử nối lại…');renderPlayers();guestRetry(code);});}
+function guestRetry(code){clearTimeout(NET.retryT);NET.retryT=setTimeout(()=>{if(NET.mode!=='guest'||!NET.lost)return;
+    const p=NET.peer;try{if(p.disconnected)p.reconnect();}catch(e){}guestConnect(code);guestRetry(code);},4000);}
+function netBar(msg){let b=$('#netbar');if(!b){b=document.createElement('div');b.id='netbar';b.setAttribute('role','status');document.body.appendChild(b);}
+  b.innerHTML=msg?`<span>${esc(msg)}</span><button class="btn sm" data-act="net-leave">Rời phòng</button>`:'';b.classList.toggle('show',!!msg);}
 function guestOnData(m){if(!m||typeof m!=='object')return;
   if(m.t==='err'){setStatus(m.msg);toast(m.msg,'warn');leaveRoom(true);return;}
   if(m.t==='deny'){toast(m.msg,'warn');return;}
   if(m.t==='lobby'){NET.lobby=m.L;if(m.L.skin&&CFG.skin!==m.L.skin)CFG.skin=m.L.skin;if(m.L.dice)CFG.dice=m.L.dice;
     if(view!=='lobby'){view='lobby';setStatus('');render();}else renderLobby();return;}
   if(m.t==='ev'){if(view==='game'&&S&&S.online){EVQ.push(m.e);playEvents();}return;}
-  if(m.t==='state'){if(EVQ.length||EVQ.running){EVQ.pending=m;return;}applyState(m);}}
-function applyState(m){const first=!S||!S.online||view!=='game';S=m.S;if(m.skin)CFG.skin=m.skin;if(m.dice)CFG.dice=m.dice;NET.started=true;
+  if(m.t==='state'){if(m.on)NET.on=m.on;if(EVQ.length||EVQ.running){EVQ.pending=m;return;}applyState(m);}}
+function applyState(m){const first=!S||!S.online||view!=='game',wasOver=S&&S.phase==='gameover';S=m.S;if(m.skin)CFG.skin=m.skin;if(m.dice)CFG.dice=m.dice;NET.started=true;
   if(first){view='game';busy=false;render();}else renderAll();
+  if(S.phase==='gameover'&&!wasOver){showRanking(S.players.filter(p=>!p.bankrupt).length===1?'Có người thắng rồi':'Kết thúc ván');return;}
   if(S.phase==='buy'&&myTurn()&&modalKind!=='buy')showBuyCard();
   else if(modalKind==='buy'&&(S.phase!=='buy'||!myTurn()))closeModal();}
 /* guest: replay the host's effects in order on the local copy, then take the host's snapshot */
@@ -1433,17 +1473,20 @@ function guestMe(patch){if(NET.mode!=='guest')return;const me=NET.lobby&&NET.lob
   send(NET.hostConn,Object.assign({t:'me'},patch));}
 
 /* ---------- shared ---------- */
-function netAct(a,d){if(a==='sellto'){d=Object.assign({},d,{b:$('#buyer')?$('#buyer').value:'',price:$('#sellprice')?$('#sellprice').value:''});}
+function netAct(a,d){if(a==='bankrupt'||a==='endgame-go')closeModal();if(a==='sellto'){d=Object.assign({},d,{b:$('#buyer')?$('#buyer').value:'',price:$('#sellprice')?$('#sellprice').value:''});}
   if(NET.mode==='host'){const r=hostApply(mySeat(),a,d);if(r)toast(r,'warn');}
   else send(NET.hostConn,{t:'act',a,d});}
 function leaveRoom(silent){const was=NET.mode;try{NET.peer&&NET.peer.destroy();}catch(e){}
-  Object.assign(NET,{mode:'local',peer:null,conns:{},code:'',lobby:null,hostConn:null,started:false});
+  if(was==='host'&&!silent)dropSavedOnline();
+  clearTimeout(NET.retryT);netBar('');
+  Object.assign(NET,{mode:'local',peer:null,conns:{},code:'',lobby:null,hostConn:null,started:false,lost:false,on:[]});
   if(S&&S.online){S=null;try{S=loadAll();}catch(e){}}
   view='setup';if(!silent)setStatus('');render();window.scrollTo(0,0);}
 
 /* ---------- views ---------- */
-function renderOnline(){const el=$('#online');if(!el)return;
-  el.innerHTML=`<div class="on-card"><div class="on-col"><h3>Tạo phòng</h3><p class="hint">Máy bạn làm chủ phòng, giữ luật chơi. Người khác nhập mã để vào.</p>
+function renderOnline(){const el=$('#online');if(!el)return;const sv=savedOnline();
+  el.innerHTML=(sv?`<div class="on-resume"><div><b>Ván online đang dở · phòng ${esc(sv.code)}</b><span class="hint">Bạn là chủ phòng. Mở lại để mọi người vào tiếp bằng mã cũ.</span></div>
+      <div class="on-ra"><button class="btn primary" data-act="net-resume">Mở lại phòng</button><button class="btn sm" data-act="net-drop">Bỏ ván này</button></div></div>`:'')+`<div class="on-card"><div class="on-col"><h3>Tạo phòng</h3><p class="hint">Máy bạn làm chủ phòng, giữ luật chơi. Người khác nhập mã để vào.</p>
       <button class="btn primary" data-act="net-host">Tạo phòng mới</button></div>
     <div class="on-col"><h3>Vào phòng</h3><p class="hint">Nhập mã 4 số chủ phòng đưa cho bạn.</p>
       <div class="on-join"><input id="room-code" inputmode="numeric" maxlength="4" placeholder="0000" value="${esc(new URLSearchParams(location.search).get('room')||'')}" aria-label="Mã phòng"><button class="btn primary" data-act="net-join">Vào</button></div></div></div>
@@ -1478,6 +1521,12 @@ Object.assign(ACT,{
   'net-host'(){hostRoom();},
   'net-join'(){joinRoom(($('#room-code')||{}).value);},
   'net-start'(){hostStart();},
+  'net-resume'(){const sv=savedOnline();if(sv)hostRoom(sv);},
+  'net-drop'(){confirmModal('Bỏ ván online?','Ván đang dở sẽ bị xoá, không mở lại được.','net-drop-go','Bỏ ván',true);},
+  'net-drop-go'(){closeModal();dropSavedOnline();renderOnline();},
+  'net-skip'(){if(NET.mode!=='host'||busy||!S||S.phase==='gameover')return;const p=cp();if(isOn(p))return;
+    if(modalKind==='buy')closeModal();S.pending=null;S.card=null;S.extra=false;S.dbl=0;
+    log(`${p.name} mất kết nối, bỏ qua lượt.`,S.cur);nextPlayer();},
   'net-leave'(){confirmModal('Rời phòng?',NET.mode==='host'?'Phòng sẽ đóng với mọi người.':'Bạn sẽ rời khỏi phòng này.','net-leave-go','Rời phòng',true);},
   'net-leave-go'(){closeModal();leaveRoom();},
   'net-copy'(d){const done=()=>toast('Đã sao chép link mời.');try{navigator.clipboard.writeText(d.l).then(done,()=>prompt('Sao chép link:',d.l));}catch(e){prompt('Sao chép link:',d.l);}},
@@ -1487,7 +1536,7 @@ document.addEventListener('input',e=>{if(e.target.id==='lb-name')setMe({name:e.t
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='room-code')ACT['net-join']();});
 function start(data){const saved=loadAll();
   if(data&&data.S){S=data.S;view=data.view||'game';if(data.draft)draft=data.draft;if(data.CFG)Object.assign(CFG,data.CFG);}
-  else if(saved){S=saved;view=S.phase==='gameover'?'setup':'game';}
+  else if(saved){S=saved;view=S.phase==='gameover'||/[?&]room=/.test(location.search)?'setup':'game';}
   busy=false;if(S&&S.phase==='buy'&&S.pending==null)S.phase='end';
   render();}
 if(window.claude?.hot?.snapshot)window.claude.hot.snapshot(()=>({S,CFG,view,draft}));
