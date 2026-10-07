@@ -795,6 +795,7 @@ function rentOf(i,sum){const t=T[i],o=S.own[i];if(!o||o.m)return 0;
 function ownsGroup(i){const t=T[i],o=S.own[i];return t.type==='prop'&&o&&groupTiles(t.g).every(j=>S.own[j]&&S.own[j].o===o.o);}
 function groupHasHouses(i){const t=T[i];return t.type==='prop'&&groupTiles(t.g).some(j=>S.own[j]&&S.own[j].lv>0);}
 function canBuild(i){const t=T[i],o=S.own[i];if(!o||t.type!=='prop'||o.m||o.lv>=5||S.phase==='debt')return false;
+  if(S.buildG!==t.g||o.o!==S.cur)return false;
   const g=groupTiles(t.g);if(!g.every(j=>S.own[j]&&S.own[j].o===o.o&&!S.own[j].m))return false;
   if(o.lv>Math.min(...g.map(j=>S.own[j].lv)))return false;
   return S.players[o.o].money>=t.hc;}
@@ -894,7 +895,7 @@ async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;ST().lands[i]=(ST().lan
   if(t.type==='prop'||t.type==='station'||t.type==='util'){const o=S.own[i];
     if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);showBuyCard();return;}
       log(`${p.name} đến ${tname(i)} nhưng không đủ tiền mua.`,me);}
-    else if(o.o===me)log(`${p.name} về ${tname(i)} của mình.`,me);
+    else if(o.o===me){if(t.type==="prop"&&ownsGroup(i)){S.buildG=t.g;log(`${p.name} về ${tname(i)} của mình và được quyền xây nhà ở nhóm màu này.`,me);}else log(`${p.name} về ${tname(i)} của mình.`,me);}
     else if(o.m)log(`${tname(i)} đang cầm cố nên ${p.name} không phải trả tiền thuê.`,me);
     else{const r=rentOf(i,sum),st=ST();st.rentIn[o.o]+=r;st.rentOut[me]+=r;if(!st.bigRent||r>st.bigRent.a)st.bigRent={p:me,a:r,i};
       if(r>=200){emit("hit",i);shake();burstAt(tileEl(i));}log(`${p.name} trả ${money(r)} tiền thuê ${tname(i)} cho ${S.players[o.o].name}.`,me);renderCenter();await pay(p,o.o,r);}
@@ -958,7 +959,7 @@ async function drawCard(p,deck,sum){const c=CARDS[deck][Math.floor(Math.random()
   settle();}
 
 async function doRoll(){if(busy||!S||!(S.phase==='roll'||S.phase==='again'))return;buildMode=false;
-  busy=true;S.card=null;S.showSum=false;renderCenter();const p=cp();
+  busy=true;S.card=null;S.showSum=false;S.buildG=null;renderCenter();const p=cp();
   const d=[rand6(),rand6()];await animateDice(d);S.dice=d;S.showSum=true;const sum=d[0]+d[1],dbl=d[0]===d[1];
   if(p.jail){
     if(dbl){p.jail=false;p.jt=0;S.extra=false;log(`${p.name} đổ được đôi ${d[0]}–${d[1]} và ra tù.`,S.cur);await moveSteps(p,sum);await land(p,sum);}
@@ -1006,7 +1007,11 @@ function showBuyCard(){if(!S||S.phase!=='buy'||S.pending==null||!myTurn())return
     <p class="buy-m">Tiền hiện có: <b>${money(p.money)}</b> → còn <b>${money(p.money-T[i].price)}</b></p>
     <div class="dlg-act"><button class="btn" data-act="skip">Bỏ qua</button><button class="btn primary" data-act="buy">Mua · ${money(T[i].price)}</button></div></div>`,'buy');}
 function endTurn(){if(busy||S.phase!=='end')return;S.card=null;S.showSum=false;S.dbl=0;S.extra=false;nextPlayer();}
-function nextPlayer(){if(timeLeft()<=0){log(`Hết giờ! Tính tổng tài sản để tìm người thắng.`,null);finishByWorth();return;}let n=S.cur;do{n=(n+1)%S.players.length;}while(S.players[n].bankrupt);
+/* nothing left to do this turn (no building right) -> pass the turn automatically */
+let autoT=0;
+function autoEnd(){clearTimeout(autoT);if(!S||S.phase!=="end"||busy||buildMode||NET.mode==="guest")return;if(buildable(S.cur).length)return;
+  autoT=setTimeout(()=>{if(S&&S.phase==="end"&&!busy&&!buildMode&&!buildable(S.cur).length)endTurn();else autoEnd();},1300);}
+function nextPlayer(){S.buildG=null;if(timeLeft()<=0){log(`Hết giờ! Tính tổng tài sản để tìm người thắng.`,null);finishByWorth();return;}let n=S.cur;do{n=(n+1)%S.players.length;}while(S.players[n].bankrupt);
   S.cur=n;S.turnNo++;S.cred=null;buildMode=false;const p=cp();
   if(p.money<0){S.phase='debt';S.debt={to:null,after:'roll'};log(`${p.name} đang âm ${money(-p.money)}, cần xoay tiền trước khi đổ.`,n);}
   else{S.phase='roll';S.msg=p.jail?`${p.name} đang ở tù (đã chờ ${p.jt}/3 lượt). Đổ được đôi để ra tù.`:(S.online?`Đến lượt ${p.name}.`:`Đến lượt ${p.name}. Chuyền máy cho ${p.name} nhé.`);}
@@ -1094,7 +1099,7 @@ function renderGame(){$('#main').innerHTML=`<div class="layout" data-skin="${CFG
   <div class="board-wrap"><div class="board" id="board">${T.map((_,i)=>tileHTML(i)).join('')}<div class="center" id="center"></div></div></div>
   <aside class="side"><div class="mini" id="mini"></div><section class="panel" id="players"></section><section class="panel" id="detail"></section>
   <section class="panel"><h3>Nhật ký ván</h3><ol class="log" id="log"></ol></section></aside></div>`;renderAll();}
-function renderAll(){if(view!=='game'||!S)return;if(NET.mode==='host')queueSync();renderDynamic();renderCenter();renderPlayers();renderDetail();renderLog();renderTop();}
+function renderAll(){if(view!=='game'||!S)return;autoEnd();if(NET.mode==='host')queueSync();renderDynamic();renderCenter();renderPlayers();renderDetail();renderLog();renderTop();}
 let buildMode=false;
 const buildable = k=>Object.keys(S.own).map(Number).filter(i=>S.own[i].o===k&&canBuild(i));
 function priceLabel(i){const t=T[i],o=S.own[i];
@@ -1132,7 +1137,7 @@ function actionsCore(p,dis){
       return `<button class="btn primary" data-act="roll" ${dis}>Đổ xúc xắc</button>`;
     case 'again':return `<button class="btn primary" data-act="roll" ${dis}>Được đôi, đổ tiếp</button>`;
     case 'buy':return modalKind==='buy'?'':`<button class="btn primary" data-act="showbuy">Xem sổ đỏ</button>`;
-    case 'end':return `<button class="btn primary" data-act="end" ${dis}>Kết thúc lượt</button>`;
+    case 'end':return buildable(S.cur).length?`<button class="btn primary" data-act="end" ${dis}>Kết thúc lượt</button>`:`<button class="btn" data-act="end" ${dis}>Chuyển lượt…</button>`;
     case 'debt':return `<button class="btn primary" data-act="paydebt" ${p.money<0?'disabled':''}>Đã đủ tiền, tiếp tục</button><button class="btn danger" data-act="askbankrupt">Phá sản</button>`;
     case 'gameover':return `<button class="btn primary" data-act="newgame">Ván mới</button><button class="btn" data-act="rank">Bảng xếp hạng</button>`;}
   return '';}
@@ -1186,7 +1191,7 @@ function renderDetail(){const el=$('#detail');if(!el)return;
         if(!o.m)b.push(`<button class="btn sm" data-act="mort" data-i="${i}" ${canMortgage(i)&&!busy?'':'disabled'}>Cầm cố +${money(t.price/2)}</button>`);
         else b.push(`<button class="btn sm" data-act="unmort" data-i="${i}" ${canUnmort(i)&&!busy?'':'disabled'}>Chuộc lại −${money(unmortCost(i))}</button>`);
         html+=`<div class="manage">${b.join('')}</div>`;
-        if(t.type==='prop'&&!ownsGroup(i))html+=`<p class="hint" style="margin-top:8px">Cần sở hữu cả nhóm màu mới được xây nhà. Nhà phải xây đều trong nhóm.</p>`;
+        if(t.type==='prop'&&!ownsGroup(i))html+=`<p class="hint" style="margin-top:8px">Cần sở hữu cả nhóm màu, và chỉ được xây khi dừng ở một ô trong nhóm. Nhà phải xây đều trong nhóm.</p>`;
         else if(t.type==='prop'&&groupHasHouses(i)&&!o.m)html+=`<p class="hint" style="margin-top:8px">Bán hết nhà trong nhóm màu trước khi cầm cố hoặc bán đất.</p>`;
         const others=S.players.map((q,k)=>({q,k})).filter(x=>x.k!==o.o&&!x.q.bankrupt);
         if(others.length&&!groupHasHouses(i))html+=`<div class="sellto"><label for="buyer">Bán cho người chơi khác (hai bên thỏa thuận tại chỗ)</label><div class="row">
