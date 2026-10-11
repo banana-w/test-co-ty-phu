@@ -646,7 +646,10 @@ const BGM=(()=>{let ac=null,out=null,timer=null,next=0,step=0;
     stop(){if(!timer)return;clearInterval(timer);timer=null;try{out.gain.cancelScheduledValues(ac.currentTime);out.gain.setValueAtTime(out.gain.value,ac.currentTime);out.gain.linearRampToValueAtTime(0,ac.currentTime+.4);}catch(e){}},
     sync(){(view==='game'&&!CFG.mute&&CFG.music!==false)?this.start():this.stop();}
   };})();
-document.addEventListener('visibilitychange',()=>{document.hidden?BGM.stop():BGM.sync();});
+document.addEventListener('visibilitychange',()=>{document.hidden?BGM.stop():BGM.sync();
+  if(!document.hidden&&typeof NET!=='undefined'&&NET.mode==='guest'&&NET.code){
+    if(!NET.lost&&NET.hostSeen&&Date.now()-NET.hostSeen>5000)NET.hostSeen=1;/* stale: let the heartbeat drop it on its next tick */
+    else if(NET.lost){clearTimeout(NET.retryT);try{if(NET.peer.disconnected)NET.peer.reconnect();}catch(e){}guestConnect(NET.code);guestRetry(NET.code);}}});
 /* sound effects: synthesized with Web Audio, no files */
 document.addEventListener("pointerdown",()=>{try{SFX.unlock();BGM.sync();}catch(e){}},{once:true});
 const SFX=(()=>{let ac=null,master=null;
@@ -1368,12 +1371,12 @@ function hostAccept(c){c.on('data',m=>{c._seen=Date.now();if(m&&m.t==='pong')ret
   c.on('close',()=>{const cid=c._cid;if(!cid)return;delete NET.conns[cid];
     if(!NET.started){NET.lobby.players=NET.lobby.players.filter(p=>p.cid!==cid);lobbySync();}
     else{const k=S.players.findIndex(p=>p.cid===cid);if(k>=0)toast(`${S.players[k].name} mất kết nối.`,'warn');presenceChanged();}});}
-function onlineSet(){return NET.mode==='host'?[myCid(),...Object.keys(NET.conns).filter(k=>Date.now()-(NET.conns[k]._seen||0)<8000)]:(NET.on||[]);}
+function onlineSet(){return NET.mode==='host'?[myCid(),...Object.keys(NET.conns).filter(k=>Date.now()-(NET.conns[k]._seen||0)<12000)]:(NET.on||[]);}
 /* heartbeat: WebRTC can sit "open" for a long time after a phone sleeps or closes the tab */
 setInterval(()=>{
   if(NET.mode==='host'){broadcast({t:'ping'});const now=onlineSet().join();if(now!==NET.lastOn){NET.lastOn=now;if(NET.started)presenceChanged();}
     for(const k in NET.conns){const c=NET.conns[k];if(Date.now()-(c._seen||0)>30000){try{c.close();}catch(e){}delete NET.conns[k];}}}
-  else if(NET.mode==='guest'&&!NET.lost&&NET.hostConn&&NET.hostSeen&&Date.now()-NET.hostSeen>9000){const c=NET.hostConn;NET.hostConn=null;try{c.close();}catch(e){}
+  else if(NET.mode==='guest'&&!NET.lost&&NET.hostConn&&NET.hostSeen&&Date.now()-NET.hostSeen>15000){const c=NET.hostConn;NET.hostConn=null;try{c.close();}catch(e){}
     NET.lost=true;NET.on=[];netBar('Mất kết nối với chủ phòng, đang thử nối lại…');if(view==='game')renderPlayers();guestRetry(NET.code);}
 },2500);
 function isOn(p){return !online()||!p.cid||onlineSet().includes(p.cid);}
@@ -1385,7 +1388,7 @@ function hostOnData(c,m){if(!m||typeof m!=='object')return;
   if(m.t==='hello'){const cid=String(m.cid||'').slice(0,20);if(!cid)return;c._cid=cid;
     if(NET.started){const k=S.players.findIndex(p=>p.cid===cid);
       if(k<0){send(c,{t:'err',msg:'Ván đã bắt đầu, không vào thêm được.'});setTimeout(()=>c.close(),300);return;}
-      NET.conns[cid]=c;toast(`${S.players[k].name} đã vào lại.`);presenceChanged();send(c,{t:'state',S,skin:CFG.skin,dice:CFG.dice,on:onlineSet()});return;}
+      NET.conns[cid]=c;toast(`${S.players[k].name} đã vào lại.`);presenceChanged();send(c,netState());return;}
     const L=NET.lobby.players;let p=L.find(q=>q.cid===cid);
     if(!p){if(L.length>=6){send(c,{t:'err',msg:'Phòng đã đủ 6 người.'});setTimeout(()=>c.close(),300);return;}
       p={cid,name:String(m.name||'Khách').slice(0,16),token:freeToken(L,m.token),color:freeColor(L,m.color),on:true};L.push(p);}
@@ -1412,7 +1415,10 @@ function hostApply(seat,a,d){if(seat<0||!GAME_ACTS.has(a))return 'Không hợp l
   if(busy)return 'Đang chạy hiệu ứng, thử lại.';
   if(a==='sellto'){if(d.b==null||d.b===''||d.price==null||d.price==='')return 'Thiếu người mua hoặc giá bán.';sellTo(+d.i,+d.b,+d.price);return '';}
   const f=ACT[a];if(f)f(d);return '';}
-function queueSync(){if(NET.mode!=='host'||!NET.started)return;clearTimeout(NET.syncT);NET.syncT=setTimeout(()=>{broadcast({t:'state',S,skin:CFG.skin,dice:CFG.dice,on:onlineSet()});
+/* what guests get: the log is trimmed so the snapshot stays small (big messages get chunked and choke the channel on long games) */
+function netState(){return {t:'state',S:Object.assign({},S,{log:S.log.slice(0,30)}),skin:CFG.skin,dice:CFG.dice,on:onlineSet()};}
+function queueSync(){if(NET.mode!=='host'||!NET.started)return;clearTimeout(NET.syncT);NET.syncT=setTimeout(()=>{
+  const m=netState(),j=JSON.stringify(m);if(j!==NET.lastSync){NET.lastSync=j;broadcast(m);}
   try{if(S.phase==='gameover')dropSavedOnline();else localStorage.setItem('ctp-online-v1',JSON.stringify({S,code:NET.code,skin:CFG.skin,dice:CFG.dice,at:Date.now()}));}catch(e){}},40);}
 
 /* ---------- guest ---------- */
@@ -1443,7 +1449,7 @@ function guestOnData(m){if(!m||typeof m!=='object')return;
   if(m.t==='deny'){toast(m.msg,'warn');return;}
   if(m.t==='lobby'){NET.lobby=m.L;if(m.L.skin&&CFG.skin!==m.L.skin)CFG.skin=m.L.skin;if(m.L.dice)CFG.dice=m.L.dice;
     if(view!=='lobby'){view='lobby';setStatus('');render();}else renderLobby();return;}
-  if(m.t==='ev'){if(view==='game'&&S&&S.online){EVQ.push(m.e);playEvents();}return;}
+  if(m.t==='ev'){if(view==='game'&&S&&S.online&&!document.hidden){EVQ.push(m.e);playEvents();}return;}
   if(m.t==='state'){if(m.on)NET.on=m.on;if(EVQ.length||EVQ.running){EVQ.pending=m;return;}applyState(m);}}
 function applyState(m){const first=!S||!S.online||view!=='game',wasOver=S&&S.phase==='gameover';S=m.S;if(m.skin)CFG.skin=m.skin;if(m.dice)CFG.dice=m.dice;NET.started=true;
   if(first){view='game';busy=false;render();}else renderAll();
@@ -1453,8 +1459,8 @@ function applyState(m){const first=!S||!S.online||view!=='game',wasOver=S&&S.pha
 /* guest: replay the host's effects in order on the local copy, then take the host's snapshot */
 const EVQ=[];
 async function playEvents(){if(EVQ.running)return;EVQ.running=true;busy=true;renderCenter();
-  while(EVQ.length){const [type,d]=EVQ.shift();REPLAY=true;
-    try{await playEvent(type,d);}catch(e){console.warn('replay',type,e);}REPLAY=false;}
+  while(EVQ.length){if(document.hidden||EVQ.length>12){EVQ.length=0;break;}const [type,d]=EVQ.shift();REPLAY=true;
+    try{await Promise.race([playEvent(type,d),wait(8000)]);}catch(e){console.warn('replay',type,e);}REPLAY=false;}
   EVQ.running=false;busy=false;const m=EVQ.pending;EVQ.pending=null;if(m)applyState(m);else renderAll();}
 async function playEvent(type,d){
   switch(type){
