@@ -802,14 +802,12 @@ function rentOf(i,sum){const t=T[i],o=S.own[i];if(!o||o.m)return 0;
   if(t.type==='util'){const n=UTILS.filter(j=>S.own[j]&&S.own[j].o===o.o).length;return (sum||7)*(n===2?10:4);}
   return 0;}
 function ownsGroup(i){const t=T[i],o=S.own[i];return t.type==='prop'&&o&&groupTiles(t.g).every(j=>S.own[j]&&S.own[j].o===o.o);}
-function groupHasHouses(i){const t=T[i];return t.type==='prop'&&groupTiles(t.g).some(j=>S.own[j]&&S.own[j].lv>0);}
+function groupHasHouses(i){const t=T[i],o=S.own[i];return t.type==='prop'&&!!o&&o.lv>0;}
 function canBuild(i){const t=T[i],o=S.own[i];if(!o||t.type!=='prop'||o.m||o.lv>=5||S.phase==='debt')return false;
-  if(S.buildG!==t.g||o.o!==S.cur)return false;
-  const g=groupTiles(t.g);if(!g.every(j=>S.own[j]&&S.own[j].o===o.o&&!S.own[j].m))return false;
-  if(o.lv>Math.min(...g.map(j=>S.own[j].lv)))return false;
+  if(S.buildI!==i||o.o!==S.cur)return false;
   return S.players[o.o].money>=t.hc;}
 function canSellHouse(i){const t=T[i],o=S.own[i];if(!o||t.type!=='prop'||o.lv===0)return false;
-  return o.lv>=Math.max(...groupTiles(t.g).map(j=>S.own[j]?S.own[j].lv:0));}
+  return true;}
 function canMortgage(i){const o=S.own[i];return o&&!o.m&&o.lv===0&&!groupHasHouses(i);}
 const unmortCost = i=>Math.ceil(T[i].price/2*1.1);
 function canUnmort(i){const o=S.own[i];return o&&o.m&&S.players[o.o].money>=unmortCost(i);}
@@ -904,7 +902,7 @@ async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;ST().lands[i]=(ST().lan
   if(t.type==='prop'||t.type==='station'||t.type==='util'){const o=S.own[i];
     if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);showBuyCard();return;}
       log(`${p.name} đến ${tname(i)} nhưng không đủ tiền mua.`,me);}
-    else if(o.o===me){if(t.type==="prop"&&ownsGroup(i)){S.buildG=t.g;log(`${p.name} về ${tname(i)} của mình và được quyền xây nhà ở nhóm màu này.`,me);}else log(`${p.name} về ${tname(i)} của mình.`,me);}
+    else if(o.o===me){if(t.type==="prop"&&!o.m){S.buildI=i;log(`${p.name} về ${tname(i)} của mình và được quyền xây nhà trên ô này.`,me);}else log(`${p.name} về ${tname(i)} của mình.`,me);}
     else if(o.m)log(`${tname(i)} đang cầm cố nên ${p.name} không phải trả tiền thuê.`,me);
     else{const r=rentOf(i,sum),st=ST();st.rentIn[o.o]+=r;st.rentOut[me]+=r;if(!st.bigRent||r>st.bigRent.a)st.bigRent={p:me,a:r,i};
       if(r>=200){emit("hit",i);shake();burstAt(tileEl(i));}log(`${p.name} trả ${money(r)} tiền thuê ${tname(i)} cho ${S.players[o.o].name}.`,me);renderCenter();await pay(p,o.o,r);}
@@ -968,7 +966,7 @@ async function drawCard(p,deck,sum){const c=CARDS[deck][Math.floor(Math.random()
   settle();}
 
 async function doRoll(){if(busy||!S||!(S.phase==='roll'||S.phase==='again'))return;buildMode=false;
-  busy=true;S.card=null;S.showSum=false;S.buildG=null;renderCenter();const p=cp();
+  busy=true;S.card=null;S.showSum=false;S.buildI=null;renderCenter();const p=cp();
   const d=[rand6(),rand6()];await animateDice(d);S.dice=d;S.showSum=true;const sum=d[0]+d[1],dbl=d[0]===d[1];
   if(p.jail){
     if(dbl){p.jail=false;p.jt=0;S.extra=false;log(`${p.name} đổ được đôi ${d[0]}–${d[1]} và ra tù.`,S.cur);await moveSteps(p,sum);await land(p,sum);}
@@ -993,7 +991,7 @@ function doBuy(){if(S.phase!=='buy')return;SFX.buy();if(modalKind==='buy')closeM
   log(`${p.name} mua ${tname(i)} với giá ${money(T[i].price)}.`,S.cur);
   const full=T[i].type==='prop'&&ownsGroup(i);
   ST().bought[S.cur]++;
-  if(full)log(`${p.name} đã có trọn bộ màu! Tiền thuê nhóm này tăng gấp đôi và giờ có thể xây nhà.`,S.cur);
+  if(full)log(`${p.name} đã có trọn bộ màu! Tiền thuê đất trống của nhóm này tăng gấp đôi.`,S.cur);
   emit('buy',[i,S.cur,full]);fxBought(i,full);
   xfer(S.cur,{tile:i},T[i].price);
   S.pending=null;settle();renderAll();save();}
@@ -1020,7 +1018,7 @@ function endTurn(){if(busy||S.phase!=='end')return;S.card=null;S.showSum=false;S
 let autoT=0;
 function autoEnd(){clearTimeout(autoT);if(!S||S.phase!=="end"||busy||buildMode||NET.mode==="guest")return;if(buildable(S.cur).length)return;
   autoT=setTimeout(()=>{if(S&&S.phase==="end"&&!busy&&!buildMode&&!buildable(S.cur).length)endTurn();else autoEnd();},1300);}
-function nextPlayer(){S.buildG=null;if(timeLeft()<=0){log(`Hết giờ! Tính tổng tài sản để tìm người thắng.`,null);finishByWorth();return;}let n=S.cur;do{n=(n+1)%S.players.length;}while(S.players[n].bankrupt);
+function nextPlayer(){S.buildI=null;if(timeLeft()<=0){log(`Hết giờ! Tính tổng tài sản để tìm người thắng.`,null);finishByWorth();return;}let n=S.cur;do{n=(n+1)%S.players.length;}while(S.players[n].bankrupt);
   S.cur=n;S.turnNo++;S.cred=null;buildMode=false;const p=cp();
   if(p.money<0){S.phase='debt';S.debt={to:null,after:'roll'};log(`${p.name} đang âm ${money(-p.money)}, cần xoay tiền trước khi đổ.`,n);}
   else{S.phase='roll';S.msg=p.jail?`${p.name} đang ở tù (đã chờ ${p.jt}/3 lượt). Đổ được đôi để ra tù.`:(S.online?`Đến lượt ${p.name}.`:`Đến lượt ${p.name}. Chuyền máy cho ${p.name} nhé.`);}
@@ -1200,8 +1198,8 @@ function renderDetail(){const el=$('#detail');if(!el)return;
         if(!o.m)b.push(`<button class="btn sm" data-act="mort" data-i="${i}" ${canMortgage(i)&&!busy?'':'disabled'}>Cầm cố +${money(t.price/2)}</button>`);
         else b.push(`<button class="btn sm" data-act="unmort" data-i="${i}" ${canUnmort(i)&&!busy?'':'disabled'}>Chuộc lại −${money(unmortCost(i))}</button>`);
         html+=`<div class="manage">${b.join('')}</div>`;
-        if(t.type==='prop'&&!ownsGroup(i))html+=`<p class="hint" style="margin-top:8px">Cần sở hữu cả nhóm màu, và chỉ được xây khi dừng ở một ô trong nhóm. Nhà phải xây đều trong nhóm.</p>`;
-        else if(t.type==='prop'&&groupHasHouses(i)&&!o.m)html+=`<p class="hint" style="margin-top:8px">Bán hết nhà trong nhóm màu trước khi cầm cố hoặc bán đất.</p>`;
+        if(t.type==='prop'&&!canBuild(i)&&!groupHasHouses(i))html+=`<p class="hint" style="margin-top:8px">Chỉ được xây nhà trên ô này khi dừng đúng ở ô này.</p>`;
+        else if(t.type==='prop'&&groupHasHouses(i)&&!o.m)html+=`<p class="hint" style="margin-top:8px">Bán hết nhà trên ô này trước khi cầm cố hoặc bán đất.</p>`;
         const others=S.players.map((q,k)=>({q,k})).filter(x=>x.k!==o.o&&!x.q.bankrupt);
         if(others.length&&!groupHasHouses(i))html+=`<div class="sellto"><label for="buyer">Bán cho người chơi khác (hai bên thỏa thuận tại chỗ)</label><div class="row">
           <select id="buyer">${others.map(x=>`<option value="${x.k}">${esc(x.q.name)}</option>`).join('')}</select>
