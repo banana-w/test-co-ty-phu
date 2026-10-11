@@ -345,7 +345,7 @@ button{font-family:inherit}
   .board-wrap{width:100%;height:100%;max-width:none}
   .board{width:100%;height:100%;aspect-ratio:auto;container-type:size;border-radius:6px;border-width:1.5px}
   /* even tiles on a short, wide board: taller top/bottom rows and slimmer side columns, taken from the centre */
-  .board{--ch:clamp(52px,calc(var(--h)*.15),64px);--cb:clamp(40px,calc(var(--h)*.12),50px);--cw:clamp(96px,13vw,124px);
+  .board{--ch:clamp(52px,calc(var(--h)*.15),64px);--cb:clamp(44px,calc(var(--h)*.13),52px);--cw:clamp(96px,13vw,124px);
     grid-template-columns:var(--cw) repeat(9,minmax(0,1fr)) var(--cw);grid-template-rows:var(--ch) repeat(9,minmax(0,1fr)) var(--cb)}
 
   /* tiles in fixed px so they stay legible on a short, wide board */
@@ -392,11 +392,11 @@ button{font-family:inherit}
   .side-l .tprice,.side-r .tprice{font-size:9.5px}
   .side-l .ticon,.side-r .ticon{width:15px;height:15px}
   .side-l .tart,.side-r .tart{width:19px;height:19px}
-  /* bottom row is shorter: one line name, price below, no picture */
+  /* bottom row is shorter: small picture, one line name, price below */
   .side-b .band{flex-basis:6px}
   .side-b .tinfo{gap:1px;padding:1px 2px 2px}
   .side-b .tname{display:block;-webkit-line-clamp:unset;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-  .side-b .tinfo:has(.tprice:not(:empty)) .tart{display:none}
+  .side-b .tart,.side-b .tinfo .ticon,.side-b .tinfo:has(.tprice:not(:empty)) .ticon{display:block;width:12px;height:12px;flex:none}
   .side-b .corner .ticon,.corner.side-b .ticon{width:15px;height:15px}
 
   /* board centre: players on the left, turn / dice / message / actions on the right */
