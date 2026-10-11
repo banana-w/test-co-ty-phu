@@ -243,11 +243,6 @@ button{font-family:inherit}
 .owner{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
 .owner .tok{--sz:22px;border-width:1.5px}
 .manage{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.sellto{display:grid;gap:6px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
-.sellto label{font-size:12px;color:var(--muted)}
-.sellto .row{display:flex;gap:6px;flex-wrap:wrap}
-.sellto select,.sellto input{font:500 14px var(--f-body);padding:7px 9px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
-.sellto input{width:100px}
 .log{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto;display:grid;gap:7px;font-size:13px}
 .log li{display:grid;grid-template-columns:8px minmax(0,1fr);gap:8px;align-items:baseline}
 .log li i{width:8px;height:8px;border-radius:50%;display:block;background:var(--muted)}
@@ -1105,11 +1100,12 @@ function manage(kind,i){if(busy||!S||S.phase==='gameover')return;const o=S.own[i
   else if(kind==='unmort'&&canUnmort(i)){const c=unmortCost(i);o.m=false;log(`${p.name} chuộc lại ${tname(i)} (−${money(c)}).`,pi);xfer(pi,{tile:i},c);}
   else return;
   renderAll();save();}
-function sellTo(i,bArg,pArg){if(busy||!S)return;const o=S.own[i];if(!o||groupHasHouses(i))return;
-  const b=bArg!=null?bArg:+$('#buyer').value,price=Math.max(0,Math.round(+(pArg!=null?pArg:$('#sellprice').value)||0));const buyer=S.players[b],seller=S.players[o.o];
-  if(!buyer||buyer.bankrupt||b===o.o)return;
-  if(buyer.money<price){if($('#sellmsg'))$('#sellmsg').textContent=`${buyer.name} chỉ có ${money(buyer.money)}, không đủ trả ${money(price)}.`;return;}
-  xfer(b,o.o,price);log(`${seller.name} bán ${tname(i)} cho ${buyer.name} với giá ${money(price)}.`,o.o);o.o=b;renderAll();save();}
+/* sell straight to the bank: land and every house on it, for half of what was paid */
+function bankValue(i){const t=T[i],o=S.own[i];return o?Math.round((t.price+(t.type==='prop'?o.lv*t.hc:0))/2):0;}
+function canSellBank(i){const o=S.own[i];return !!o&&!o.m&&S.phase!=='gameover';}
+function sellBank(i){if(busy||!S||!canSellBank(i))return;const o=S.own[i],pi=o.o,p=S.players[pi],v=bankValue(i);
+  delete S.own[i];if(S.buildI===i)S.buildI=null;
+  log(`${p.name} bán ${tname(i)} cho ngân hàng (+${money(v)}).`,pi);xfer({tile:i},pi,v);renderAll();save();}
 
 /* ================= rendering ================= */
 function dieHTML(v,skin=CFG.dice){if(skin==='digit')return `<span class="die digit"><b>${v}</b></span>`;
@@ -1230,14 +1226,12 @@ function renderDetail(){const el=$('#detail');if(!el)return;
           if(o.lv>0)b.push(`<button class="btn sm" data-act="sellh" data-i="${i}" ${canSellHouse(i)&&!busy?'':'disabled'}>Bán nhà +${money(t.hc/2)}</button>`);}
         if(!o.m)b.push(`<button class="btn sm" data-act="mort" data-i="${i}" ${canMortgage(i)&&!busy?'':'disabled'}>Cầm cố +${money(t.price/2)}</button>`);
         else b.push(`<button class="btn sm" data-act="unmort" data-i="${i}" ${canUnmort(i)&&!busy?'':'disabled'}>Chuộc lại −${money(unmortCost(i))}</button>`);
+        b.push(`<button class="btn sm" data-act="sellbank-ask" data-i="${i}" ${canSellBank(i)&&!busy?'':'disabled'}>Bán cho ngân hàng +${money(bankValue(i))}</button>`);
         html+=`<div class="manage">${b.join('')}</div>`;
+        if(o.m)html+=`<p class="hint" style="margin-top:8px">Chuộc lại đất trước khi bán cho ngân hàng.</p>`;
         if(t.type==='prop'&&!canBuild(i)&&!groupHasHouses(i))html+=`<p class="hint" style="margin-top:8px">Chỉ được xây nhà trên ô này khi dừng đúng ở ô này.</p>`;
-        else if(t.type==='prop'&&groupHasHouses(i)&&!o.m)html+=`<p class="hint" style="margin-top:8px">Bán hết nhà trên ô này trước khi cầm cố hoặc bán đất.</p>`;
-        const others=S.players.map((q,k)=>({q,k})).filter(x=>x.k!==o.o&&!x.q.bankrupt);
-        if(others.length&&!groupHasHouses(i))html+=`<div class="sellto"><label for="buyer">Bán cho người chơi khác (hai bên thỏa thuận tại chỗ)</label><div class="row">
-          <select id="buyer">${others.map(x=>`<option value="${x.k}">${esc(x.q.name)}</option>`).join('')}</select>
-          <input id="sellprice" type="number" min="0" step="10" value="${t.price}" aria-label="Giá bán">
-          <button class="btn sm" data-act="sellto" data-i="${i}" ${d}>Bán</button></div><span class="hint" id="sellmsg"></span></div>`;}}
+        else if(t.type==='prop'&&groupHasHouses(i)&&!o.m)html+=`<p class="hint" style="margin-top:8px">Bán hết nhà trên ô này trước khi cầm cố.</p>`;
+        }}
   }else{const txt={chance:`Dừng ở đây thì rút một thẻ ${s.chance}: có thể được tiền, mất tiền hoặc phải di chuyển.`,
       chest:`Dừng ở đây thì rút một thẻ ${s.chest}: thường là các khoản thu chi bất ngờ.`,
       tax:`Nộp ${money(t.amt)} cho ngân hàng${S.rules.parking?' (dồn vào quỹ Bãi đỗ xe)':''}.`,
@@ -1294,7 +1288,7 @@ function showRanking(title){const order=S.players.map((p,i)=>({p,i,w:p.bankrupt?
     ${S.phase==="gameover"?statsHTML():""}
     <p class="hint">Tổng tài sản = tiền mặt + giá đất (đất cầm cố tính nửa giá) + giá nhà đã xây.</p>
     <div class="dlg-act">${S.phase==='gameover'?'<button class="btn primary" data-act="newgame">Ván mới</button>':''}<button class="btn" data-act="close-modal">Về bàn cờ</button></div></div>`);}
-function confirmModal(title,text,act,label,danger){showModal(`<div class="dlg" role="dialog" aria-label="${title}"><h2>${title}</h2><p>${text}</p><div class="dlg-act"><button class="btn" data-act="close-modal">Hủy</button><button class="btn ${danger?'danger':'primary'}" data-act="${act}">${label}</button></div></div>`);}
+function confirmModal(title,text,act,label,danger,i){showModal(`<div class="dlg" role="dialog" aria-label="${title}"><h2>${title}</h2><p>${text}</p><div class="dlg-act"><button class="btn" data-act="close-modal">Hủy</button><button class="btn ${danger?'danger':'primary'}" data-act="${act}"${i!=null?` data-i="${i}"`:''}>${label}</button></div></div>`);}
 
 function startGame(){const ps=draft.players.map((d,i)=>({name:d.name.trim()||`Người chơi ${i+1}`,token:d.token,color:d.color,money:draft.start,pos:0,jail:false,jt:0,cards:0,bankrupt:false}));
   S={players:ps,own:{},cur:0,phase:'roll',dbl:0,extra:false,dice:[3,4],log:[],pot:0,rules:{start:draft.start,salary:draft.salary,parking:draft.parking,limit:draft.limit||0,dblBonus:!!draft.dblBonus},t0:Date.now(),stats:newStats(ps.length),msg:'',pending:null,debt:null,card:null,cred:null,turnNo:1,winner:null};
@@ -1317,7 +1311,8 @@ const ACT={
     sel=i;renderDynamic();renderDetail();if(landMq.matches){openSheet();$('.side').scrollTop=0;}else if(window.innerWidth<=940)$('#detail').scrollIntoView({behavior:'smooth',block:'nearest'});},
   menu(){openSheet();},'close-sheet':closeSheet,
   build(d){manage('build',+d.i);},sellh(d){manage('sellh',+d.i);},mort(d){manage('mort',+d.i);},unmort(d){manage('unmort',+d.i);},
-  sellto(d){sellTo(+d.i);},
+  'sellbank-ask'(d){const i=+d.i;if(!canSellBank(i))return;confirmModal('Bán cho ngân hàng?',`Bán ${tname(i)}${S.own[i].lv?' cùng toàn bộ nhà':''} và nhận ${money(bankValue(i))}. Ô này sẽ trống, ai cũng mua lại được.`,'sellbank','Bán',true,i);},
+  sellbank(d){if(!online())closeModal();sellBank(+d.i);},
   buildmode(){if(busy||!S)return;buildMode=!buildMode;renderAll();},
   newgame(){if(online()){ACT['net-leave']();return;}closeModal();view='setup';pickOpen=null;render();window.scrollTo(0,0);},
   resume(){view='game';render();},
@@ -1359,8 +1354,8 @@ const PEER_PREFIX='cotyphu-v1-';
 let REPLAY=false;
 /* host: announce an effect so guests can play it too (state follows separately) */
 function emit(type,data){if(NET.mode==='host'&&NET.started&&!REPLAY)broadcast({t:'ev',e:[type,data]});}
-const GAME_ACTS=new Set(['roll','buy','skip','end','payjail','usecard','paydebt','bankrupt','build','sellh','mort','unmort','sellto','endgame-go']);
-const OWNER_ACTS=new Set(['build','sellh','mort','unmort','sellto']);
+const GAME_ACTS=new Set(['roll','buy','skip','end','payjail','usecard','paydebt','bankrupt','build','sellh','mort','unmort','sellbank','endgame-go']);
+const OWNER_ACTS=new Set(['build','sellh','mort','unmort','sellbank']);
 function myCid(){if(NET.cid)return NET.cid;try{NET.cid=localStorage.getItem('ctp-cid')||'';}catch(e){}
   if(!NET.cid){NET.cid=Math.random().toString(36).slice(2,10);try{localStorage.setItem('ctp-cid',NET.cid);}catch(e){}}return NET.cid;}
 const online=()=>NET.mode!=='local';
@@ -1443,7 +1438,6 @@ function hostApply(seat,a,d){if(seat<0||!GAME_ACTS.has(a))return 'Không hợp l
   else if(OWNER_ACTS.has(a)){const o=S.own[+d.i];if(!o||o.o!==seat)return 'Đây không phải đất của bạn.';}
   else if(seat!==S.cur)return 'Chưa đến lượt bạn.';
   if(busy)return 'Đang chạy hiệu ứng, thử lại.';
-  if(a==='sellto'){if(d.b==null||d.b===''||d.price==null||d.price==='')return 'Thiếu người mua hoặc giá bán.';sellTo(+d.i,+d.b,+d.price);return '';}
   const f=ACT[a];if(f)f(d);return '';}
 /* what guests get: the log is trimmed so the snapshot stays small (big messages get chunked and choke the channel on long games) */
 function netState(){return {t:'state',S:Object.assign({},S,{log:S.log.slice(0,30)}),skin:CFG.skin,dice:CFG.dice,on:onlineSet()};}
@@ -1507,7 +1501,7 @@ function guestMe(patch){if(NET.mode!=='guest')return;const me=NET.lobby&&NET.lob
   send(NET.hostConn,Object.assign({t:'me'},patch));}
 
 /* ---------- shared ---------- */
-function netAct(a,d){if(a==='bankrupt'||a==='endgame-go')closeModal();if(a==='sellto'){d=Object.assign({},d,{b:$('#buyer')?$('#buyer').value:'',price:$('#sellprice')?$('#sellprice').value:''});}
+function netAct(a,d){if(a==='bankrupt'||a==='endgame-go'||a==='sellbank')closeModal();
   if(NET.mode==='host'){const r=hostApply(mySeat(),a,d);if(r)toast(r,'warn');}
   else send(NET.hostConn,{t:'act',a,d});}
 function leaveRoom(silent){const was=NET.mode;try{NET.peer&&NET.peer.destroy();}catch(e){}
