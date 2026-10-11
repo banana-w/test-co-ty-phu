@@ -1100,8 +1100,8 @@ function manage(kind,i){if(busy||!S||S.phase==='gameover')return;const o=S.own[i
   else if(kind==='unmort'&&canUnmort(i)){const c=unmortCost(i);o.m=false;log(`${p.name} chuộc lại ${tname(i)} (−${money(c)}).`,pi);xfer(pi,{tile:i},c);}
   else return;
   renderAll();save();}
-/* sell straight to the bank: land and every house on it, for half of what was paid */
-function bankValue(i){const t=T[i],o=S.own[i];return o?Math.round((t.price+(t.type==='prop'?o.lv*t.hc:0))/2):0;}
+/* sell straight to the bank: land and every house on it, for 75% of what was paid */
+function bankValue(i){const t=T[i],o=S.own[i];return o?Math.round((t.price+(t.type==='prop'?o.lv*t.hc:0))*.75):0;}
 function canSellBank(i){const o=S.own[i];return !!o&&!o.m&&S.phase!=='gameover';}
 function sellBank(i){if(busy||!S||!canSellBank(i))return;const o=S.own[i],pi=o.o,p=S.players[pi],v=bankValue(i);
   delete S.own[i];if(S.buildI===i)S.buildI=null;
