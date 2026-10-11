@@ -344,6 +344,9 @@ button{font-family:inherit}
   .layout{display:block;max-width:none;height:var(--h);padding-left:var(--gut-l);padding-right:var(--gut-r);padding-block:4px}
   .board-wrap{width:100%;height:100%;max-width:none}
   .board{width:100%;height:100%;aspect-ratio:auto;container-type:size;border-radius:6px;border-width:1.5px}
+  /* even tiles on a short, wide board: taller top/bottom rows and slimmer side columns, taken from the centre */
+  .board{--ch:clamp(54px,calc(var(--h)*.165),70px);--cw:clamp(84px,11vw,108px);
+    grid-template-columns:var(--cw) repeat(9,minmax(0,1fr)) var(--cw);grid-template-rows:var(--ch) repeat(9,minmax(0,1fr)) var(--ch)}
 
   /* tiles in fixed px so they stay legible on a short, wide board */
   .tinfo{padding:2px 2px 3px;gap:1px}
@@ -367,7 +370,7 @@ button{font-family:inherit}
   .corner .ticon{display:block;width:18px;height:18px}
   .corner .cl{font-size:10px}
   .corner .cs{display:none}
-  .side-b .band,.side-t .band{flex-basis:10px}
+  .side-b .band,.side-t .band{flex-basis:7px}
   .side-l .band,.side-r .band{flex-basis:10px}
   .side-t .tinfo,.side-b .tinfo{justify-content:center;gap:2px}
   .side-t .tname,.side-b .tname{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
