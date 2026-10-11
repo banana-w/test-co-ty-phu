@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#E6ECE8">
@@ -37,6 +37,8 @@
 *{box-sizing:border-box}
 /* not inherited, and scroll boxes (landscape centre panels) start a new chain -> set it everywhere */
 *{touch-action:manipulation}
+/* iOS enlarges text in landscape */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* iOS zooms into inputs under 16px */
 @media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
@@ -650,12 +652,16 @@ const BGM=(()=>{let ac=null,out=null,timer=null,next=0,step=0;
     stop(){if(!timer)return;clearInterval(timer);timer=null;try{out.gain.cancelScheduledValues(ac.currentTime);out.gain.setValueAtTime(out.gain.value,ac.currentTime);out.gain.linearRampToValueAtTime(0,ac.currentTime+.4);}catch(e){}},
     sync(){(view==='game'&&!CFG.mute&&CFG.music!==false)?this.start():this.stop();}
   };})();
-/* fallback for browsers that ignore touch-action: a quick second tap still counts as a tap but cannot zoom */
+/* no zoom of any kind. iOS Safari ignores user-scalable=no, so also block its pinch gestures and double-tap here */
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1||(e.scale&&e.scale!==1))e.preventDefault();},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+/* a quick second tap still counts as a tap but cannot zoom */
 let lastTap=0;
-document.addEventListener('touchend',e=>{const now=Date.now(),t=e.target;
+window.addEventListener('touchend',e=>{const now=Date.now(),t=e.target;
   if(now-lastTap<350&&e.changedTouches.length===1&&!e.touches.length&&t.closest&&!t.closest('input,textarea,select,label')){
     e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));}
-  lastTap=now;},{passive:false});
+  lastTap=now;},{passive:false,capture:true});
 document.addEventListener('visibilitychange',()=>{document.hidden?BGM.stop():BGM.sync();
   if(!document.hidden&&typeof NET!=='undefined'&&NET.mode==='guest'&&NET.code){
     if(!NET.lost&&NET.hostSeen&&Date.now()-NET.hostSeen>5000)NET.hostSeen=1;/* stale: let the heartbeat drop it on its next tick */
