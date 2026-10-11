@@ -35,7 +35,8 @@
   --accent:#E8594D; --accent-ink:#1C0705; --danger:#F97066; color-scheme:dark}
 
 *{box-sizing:border-box}
-html,body{touch-action:manipulation}
+/* not inherited, and scroll boxes (landscape centre panels) start a new chain -> set it everywhere */
+*{touch-action:manipulation}
 /* iOS zooms into inputs under 16px */
 @media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
@@ -649,6 +650,12 @@ const BGM=(()=>{let ac=null,out=null,timer=null,next=0,step=0;
     stop(){if(!timer)return;clearInterval(timer);timer=null;try{out.gain.cancelScheduledValues(ac.currentTime);out.gain.setValueAtTime(out.gain.value,ac.currentTime);out.gain.linearRampToValueAtTime(0,ac.currentTime+.4);}catch(e){}},
     sync(){(view==='game'&&!CFG.mute&&CFG.music!==false)?this.start():this.stop();}
   };})();
+/* fallback for browsers that ignore touch-action: a quick second tap still counts as a tap but cannot zoom */
+let lastTap=0;
+document.addEventListener('touchend',e=>{const now=Date.now(),t=e.target;
+  if(now-lastTap<350&&e.changedTouches.length===1&&!e.touches.length&&t.closest&&!t.closest('input,textarea,select,label')){
+    e.preventDefault();t.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));}
+  lastTap=now;},{passive:false});
 document.addEventListener('visibilitychange',()=>{document.hidden?BGM.stop():BGM.sync();
   if(!document.hidden&&typeof NET!=='undefined'&&NET.mode==='guest'&&NET.code){
     if(!NET.lost&&NET.hostSeen&&Date.now()-NET.hostSeen>5000)NET.hostSeen=1;/* stale: let the heartbeat drop it on its next tick */
