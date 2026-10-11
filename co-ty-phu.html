@@ -35,6 +35,9 @@
   --accent:#E8594D; --accent-ink:#1C0705; --danger:#F97066; color-scheme:dark}
 
 *{box-sizing:border-box}
+html,body{touch-action:manipulation}
+/* iOS zooms into inputs under 16px */
+@media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
