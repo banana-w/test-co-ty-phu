@@ -1493,7 +1493,10 @@ function renderOnline(){const el=$('#online');if(!el)return;const sv=savedOnline
 function lobbyRow(p,editable){return `<div class="lb-row${p.cid===myCid()?' me':''}"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span>
   ${editable?`<input class="lb-name" id="lb-name" value="${esc(p.name)}" maxlength="16" aria-label="Tên của bạn">`:`<b>${esc(p.name)}</b>`}
   ${p.host?'<span class="tag">Chủ phòng</span>':''}${p.cid===myCid()?'<span class="tag me">Bạn</span>':''}</div>`;}
-function renderLobby(){const L=NET.lobby;if(!L)return;const host=NET.mode==='host',me=L.players.find(p=>p.cid===myCid())||{};
+/* keep the name box focused (and what is being typed) when the lobby re-renders from a host sync */
+function renderLobby(){const f=document.activeElement,keep=f&&f.id==='lb-name'?{v:f.value,s:f.selectionStart,e:f.selectionEnd}:null;
+  renderLobbyView();if(!keep)return;const n=$('#lb-name');if(!n)return;n.value=keep.v;n.focus();try{n.setSelectionRange(keep.s,keep.e);}catch(e){}}
+function renderLobbyView(){const L=NET.lobby;if(!L)return;const host=NET.mode==='host',me=L.players.find(p=>p.cid===myCid())||{};
   const others=L.players.filter(p=>p!==me),link=location.origin+location.pathname+'?room='+NET.code;
   const R=host?{start:draft.start,salary:draft.salary,parking:draft.parking,limit:draft.limit||0,dblBonus:!!draft.dblBonus}:L.rules||{};
   const ruleTxt=`Tiền khởi đầu ${money(R.start)} · Lương ${money(R.salary)}${R.limit?` · ${R.limit} phút`:''}${R.parking?' · Quỹ Bãi đỗ xe':''}${R.dblBonus?' · Thưởng đổ đôi':''}`;
