@@ -1176,12 +1176,18 @@ function renderDynamic(){if(!$('#board'))return;if(NET.mode==='host')queueSync()
         else h.innerHTML=Array.from({length:lv},(_,k)=>`<i class="house${d&&k===lv-1?' drop':''}"></i>`).join('');}}
     el.querySelector('.toks').innerHTML=order.map(k=>{const p=S.players[k];return (!p.bankrupt&&p.pos===i)?`<span class="tok${k===S.cur&&S.phase!=='gameover'?' cur':''}${p.jail?' jailed':''}" data-p="${k}" style="--pc:${p.color}" title="${esc(p.name)}">${tokEmoji(p.token)}</span>`:'';}).join('');});glideToks(before);}
 /* FLIP: tokens are re-rendered in their new tile, then slid (with a small hop) from where they were */
-function glideToks(before){if(CFG.speed==='off'||(reduceMq&&reduceMq.matches)||!Element.prototype.animate)return;
+function glideToks(before){document.querySelectorAll('.tok-fly').forEach(f=>{f._done&&f._done();});
+  if(CFG.speed==='off'||(reduceMq&&reduceMq.matches)||!Element.prototype.animate)return;
+  /* tiles clip their content, so the moving token is a fixed-position clone flying above the board */
   document.querySelectorAll('#board .toks .tok').forEach(t=>{const a=before[t.dataset.p];if(!a)return;const b=t.getBoundingClientRect();
-    const dx=a.left+a.width/2-(b.left+b.width/2),dy=a.top+a.height/2-(b.top+b.height/2),dist=Math.hypot(dx,dy);if(dist<2)return;
-    const s0=a.width/b.width||1,far=dist>b.width*4,ms=far?Math.max(420,stepMs()*3):Math.max(120,stepMs()*.95),hop=far?-28:-Math.min(14,dist*.45);
-    t.animate([{transform:`translate(${dx}px,${dy}px) scale(${s0})`},{transform:`translate(${dx/2}px,${dy/2+hop}px) scale(${(s0+1)/2*1.12})`,offset:.5},{transform:'none'}],
-      {duration:ms,easing:'cubic-bezier(.3,.7,.4,1)'});});}
+    const ax=a.left+a.width/2,ay=a.top+a.height/2,bx=b.left+b.width/2,by=b.top+b.height/2,dist=Math.hypot(ax-bx,ay-by);if(dist<2)return;
+    const far=dist>b.width*4,ms=far?Math.max(420,stepMs()*3):Math.max(120,stepMs()*.95),hop=far?-28:-Math.min(14,dist*.45),s0=a.width/b.width||1;
+    const f=t.cloneNode(true);f.classList.add('tok-fly');f.style.cssText+=`;position:fixed;left:${b.left}px;top:${b.top}px;width:${b.width}px;height:${b.height}px;margin:0;z-index:40;pointer-events:none;animation:none`;
+    document.body.appendChild(f);t.style.visibility='hidden';
+    f._done=()=>{f._done=null;f.remove();t.style.visibility='';};
+    const dx=ax-bx,dy=ay-by;
+    const an=f.animate([{transform:`translate(${dx}px,${dy}px) scale(${s0})`},{transform:`translate(${dx/2}px,${dy/2+hop}px) scale(${(s0+1)/2*1.12})`,offset:.5},{transform:'none'}],
+      {duration:ms,easing:'cubic-bezier(.3,.7,.4,1)'});an.onfinish=an.oncancel=()=>f._done&&f._done();});}
 function actionsHTML(){const p=cp(),dis=busy?'disabled':'';
   if(online()&&!myTurn()&&S.phase!=='gameover')return isOn(p)?`<p class="wait">Đang chờ <b>${esc(p.name)}</b>…</p>`:`<p class="wait off"><b>${esc(p.name)}</b> đang mất kết nối…</p>${NET.mode==='host'&&!busy?'<button class="btn sm" data-act="net-skip">Bỏ qua lượt này</button>':''}`;
   if(buildMode&&S.phase!=='gameover')return `<button class="btn primary" data-act="buildmode">Xây xong</button>`;
