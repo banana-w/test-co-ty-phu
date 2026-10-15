@@ -535,6 +535,18 @@ button{font-family:inherit}
 .on-resume{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:color-mix(in srgb,var(--accent) 10%,var(--surface));border:1.5px solid var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:12px}
 .on-resume>div:first-child{display:grid;gap:3px;min-width:0}
 .on-ra{display:flex;gap:8px;align-items:center}
+.emo{position:fixed;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.emo-btn{width:48px;height:48px;border-radius:50%;border:2px solid #F5C542;background:#1d2a22;font-size:24px;box-shadow:0 4px 14px rgba(0,0,0,.45);cursor:pointer}
+.emo-pick{display:none;grid-template-columns:repeat(4,auto);gap:4px;padding:8px;border-radius:14px;background:#fffdf6;box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:min(300px,calc(100vw - 32px))}
+.emo-pick.show{display:grid}
+.emo-pick button{border:0;background:#f1ead6;border-radius:10px;font-size:22px;padding:6px;cursor:pointer;min-width:42px}
+.emo-pick button.txt{font-size:12px;font-weight:700;grid-column:span 2;color:#3a2e12}
+.emo-bub{position:fixed;z-index:70;pointer-events:none;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;padding:6px 10px 4px;border-radius:14px;background:#fff;border:2px solid var(--pc);
+  box-shadow:0 6px 18px rgba(0,0,0,.35);animation:emoIn 2.6s ease forwards;white-space:nowrap}
+.emo-bub span{font-size:30px;line-height:1.1}.emo-bub.txt span{font-size:15px;font-weight:800;color:#2a2210}
+.emo-bub small{font-size:10px;font-weight:700;color:#555}
+.emo-bub::after{content:"";position:absolute;bottom:-7px;left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:var(--pc);border-bottom:0}
+@keyframes emoIn{0%{opacity:0;transform:translate(-50%,-80%) scale(.4)}12%{opacity:1;transform:translate(-50%,-110%) scale(1.08)}20%{transform:translate(-50%,-105%) scale(1)}80%{opacity:1;transform:translate(-50%,-110%)}100%{opacity:0;transform:translate(-50%,-140%)}}
 #netbar{position:fixed;left:0;right:0;top:0;z-index:65;display:none;gap:10px;align-items:center;justify-content:center;padding:calc(8px + env(safe-area-inset-top,0px)) 16px 8px;background:#9E2A1F;color:#fff;font:600 14px var(--f-body);box-shadow:0 4px 14px rgba(0,0,0,.3)}
 #netbar.show{display:flex}
 #netbar .btn{background:#fff;color:#9E2A1F;border-color:#fff}
@@ -1134,7 +1146,7 @@ function render(){if(view==='setup')renderSetup();else if(view==='lobby')renderL
 function renderGame(){$('#main').innerHTML=`<div class="layout" data-skin="${CFG.skin}">
   <div class="board-wrap"><div class="board" id="board">${T.map((_,i)=>tileHTML(i)).join('')}<div class="center" id="center"></div></div></div>
   <aside class="side"><div class="mini" id="mini"></div><section class="panel" id="players"></section><section class="panel" id="detail"></section>
-  <section class="panel"><h3>Nhật ký ván</h3><ol class="log" id="log"></ol></section></aside></div>`;renderAll();}
+  <section class="panel"><h3>Nhật ký ván</h3><ol class="log" id="log"></ol></section></aside></div>${emoHTML()}`;renderAll();}
 function renderAll(){if(view!=='game'||!S)return;autoEnd();renderDynamic();renderCenter();renderPlayers();renderDetail();renderLog();renderTop();}
 let buildMode=false;
 const buildable = k=>Object.keys(S.own).map(Number).filter(i=>S.own[i].o===k&&canBuild(i));
@@ -1147,6 +1159,7 @@ function priceLabel(i){const t=T[i],o=S.own[i];
 function renderDynamic(){if(!$('#board'))return;if(NET.mode==='host')queueSync();
   const bset=new Set(buildMode&&S.phase!=='gameover'?buildable(S.cur):[]);
   const order=S.players.map((p,k)=>k).sort((a,b)=>(a===S.cur)-(b===S.cur));
+  const before={};document.querySelectorAll('#board .toks .tok').forEach(t=>before[t.dataset.p]=t.getBoundingClientRect());
   document.querySelectorAll('#board .tile').forEach(el=>{const i=+el.dataset.i,t=T[i],o=VIS.hideOwn[i]?null:S.own[i];
     el.classList.toggle('mort',!!(o&&o.m));el.classList.toggle('sel',sel===i);
     el.classList.toggle('can-build',bset.has(i));el.classList.toggle('dim',buildMode&&!bset.has(i));
@@ -1161,7 +1174,14 @@ function renderDynamic(){if(!$('#board'))return;if(NET.mode==='host')queueSync()
       if(h.dataset.lv!==String(lv)){const d=VIS.drop[i]&&lv>(+h.dataset.lv||0);h.dataset.lv=lv;
         if(lv===5)h.innerHTML=`<i class="hotel${d?' drop':''}"></i>`;
         else h.innerHTML=Array.from({length:lv},(_,k)=>`<i class="house${d&&k===lv-1?' drop':''}"></i>`).join('');}}
-    el.querySelector('.toks').innerHTML=order.map(k=>{const p=S.players[k];return (!p.bankrupt&&p.pos===i)?`<span class="tok${k===S.cur&&S.phase!=='gameover'?' cur':''}${p.jail?' jailed':''}" data-p="${k}" style="--pc:${p.color}" title="${esc(p.name)}">${tokEmoji(p.token)}</span>`:'';}).join('');});}
+    el.querySelector('.toks').innerHTML=order.map(k=>{const p=S.players[k];return (!p.bankrupt&&p.pos===i)?`<span class="tok${k===S.cur&&S.phase!=='gameover'?' cur':''}${p.jail?' jailed':''}" data-p="${k}" style="--pc:${p.color}" title="${esc(p.name)}">${tokEmoji(p.token)}</span>`:'';}).join('');});glideToks(before);}
+/* FLIP: tokens are re-rendered in their new tile, then slid (with a small hop) from where they were */
+function glideToks(before){if(CFG.speed==='off'||(reduceMq&&reduceMq.matches)||!Element.prototype.animate)return;
+  document.querySelectorAll('#board .toks .tok').forEach(t=>{const a=before[t.dataset.p];if(!a)return;const b=t.getBoundingClientRect();
+    const dx=a.left+a.width/2-(b.left+b.width/2),dy=a.top+a.height/2-(b.top+b.height/2),dist=Math.hypot(dx,dy);if(dist<2)return;
+    const s0=a.width/b.width||1,far=dist>b.width*4,ms=far?Math.max(420,stepMs()*3):Math.max(120,stepMs()*.95),hop=far?-28:-Math.min(14,dist*.45);
+    t.animate([{transform:`translate(${dx}px,${dy}px) scale(${s0})`},{transform:`translate(${dx/2}px,${dy/2+hop}px) scale(${(s0+1)/2*1.12})`,offset:.5},{transform:'none'}],
+      {duration:ms,easing:'cubic-bezier(.3,.7,.4,1)'});});}
 function actionsHTML(){const p=cp(),dis=busy?'disabled':'';
   if(online()&&!myTurn()&&S.phase!=='gameover')return isOn(p)?`<p class="wait">Đang chờ <b>${esc(p.name)}</b>…</p>`:`<p class="wait off"><b>${esc(p.name)}</b> đang mất kết nối…</p>${NET.mode==='host'&&!busy?'<button class="btn sm" data-act="net-skip">Bỏ qua lượt này</button>':''}`;
   if(buildMode&&S.phase!=='gameover')return `<button class="btn primary" data-act="buildmode">Xây xong</button>`;
@@ -1421,6 +1441,7 @@ function hostOnData(c,m){if(!m||typeof m!=='object')return;
   if(!c._cid)return;
   if(m.t==='me'&&!NET.started){const L=NET.lobby.players,p=L.find(q=>q.cid===c._cid);if(!p)return;const others=L.filter(q=>q!==p);
     if(m.name!=null)p.name=String(m.name).slice(0,16);if(m.token)p.token=freeToken(others,m.token);if(m.color)p.color=freeColor(others,m.color);lobbySync();return;}
+  if(m.t==='emo'&&NET.started){const seat=S.players.findIndex(p=>p.cid===c._cid),k=+m.k;if(seat>=0&&EMOS[k]&&showEmo(seat,k)!==false)broadcast({t:'emo',p:seat,k});return;}
   if(m.t==='act'&&NET.started){const seat=S.players.findIndex(p=>p.cid===c._cid);const r=hostApply(seat,m.a,m.d||{});if(r)send(c,{t:'deny',msg:r});}}
 function lobbySync(noRender){if(NET.mode!=="host")return;broadcast({t:"lobby",L:lobbyPayload()});if(view==="lobby"&&!noRender)renderLobby();}
 function lobbyPayload(){return {code:NET.code,players:NET.lobby.players,skin:CFG.skin,dice:CFG.dice,
@@ -1472,6 +1493,7 @@ function netBar(msg){let b=$('#netbar');if(!b){b=document.createElement('div');b
 function guestOnData(m){if(!m||typeof m!=='object')return;
   if(m.t==='err'){setStatus(m.msg);toast(m.msg,'warn');leaveRoom(true);return;}
   if(m.t==='deny'){toast(m.msg,'warn');return;}
+  if(m.t==='emo'){if(view==='game'&&S){showEmo.last={};showEmo(+m.p,+m.k);}return;}
   if(m.t==='lobby'){NET.lobby=m.L;if(m.L.skin&&CFG.skin!==m.L.skin)CFG.skin=m.L.skin;if(m.L.dice)CFG.dice=m.L.dice;
     if(view!=='lobby'){view='lobby';setStatus('');render();}else renderLobby();return;}
   if(m.t==='ev'){if(view==='game'&&S&&S.online&&!document.hidden){EVQ.push(m.e);playEvents();}return;}
@@ -1498,6 +1520,19 @@ async function playEvent(type,d){
     case 'build':if(S.own[d[0]])S.own[d[0]].lv=d[1];fxBuilt(d[0],d[1]);break;
     case 'hit':shake();burstAt(tileEl(d));break;
     case 'win':confetti(140);SFX.win();break;}}
+/* quick emotes: bubble over the sender's token on every screen */
+const EMOS=['😂','😡','😱','👏','💸','🙏','😎','🤑','Nhanh lên!','Hay quá!','Tha cho em','Đen quá 😭'];
+function emoHTML(){return online()&&S&&S.phase!=='gameover'&&mySeat()>=0?`<div class="emo"><div class="emo-pick" id="emopick">${EMOS.map((e,k)=>`<button class="${e.length>2?'txt':''}" data-act="emo" data-k="${k}">${e}</button>`).join('')}</div><button class="emo-btn" data-act="emo-open" aria-label="Biểu cảm">😊</button></div>`:'';}
+function mySeat(){return S?S.players.findIndex(p=>p.cid===myCid()):-1;}
+function showEmo(seat,k){const e=EMOS[k],p=S&&S.players[seat];if(!e||!p)return;
+  const now=Date.now();showEmo.last=showEmo.last||{};if(now-(showEmo.last[seat]||0)<1200)return false;showEmo.last[seat]=now;
+  const tok=document.querySelector(`#board .tok[data-p="${seat}"]`)||document.querySelector('#board');if(!tok)return;const r=tok.getBoundingClientRect();
+  const b=document.createElement('div');b.className='emo-bub'+(e.length>2?' txt':'');b.style.setProperty('--pc',p.color);
+  b.innerHTML=`<span>${esc(e)}</span><small>${esc(p.name)}</small>`;b.style.left=(r.left+r.width/2)+'px';b.style.top=Math.max(50,r.top)+'px';document.body.appendChild(b);
+  const w=b.offsetWidth/2+8;b.style.left=Math.min(innerWidth-w,Math.max(w,r.left+r.width/2))+'px';
+  SFX.step&&SFX.step();setTimeout(()=>b.remove(),2600);return true;}
+function sendEmo(k){const seat=mySeat();if(seat<0)return;
+  if(NET.mode==='host'){if(showEmo(seat,k)!==false)broadcast({t:'emo',p:seat,k});}else send(NET.hostConn,{t:'emo',k});}
 function guestMe(patch){if(NET.mode!=='guest')return;const me=NET.lobby&&NET.lobby.players.find(p=>p.cid===myCid());if(me)Object.assign(me,patch);
   send(NET.hostConn,Object.assign({t:'me'},patch));}
 
@@ -1561,6 +1596,8 @@ Object.assign(ACT,{
     log(`${p.name} mất kết nối, bỏ qua lượt.`,S.cur);nextPlayer();},
   'net-leave'(){confirmModal('Rời phòng?',NET.mode==='host'?'Phòng sẽ đóng với mọi người.':'Bạn sẽ rời khỏi phòng này.','net-leave-go','Rời phòng',true);},
   'net-leave-go'(){closeModal();leaveRoom();},
+  'emo-open'(){const p=$('#emopick');if(p)p.classList.toggle('show');},
+  emo(d){sendEmo(+d.k);const p=$('#emopick');if(p)p.classList.remove('show');},
   'net-copy'(d){const done=()=>toast('Đã sao chép link mời.');try{navigator.clipboard.writeText(d.l).then(done,()=>prompt('Sao chép link:',d.l));}catch(e){prompt('Sao chép link:',d.l);}},
   'lb-tok'(d){setMe({token:d.t});},'lb-col'(d){setMe({color:d.c});}
 });
