@@ -1467,7 +1467,7 @@ function hostApply(seat,a,d){if(seat<0||!GAME_ACTS.has(a))return 'Không hợp l
   if(busy)return 'Đang chạy hiệu ứng, thử lại.';
   const f=ACT[a];if(f)f(d);return '';}
 /* what guests get: the log is trimmed so the snapshot stays small (big messages get chunked and choke the channel on long games) */
-function netState(){return {t:'state',S:Object.assign({},S,{log:S.log.slice(0,30)}),skin:CFG.skin,dice:CFG.dice,on:onlineSet()};}
+function netState(){return {t:'state',S:Object.assign({},S,{log:S.log.slice(0,5)}),skin:CFG.skin,dice:CFG.dice,on:onlineSet()};}
 function queueSync(){if(NET.mode!=='host'||!NET.started)return;clearTimeout(NET.syncT);NET.syncT=setTimeout(()=>{
   const m=netState(),j=JSON.stringify(m);if(j===NET.lastSync)return;NET.lastSync=j;broadcast(m);
   /* the resume save is a full copy of S: write it at most once a second, not on every animation step */
