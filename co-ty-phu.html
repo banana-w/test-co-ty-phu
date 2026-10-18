@@ -643,9 +643,8 @@ const T = [];
   P.forEach((idx,k)=>T[idx]={type:'prop',k,g:G[k],price:PR[k],rent:[Math.round(PR[k]/10),...R[k].slice(1)],hc:HC[G[k]]});
   [5,15,25,35].forEach((idx,k)=>T[idx]={type:'station',k,price:200});
   [12,28].forEach((idx,k)=>T[idx]={type:'util',k,price:150});
-  [7,22].forEach(i=>T[i]={type:'chance'});
-  [17,33].forEach(i=>T[i]={type:'chest'});
-  T[2]={type:'bonus',amt:50,n:'Tiền thưởng'}; T[36]={type:'bonus',amt:50,n:'Tiền thưởng'};
+  [7,22,36].forEach(i=>T[i]={type:'chance'});
+  [2,17,33].forEach(i=>T[i]={type:'chest'});
   T[4]={type:'tax',amt:200,n:'Thuế thu nhập'}; T[38]={type:'tax',amt:100,n:'Thuế xa xỉ'};
   T[0]={type:'go'};T[10]={type:'jail'};T[20]={type:'park'};T[30]={type:'gojail'};
 })();
@@ -830,7 +829,7 @@ const readMs = ()=>({slow:1500,normal:1050,fast:600,off:0})[CFG.speed];
 function money(n){const c=SK().cur;const neg=n<0;n=Math.abs(Math.round(n));return (neg?'−':'')+c.p+n.toLocaleString('vi-VN')+c.s;}
 function tname(i){const t=T[i],s=SK();
   switch(t.type){case 'prop':return s.props[t.k];case 'station':return s.stations[t.k];case 'util':return s.utils[t.k];
-  case 'chance':return s.chance;case 'chest':return s.chest;case 'tax':case 'bonus':return t.n;case 'go':return 'Xuất phát';
+  case 'chance':return s.chance;case 'chest':return s.chest;case 'tax':return t.n;case 'go':return 'Xuất phát';
   case 'jail':return 'Nhà tù';case 'park':return 'Bãi đỗ xe';case 'gojail':return 'Vào tù';}return '';}
 function inkOn(hex){const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;
   return (0.2126*r+0.7152*g+0.0722*b)>0.55?'#161616':'#FFFFFF';}
@@ -954,7 +953,6 @@ async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;ST().lands[i]=(ST().lan
     else{const r=rentOf(i,sum),st=ST();st.rentIn[o.o]+=r;st.rentOut[me]+=r;if(!st.bigRent||r>st.bigRent.a)st.bigRent={p:me,a:r,i};
       if(r>=200){emit("hit",i);shake();burstAt(tileEl(i));}log(`${p.name} trả ${money(r)} tiền thuê ${tname(i)} cho ${S.players[o.o].name}.`,me);renderCenter();await pay(p,o.o,r);}
   }else if(t.type==='chance'||t.type==='chest'){await drawCard(p,t.type,sum);return;}
-  else if(t.type==='bonus'){log(`${p.name} nhận ${t.n.toLowerCase()} ${money(t.amt)}.`,me);renderCenter();await gain(p,t.amt);}
   else if(t.type==='tax'){log(`${p.name} nộp ${t.n.toLowerCase()} ${money(t.amt)}.`,me);renderCenter();await pay(p,null,t.amt,'tax');}
   else if(t.type==='gojail'){log(`${p.name} dừng ở ô Vào tù và bị đưa thẳng vào tù.`,me);renderCenter();await wait(stepMs()*3);goJail(p);}
   else if(t.type==='park'){if(S.rules.parking&&S.pot>0){log(`${p.name} nhận toàn bộ quỹ Bãi đỗ xe: ${money(S.pot)}.`,me);renderCenter();await xfer('pot',me,S.pot);}
@@ -1137,8 +1135,8 @@ function tileHTML(i){const t=T[i],[r,c]=gridPos(i),st=`grid-row:${r};grid-column
     return `<div class="tile corner c-${t.type}" data-act="tile" data-i="${i}" style="${st}" tabindex="0" role="button" aria-label="${m[1]}"><span class="ticon">${m[0]}</span><span class="cl">${m[1]}</span><span class="cs">${m[2]}</span><div class="toks"></div></div>`;}
   const side=i<10?'side-b':i<20?'side-l':i<30?'side-t':'side-r';let band='',info;
   if(t.type==='prop'){band=`<div class="band" style="background:var(--g${t.g})"><span class="houses"></span></div>`;info=`<span class="tname">${nm}</span>${tileArt(CFG.skin,t.k).replace(`class="tart"`,`class="tart" style="--tc:var(--g${t.g})"`)}<span class="tprice">${money(t.price)}</span>`;}
-  else{const ic={station:IC.train,util:t.k?IC.drop:IC.bolt,chance:IC.q,chest:IC.star,tax:IC.coin,bonus:IC.coin}[t.type];
-    info=`<span class="tname">${nm}</span><span class="ticon">${ic}</span><span class="tprice">${t.price?money(t.price):t.amt?(t.type==='bonus'?'+':'−')+money(t.amt):''}</span>`;}
+  else{const ic={station:IC.train,util:t.k?IC.drop:IC.bolt,chance:IC.q,chest:IC.star,tax:IC.coin}[t.type];
+    info=`<span class="tname">${nm}</span><span class="ticon">${ic}</span><span class="tprice">${t.price?money(t.price):t.amt?'−'+money(t.amt):''}</span>`;}
   return `<div class="tile ${side} t-${t.type}" data-act="tile" data-i="${i}" style="${st}" tabindex="0" role="button" aria-label="${nm}">${band}<div class="tinfo">${info}</div><div class="own"></div><div class="toks"></div></div>`;}
 
 function renderTop(){const t=$('#top');
@@ -1269,7 +1267,6 @@ function renderDetail(){const el=$('#detail');if(!el)return;
         }}
   }else{const txt={chance:`Dừng ở đây thì rút một thẻ ${s.chance}: có thể được tiền, mất tiền hoặc phải di chuyển.`,
       chest:`Dừng ở đây thì rút một thẻ ${s.chest}: thường là các khoản thu chi bất ngờ.`,
-      bonus:`Dừng ở đây nhận ${money(t.amt)} từ ngân hàng.`,
       tax:`Nộp ${money(t.amt)} cho ngân hàng${S.rules.parking?' (dồn vào quỹ Bãi đỗ xe)':''}.`,
       go:`Mỗi lần đi qua hoặc dừng ở đây nhận ${money(S.rules.salary)}.`,
       jail:'Người bị vào tù phải đổ được đôi, nộp phạt hoặc dùng thẻ để ra. Tối đa 3 lượt. Dừng đúng ô này thì chỉ là ghé thăm.',
