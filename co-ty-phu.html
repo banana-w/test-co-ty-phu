@@ -89,6 +89,8 @@ button{font-family:inherit}
 @keyframes drop{0%{transform:translateY(-320%) scale(.5);opacity:0}45%{opacity:1}100%{transform:none}}
 .tile.thud{animation:thud .5s ease-out}
 @keyframes thud{25%{filter:brightness(1.25)}}
+.tile.can-cash{box-shadow:inset 0 0 0 max(2px,.4cqi) #E5484D;animation:cash 0.9s ease-in-out infinite;z-index:1}
+@keyframes cash{50%{box-shadow:inset 0 0 0 max(4px,.7cqi) #E5484D,inset 0 0 2.4cqi rgba(229,72,77,.55);filter:brightness(1.12)}}
 .tile.can-build{box-shadow:inset 0 0 0 max(2px,.4cqi) #F5C542;animation:glow 1.2s ease-in-out infinite;z-index:1}
 @keyframes glow{50%{box-shadow:inset 0 0 0 max(3px,.6cqi) #F5C542,inset 0 0 2.4cqi rgba(245,197,66,.55)}}
 .tile.dim{filter:saturate(.3) brightness(.9);opacity:.75}
@@ -637,11 +639,13 @@ const T = [];
     [35,175,500,1100,1300,1500],[50,200,600,1400,1700,2000]];
   const HC=[50,50,100,100,150,150,200,200];
   for(let i=0;i<40;i++) T[i]={type:'blank'};
-  P.forEach((idx,k)=>T[idx]={type:'prop',k,g:G[k],price:PR[k],rent:R[k],hc:HC[G[k]]});
+  /* bare land rents 10% of its price (classic rules give 2-50, too little when houses only go up one per visit) */
+  P.forEach((idx,k)=>T[idx]={type:'prop',k,g:G[k],price:PR[k],rent:[Math.round(PR[k]/10),...R[k].slice(1)],hc:HC[G[k]]});
   [5,15,25,35].forEach((idx,k)=>T[idx]={type:'station',k,price:200});
   [12,28].forEach((idx,k)=>T[idx]={type:'util',k,price:150});
-  [7,22,36].forEach(i=>T[i]={type:'chance'});
-  [2,17,33].forEach(i=>T[i]={type:'chest'});
+  [7,22].forEach(i=>T[i]={type:'chance'});
+  [17,33].forEach(i=>T[i]={type:'chest'});
+  T[2]={type:'bonus',amt:50,n:'Tiền thưởng'}; T[36]={type:'bonus',amt:50,n:'Tiền thưởng'};
   T[4]={type:'tax',amt:200,n:'Thuế thu nhập'}; T[38]={type:'tax',amt:100,n:'Thuế xa xỉ'};
   T[0]={type:'go'};T[10]={type:'jail'};T[20]={type:'park'};T[30]={type:'gojail'};
 })();
@@ -814,7 +818,10 @@ const TILE_ART={
 };
 function tileArt(skin,k){const l=TILE_ART[skin];const key=l?l.split(' ')[k]:null;return ART[key]?`<span class="tart"><svg viewBox="0 0 32 32" aria-hidden="true">${ART[key]}</svg></span>`:'';}
 const cp = ()=>S.players[S.cur];
-const rand6 = ()=>1+Math.floor(Math.random()*6);
+/* uniform integer in [0,n) from the crypto RNG; rejection sampling keeps every face exactly equally likely */
+function randInt(n){const c=globalThis.crypto;if(!c||!c.getRandomValues)return Math.floor(Math.random()*n);
+  const a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;do c.getRandomValues(a);while(a[0]>=lim);return a[0]%n;}
+const rand6 = ()=>1+randInt(6);
 const wait = ms=>ms>0?new Promise(r=>setTimeout(r,ms)):Promise.resolve();
 const stepMs = ()=>({slow:260,normal:150,fast:70,off:0})[CFG.speed];
 const diceMs = ()=>({slow:850,normal:560,fast:300,off:0})[CFG.speed];
@@ -823,7 +830,7 @@ const readMs = ()=>({slow:1500,normal:1050,fast:600,off:0})[CFG.speed];
 function money(n){const c=SK().cur;const neg=n<0;n=Math.abs(Math.round(n));return (neg?'−':'')+c.p+n.toLocaleString('vi-VN')+c.s;}
 function tname(i){const t=T[i],s=SK();
   switch(t.type){case 'prop':return s.props[t.k];case 'station':return s.stations[t.k];case 'util':return s.utils[t.k];
-  case 'chance':return s.chance;case 'chest':return s.chest;case 'tax':return t.n;case 'go':return 'Xuất phát';
+  case 'chance':return s.chance;case 'chest':return s.chest;case 'tax':case 'bonus':return t.n;case 'go':return 'Xuất phát';
   case 'jail':return 'Nhà tù';case 'park':return 'Bãi đỗ xe';case 'gojail':return 'Vào tù';}return '';}
 function inkOn(hex){const n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255;
   return (0.2126*r+0.7152*g+0.0722*b)>0.55?'#161616':'#FFFFFF';}
@@ -942,11 +949,12 @@ async function land(p,sum){const i=p.pos,t=T[i],me=S.cur;ST().lands[i]=(ST().lan
   if(t.type==='prop'||t.type==='station'||t.type==='util'){const o=S.own[i];
     if(!o){if(p.money>=t.price){S.pending=i;S.phase='buy';log(`${p.name} đến ${tname(i)}. Ô còn trống, giá ${money(t.price)}.`,me);showBuyCard();return;}
       log(`${p.name} đến ${tname(i)} nhưng không đủ tiền mua.`,me);}
-    else if(o.o===me){if(t.type==="prop"&&!o.m){S.buildI=i;log(`${p.name} về ${tname(i)} của mình và được quyền xây nhà trên ô này.`,me);}else log(`${p.name} về ${tname(i)} của mình.`,me);}
+    else if(o.o===me){if(t.type==="prop"&&!o.m){S.buildI=i;log(`${p.name} về ${tname(i)} của mình và được xây thêm 1 nhà trên ô này.`,me);}else log(`${p.name} về ${tname(i)} của mình.`,me);}
     else if(o.m)log(`${tname(i)} đang cầm cố nên ${p.name} không phải trả tiền thuê.`,me);
     else{const r=rentOf(i,sum),st=ST();st.rentIn[o.o]+=r;st.rentOut[me]+=r;if(!st.bigRent||r>st.bigRent.a)st.bigRent={p:me,a:r,i};
       if(r>=200){emit("hit",i);shake();burstAt(tileEl(i));}log(`${p.name} trả ${money(r)} tiền thuê ${tname(i)} cho ${S.players[o.o].name}.`,me);renderCenter();await pay(p,o.o,r);}
   }else if(t.type==='chance'||t.type==='chest'){await drawCard(p,t.type,sum);return;}
+  else if(t.type==='bonus'){log(`${p.name} nhận ${t.n.toLowerCase()} ${money(t.amt)}.`,me);renderCenter();await gain(p,t.amt);}
   else if(t.type==='tax'){log(`${p.name} nộp ${t.n.toLowerCase()} ${money(t.amt)}.`,me);renderCenter();await pay(p,null,t.amt,'tax');}
   else if(t.type==='gojail'){log(`${p.name} dừng ở ô Vào tù và bị đưa thẳng vào tù.`,me);renderCenter();await wait(stepMs()*3);goJail(p);}
   else if(t.type==='park'){if(S.rules.parking&&S.pot>0){log(`${p.name} nhận toàn bộ quỹ Bãi đỗ xe: ${money(S.pot)}.`,me);renderCenter();await xfer('pot',me,S.pot);}
@@ -997,7 +1005,7 @@ async function showCardFx(deck,dn,text){emit("card",[deck,dn,text]);
   document.body.appendChild(fx);SFX.card();
   await wait(900+Math.max(1400,readMs()));
   fx.classList.add('out');await wait(300);fx.remove();}
-async function drawCard(p,deck,sum){const c=CARDS[deck][Math.floor(Math.random()*CARDS[deck].length)];
+async function drawCard(p,deck,sum){const c=CARDS[deck][randInt(CARDS[deck].length)];
   const text=c.t();const dn=deck==='chance'?SK().chance:SK().chest;
   S.card={deck,text};log(`${p.name} rút thẻ ${dn}: ${text}`,S.cur);renderCenter();
   await showCardFx(deck,dn,text);
@@ -1105,7 +1113,7 @@ function statsHTML(){if(!S.stats)return '';const st=S.stats,P=S.players,best=a=>
 function manage(kind,i){if(busy||!S||S.phase==='gameover')return;const o=S.own[i];if(!o)return;const p=S.players[o.o],t=T[i],pi=o.o;
   if(kind==='build'&&canBuild(i)){ST().built[pi]++;o.lv++;const lv=o.lv;
     log(`${p.name} ${lv===5?'nâng khách sạn':'xây nhà thứ '+lv} ở ${tname(i)} (−${money(t.hc)}).`,pi);
-    emit('build',[i,lv]);fxBuilt(i,lv);
+    S.buildI=null;emit('build',[i,lv]);fxBuilt(i,lv);
     xfer(pi,{tile:i},t.hc);}
   else if(kind==='sellh'&&canSellHouse(i)){o.lv--;log(`${p.name} bán bớt nhà ở ${tname(i)} (+${money(t.hc/2)}).`,pi);xfer({tile:i},pi,t.hc/2);}
   else if(kind==='mort'&&canMortgage(i)){o.m=true;log(`${p.name} cầm cố ${tname(i)} (+${money(t.price/2)}).`,pi);xfer({tile:i},pi,t.price/2);}
@@ -1129,8 +1137,8 @@ function tileHTML(i){const t=T[i],[r,c]=gridPos(i),st=`grid-row:${r};grid-column
     return `<div class="tile corner c-${t.type}" data-act="tile" data-i="${i}" style="${st}" tabindex="0" role="button" aria-label="${m[1]}"><span class="ticon">${m[0]}</span><span class="cl">${m[1]}</span><span class="cs">${m[2]}</span><div class="toks"></div></div>`;}
   const side=i<10?'side-b':i<20?'side-l':i<30?'side-t':'side-r';let band='',info;
   if(t.type==='prop'){band=`<div class="band" style="background:var(--g${t.g})"><span class="houses"></span></div>`;info=`<span class="tname">${nm}</span>${tileArt(CFG.skin,t.k).replace(`class="tart"`,`class="tart" style="--tc:var(--g${t.g})"`)}<span class="tprice">${money(t.price)}</span>`;}
-  else{const ic={station:IC.train,util:t.k?IC.drop:IC.bolt,chance:IC.q,chest:IC.star,tax:IC.coin}[t.type];
-    info=`<span class="tname">${nm}</span><span class="ticon">${ic}</span><span class="tprice">${t.price?money(t.price):t.amt?'−'+money(t.amt):''}</span>`;}
+  else{const ic={station:IC.train,util:t.k?IC.drop:IC.bolt,chance:IC.q,chest:IC.star,tax:IC.coin,bonus:IC.coin}[t.type];
+    info=`<span class="tname">${nm}</span><span class="ticon">${ic}</span><span class="tprice">${t.price?money(t.price):t.amt?(t.type==='bonus'?'+':'−')+money(t.amt):''}</span>`;}
   return `<div class="tile ${side} t-${t.type}" data-act="tile" data-i="${i}" style="${st}" tabindex="0" role="button" aria-label="${nm}">${band}<div class="tinfo">${info}</div><div class="own"></div><div class="toks"></div></div>`;}
 
 function renderTop(){const t=$('#top');
@@ -1162,7 +1170,8 @@ function renderDynamic(){if(!$('#board'))return;if(NET.mode==='host')queueSync()
   const before={};document.querySelectorAll('#board .toks .tok').forEach(t=>before[t.dataset.p]=t.getBoundingClientRect());
   document.querySelectorAll('#board .tile').forEach(el=>{const i=+el.dataset.i,t=T[i],o=VIS.hideOwn[i]?null:S.own[i];
     el.classList.toggle('mort',!!(o&&o.m));el.classList.toggle('sel',sel===i);
-    el.classList.toggle('can-build',bset.has(i));el.classList.toggle('dim',buildMode&&!bset.has(i));
+    el.classList.toggle('can-build',bset.has(i));
+    el.classList.toggle('can-cash',S.phase==='debt'&&myTurn()&&!!o&&o.o===S.cur&&(canSellHouse(i)||canMortgage(i)||canSellBank(i)));el.classList.toggle('dim',buildMode&&!bset.has(i));
     let bb=el.querySelector('.bb');
     if(bset.has(i)){if(!bb){bb=document.createElement('span');bb.className='bb';el.appendChild(bb);}
       bb.textContent=(S.own[i].lv===4?'+ Khách sạn ':'+ Nhà ')+money(t.hc);}else if(bb)bb.remove();
@@ -1208,7 +1217,7 @@ function renderCenter(){const c=$('#center');if(!c)return;const s=SK(),over=S.ph
   let msg=S.card?`<div class="card-pop"><span class="card-k">${S.card.deck==='chance'?s.chance:s.chest}</span><p>${esc(S.card.text)}</p></div>`:`<p class="c-msg">${esc(S.msg||'')}</p>`;
   if(buildMode&&S.phase!=='gameover'){const n=buildable(S.cur).length;
     msg=`<p class="c-msg">${n?`Chạm vào ô đang sáng để xây. Nhà phải xây đều trong cùng nhóm màu, đủ 4 nhà thì nâng lên khách sạn.`:`Hết ô xây được: nhóm màu đã xây đều tối đa hoặc không đủ tiền.`}</p>`;}
-  if(S.phase==='debt')msg+=`<p class="c-warn">Đang âm ${money(-cp().money)}. Bấm vào ô đất của ${esc(cp().name)} để bán nhà hoặc cầm cố.</p>`;
+  if(S.phase==='debt')msg+=`<p class="c-warn">Đang âm ${money(-cp().money)}. Bấm vào các ô đang nhấp nháy đỏ để bán nhà, cầm cố hoặc bán cho ngân hàng.</p>`;
   c.innerHTML=`<div class="c-title"><span class="c-kicker">Cờ Tỷ Phú</span><span class="c-name">${s.name}</span></div>
    <div class="c-turn"><span class="tok" style="--pc:${p.color}">${tokEmoji(p.token)}</span><span class="c-who"><b>${over?'Người thắng: ':''}${esc(p.name)}</b>${over?`<span>${money(worth(S.winner))}</span>`:mspan(idx(p))}</span>${!over&&p.jail?'<span class="tag">Ở tù</span>':''}</div>
    <div class="dice-row" id="dice" data-dice="${CFG.dice}">${dieHTML(S.dice[0])}${dieHTML(S.dice[1])}${S.showSum?`<b class="dsum">= ${S.dice[0]+S.dice[1]}</b>`:""}</div>
@@ -1255,11 +1264,12 @@ function renderDetail(){const el=$('#detail');if(!el)return;
         b.push(`<button class="btn sm" data-act="sellbank-ask" data-i="${i}" ${canSellBank(i)&&!busy?'':'disabled'}>Bán cho ngân hàng +${money(bankValue(i))}</button>`);
         html+=`<div class="manage">${b.join('')}</div>`;
         if(o.m)html+=`<p class="hint" style="margin-top:8px">Chuộc lại đất trước khi bán cho ngân hàng.</p>`;
-        if(t.type==='prop'&&!canBuild(i)&&!groupHasHouses(i))html+=`<p class="hint" style="margin-top:8px">Chỉ được xây nhà trên ô này khi dừng đúng ở ô này.</p>`;
+        if(t.type==='prop'&&!canBuild(i)&&!groupHasHouses(i))html+=`<p class="hint" style="margin-top:8px">Mỗi lần dừng đúng ở ô này được xây thêm 1 nhà.</p>`;
         else if(t.type==='prop'&&groupHasHouses(i)&&!o.m)html+=`<p class="hint" style="margin-top:8px">Bán hết nhà trên ô này trước khi cầm cố.</p>`;
         }}
   }else{const txt={chance:`Dừng ở đây thì rút một thẻ ${s.chance}: có thể được tiền, mất tiền hoặc phải di chuyển.`,
       chest:`Dừng ở đây thì rút một thẻ ${s.chest}: thường là các khoản thu chi bất ngờ.`,
+      bonus:`Dừng ở đây nhận ${money(t.amt)} từ ngân hàng.`,
       tax:`Nộp ${money(t.amt)} cho ngân hàng${S.rules.parking?' (dồn vào quỹ Bãi đỗ xe)':''}.`,
       go:`Mỗi lần đi qua hoặc dừng ở đây nhận ${money(S.rules.salary)}.`,
       jail:'Người bị vào tù phải đổ được đôi, nộp phạt hoặc dùng thẻ để ra. Tối đa 3 lượt. Dừng đúng ô này thì chỉ là ghé thăm.',
