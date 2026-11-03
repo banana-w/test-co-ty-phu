@@ -5253,7 +5253,7 @@ function ptOf(i){
 }
 function warmPts(){ if(!camIdle()) return; for(let i=0;i<N;i++) ptOf(i); }
 function camTo(p){
-  const cam = document.getElementById('cam'), st = document.getElementById('stage'); if(!cam || !st || calm() || (S && S.net) || p.bot || p.id!==S.viewer) return;
+  const cam = document.getElementById('cam'), st = document.getElementById('stage'); if(!cam || !st || calm() || p.bot || p.id!==S.viewer) return;
   const c = PTC[p.pos]; if(!c) return;
   const z = 1.3, W = st.clientWidth, H = st.clientHeight;
   const tx = Math.max(W - W*z, Math.min(0, W/2 - c[0]*z)), ty = Math.max(H - H*z, Math.min(0, H/2 - c[1]*z));
@@ -5695,6 +5695,7 @@ function ask(title, body, opts, secs = DECIDE, who){
 // ===== Chơi nhiều máy: máy chủ phòng chạy ván, các máy khác chỉ hiển thị và gửi thao tác =====
 const seatPos = id => (NET && NET.me>0) ? (id - NET.me + 4) % 4 : id;   // mỗi máy luôn thấy mình ở góc dưới bên trái
 let NET = null, chatSeq = 0, netLast = 0, netTimer = null, netLgSeq = -1;
+const FXQ = [], FXSEEN = {};   /* chủ phòng: hiệu ứng chờ gửi; khách: lúc vừa thấy hiệu ứng tiền của từng người */
 const netHost = () => !!(NET && NET.role==='host' && NET.live);
 const netClient = () => !!(NET && NET.role==='client');
 function netEmit(topic, data){ try { if(NET && NET.R){ const p = NET.R.emit(topic, data); if(p && p.catch) p.catch(() => {}); } } catch(e) {} }
@@ -5727,7 +5728,7 @@ function netSync(force){
   const now = Date.now();
   if(!force && now-netLast < 170){ if(!netTimer) netTimer = setTimeout(() => { netTimer = null; netSync(true); }, 180); return; }
   netLast = now;
-  netEmit('st', packState());
+  if(FXQ.length) netEmit('fx', {q:FXQ.splice(0), st:packState()}); else netEmit('st', packState());
   if(chatSeq!==netLgSeq){ netLgSeq = chatSeq; netEmit('lg', {m:chat.slice(-9).map(m => m.sys ? {q:m.q, s:1, t:String(m.text).slice(0,150)} : {q:m.q, p:m.pid, t:String(m.text).slice(0,80), e:m.emoji?1:0})}); }
   if(S.pend) netEmit('pd', S.pend);
 }
@@ -10411,6 +10412,10 @@ if(!HEADLESS){
   };
   const clientState = d => {
     if(!NET || !d || !Array.isArray(d.p)) return;
+    // tl, ld.a, bu.a, rg.l đổi theo đồng hồ dù ván không đổi: bỏ ra khi so
+    const sig = JSON.stringify(Object.assign({}, d, {tl:0, ld:d.ld ? d.ld.i : null, bu:d.bu ? d.bu.i : null, rg:d.rg ? [d.rg.p, d.rg.d] : null}));
+    if(S && S.net && sig===NET.lastSig){ NET.lastSt = Date.now(); return; }
+    NET.lastSig = sig;
     const prev = (S && S.net) ? S : null, ns = unpackState(d);
     if(prev){ ns.rewarded = prev.rewarded; ns.players.forEach((p,k) => { const o = prev.players[k]; if(!o) return; p.hitAt = o.hitAt; p.gainAt = o.gainAt; if(p.cash<o.cash) p.hitAt = Date.now(); else if(p.cash>o.cash) p.gainAt = Date.now(); }); }
     S = ns; AVMAP = S.avs; NET.lastSt = Date.now();
@@ -10421,7 +10426,7 @@ if(!HEADLESS){
     NET.lastDs = d.ds;
     if(NET.showId && d.pe!==NET.showId){ NET.showId = 0; if(askAbort) askAbort(); }
     render();
-    if(prev) ns.players.forEach((p,k) => { const o = prev.players[k]; if(o && p.alive && p.cash!==o.cash){ fxNum(p, (p.cash>o.cash ? '+' : '−') + Math.abs(p.cash-o.cash), p.cash>o.cash ? 'gain' : ''); SFX.play(p.cash>o.cash ? (p.cash-o.cash>=100 ? 'coinbig' : 'coin') : 'lose', 0, p.id===NET.me ? 1 : .45); } });
+    if(prev) ns.players.forEach((p,k) => { const o = prev.players[k]; if(o && p.alive && p.cash!==o.cash && !(Date.now() - (FXSEEN[k] || 0) < 2500)){ fxNum(p, (p.cash>o.cash ? '+' : '−') + Math.abs(p.cash-o.cash), p.cash>o.cash ? 'gain' : ''); SFX.play(p.cash>o.cash ? (p.cash-o.cash>=100 ? 'coinbig' : 'coin') : 'lose', 0, p.id===NET.me ? 1 : .45); } });
     if(S.over && !NET.shown){ NET.shown = true; showResult(); }
   };
   const clientPrompt = pd => {
@@ -10479,6 +10484,10 @@ if(!HEADLESS){
       if(!(S && S.net)){ renderLobby(); if(NET.rank && window.RKD_) window.RKD_.client(); }
     });
     R.on('st', m => { if(fromHost(m) && NET.me>=0) clientState(m.data); });
+    R.on('fx', m => { if(!fromHost(m) || NET.me<0) return; const d = m.data || {}, q = Array.isArray(d.q) ? d.q : [];
+      q.forEach(x => { if(/^fx(Gain|Lose|Num)$/.test(x && x[0]) && x[1] && x[1][0] && x[1][0]._p!=null) FXSEEN[x[1][0]._p] = Date.now(); });
+      if(d.st) clientState(d.st);
+      if(S && S.net && window.FXPLAY) window.FXPLAY(q); });
     R.on('mic', m => { const d = m.data || {}; if(m.isMe) return; MICS[+d.p] = !!d.on; if(S) render(); });
     R.on('ord', m => { if(fromHost(m) && NET.me>=0) ordGuest(m.data || {}); });
     R.on('pd', m => { if(fromHost(m)) clientPrompt(m.data); });
@@ -13770,6 +13779,33 @@ window.FS_ = (() => {
   const init = () => { const b = d.getElementById('homeFs'); if(b) b.onclick = () => { try { SFX.play('click'); } catch(e) {} toggle(); }; paint(); hint(); };
   if(d.readyState==='loading') d.addEventListener('DOMContentLoaded', init); else init();
   return {on, app, can, toggle, guide, enter, iOS, inApp};
+})();
+</script>
+<script>
+/* ===== Chơi chung: khách thấy đủ hiệu ứng như chủ phòng =====
+   Chủ phòng ghi lại từng lời gọi hiệu ứng (quân nảy từng bước, xu bay, rung bàn, biển tên ô, xây nhà, xe cảnh sát, camera...) và tiếng lẻ,
+   gửi cùng gói với trạng thái mới nhất; khách áp trạng thái rồi chạy lại đúng các hàm đó. Hiệu ứng gọi bên trong hiệu ứng khác không gửi lại. */
+(() => {
+  const FX = ['czHop','czHopEnd','czFly','fxShake','fxLight','fxSign','fxNum','fxLose','fxGain','fxEmote','fxBuild','fxBuildDust','cornerNote','policeRide','camTo','camReset'];
+  const SND = new Set(['step','fly','land','go','isle','coin','coinbig','lose','buy','build','hotel','saw','cry']);
+  const ORIG = {}; let depth = 0, queued = false;
+  const isP = v => !!(v && typeof v==='object' && S && S.players && S.players.indexOf(v) >= 0);
+  const enc = v => isP(v) ? {_p:v.id} : (typeof v==='function' ? null : v);
+  const dec = v => (v && typeof v==='object' && v._p!=null) ? (S && S.players[v._p]) || null : v;
+  const live = () => netHost() && !depth;
+  const out = (f, a) => { FXQ.push([f, a.map(enc)]); if(FXQ.length > 80) FXQ.splice(0, FXQ.length - 80);
+    if(!queued){ queued = true; queueMicrotask(() => { queued = false; if(FXQ.length) netSync(true); }); } };
+  FX.forEach(f => { const o = window[f]; if(typeof o!=='function') return; ORIG[f] = o;
+    window[f] = function(...a){ if(live() && !(f==='fxLight' && !a[1])) out(f, a);   /* fxLight nhỏ (mỗi bước) không làm gì */ depth++; try { return o.apply(this, a); } finally { depth--; } }; });
+  const play0 = SFX.play, tile0 = SFX.tile;
+  SFX.play = function(n, ...a){ if(live() && SND.has(n)) out('~play', [n, ...a]); return play0.call(this, n, ...a); };
+  SFX.tile = function(n){ if(live()) out('~tile', [n]); return tile0.call(this, n); };
+  // khách: chạy lại (không gửi đi đâu vì khách không phải chủ phòng)
+  window.FXPLAY = list => (list || []).slice(0, 80).forEach(x => { try {
+    const f = x[0], a = (x[1] || []).map(dec);
+    if(f==='~play') play0.apply(SFX, a); else if(f==='~tile') tile0.apply(SFX, a);
+    else if(ORIG[f] && !a.some((v, k) => v===null && x[1][k] && x[1][k]._p!=null)){ if(f==='camTo' && typeof warmPts==='function') warmPts(); ORIG[f](...a); }
+  } catch(e) {} });
 })();
 </script>
 </body>
