@@ -13,32 +13,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<meta name="google-adsense-account" content="ca-pub-9603065227128228">
 <meta name="description" content="Cờ tỷ phú Việt Nam: gieo xúc xắc, mua đất, xây nhà, làm tỷ phú cùng bạn bè. Vào chơi cùng mình nhé!">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Lên Đời">
-<meta property="og:title" content="Lên Đời · Cờ tỷ phú Việt Nam">
-<meta property="og:description" content="Gieo xúc xắc, mua đất, xây nhà, làm tỷ phú cùng bạn bè. Vào chơi cùng mình nhé! 🎲">
-<meta property="og:image" content="https://lendoi.web.app/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="https://lendoi.web.app/">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://lendoi.web.app/og.png">
 <script>/* IS_APP: đang chạy trong app iOS (Capacitor); thêm ?app=1 để thử trên trình duyệt */window.IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())||/[?&]app=1/.test(location.search);if(window.IS_APP){document.documentElement.classList.add('app');/* app: không cho phóng to, kể cả khi chạm ô nhập chữ nhỏ */document.querySelector('meta[name=viewport]').setAttribute('content','width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');}/* land: mọi màn hình dùng bố cục ngang (app iOS và điện thoại cảm ứng; cầm dọc thì cả trang xoay 90 độ) */if(window.IS_APP||/[?&]land=1/.test(location.search)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))document.documentElement.classList.add('land');</script>
-<title>Lên Đời · bản chơi thử</title>
-<script>/* QUẢNG CÁO THẬT (Google H5 Games Ads, bản web): client = mã AdSense dạng 'ca-pub-1234567890123456'. test: true = chỉ hiện quảng cáo thử của Google (không tính tiền). Để trống client thì game dùng video mô phỏng như cũ. */
-window.ADS_CFG={client:'ca-pub-9603065227128228', test:false};
-(function(){ var C = window.ADS_CFG; if(!C.client || window.IS_APP) return;
-  var s = document.createElement('script'); s.async = true; s.crossOrigin = 'anonymous';
-  s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + encodeURIComponent(C.client);
-  s.setAttribute('data-ad-frequency-hint', '120s'); if(C.test) s.setAttribute('data-adbreak-test', 'on');
-  document.head.appendChild(s);
-  window.adsbygoogle = window.adsbygoogle || []; window.adBreak = window.adConfig = function(o){ window.adsbygoogle.push(o); };
-  window.adConfig({preloadAdBreaks:'on', sound:'on'});
-})();</script>
-<script>/* NẠP KIM CƯƠNG bằng chuyển khoản VietQR: điền ngân hàng nhận tiền. bank = mã ngân hàng VietQR (vd 'MB','VCB','TCB','ACB'), acc = số tài khoản, name = tên chủ tài khoản (KHÔNG DẤU, viết hoa). Để trống thì nút nạp chỉ báo 'sắp có'. */window.PAY_CFG={bank:'',acc:'',name:''};</script>
-<script>/* máy chủ phòng chơi nhiều máy (Firebase Realtime Database). null = chưa cấu hình */window.FB_CFG={apiKey:"AIzaSyBRW_VPPx1KYSBN7ZevSdYvlD8OKs5j1LY",authDomain:"lendoi.firebaseapp.com",databaseURL:"https://lendoi-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"lendoi",storageBucket:"lendoi.firebasestorage.app",messagingSenderId:"236014419031",appId:"1:236014419031:web:b56334ff49ba09bbc47712"};if(window.FB_CFG)document.documentElement.classList.add('net');</script>
+<title>Lên Đời</title>
 <script>/* font: trong app dùng file nhúng sẵn (fonts/), trên web tải từ Google Fonts */document.write('<link rel="stylesheet" href="'+(window.IS_APP?'fonts/fonts.css':'https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;600;700;800&family=Oswald:wght@500;700&family=Josefin+Sans:wght@600;700&family=Barlow+Condensed:wght@600;700&display=swap')+'">');</script>
 <style>
 :root{
@@ -4069,16 +4046,11 @@ body.lite .tk.tpl::before,body.eco .tk.tpl::before{animation:none}
       <div id="wkGrid" class="rotgrid"></div>
       <div id="oldShop" hidden><div id="packBar"></div><div id="shopGrid"></div><div id="fitGrid"></div><div id="avGrid"></div><div id="plGrid"></div></div>
       <div class="tag">Kim cương và xu</div>
-      <p class="sub shsub">Xu có từ nhiệm vụ và chơi game. Kim cương có từ nạp thẻ. Xem video được tặng cả hai.</p>
+      <p class="sub shsub">Xu và kim cương có từ nhiệm vụ và chơi game.</p>
       <div class="earn">
-        <button class="ebtn ad" id="adBtn"><b>▶ Xem video</b><small>Nhận 15 xu và 1 💎</small></button>
         <button class="ebtn shareEarn"><b>✉️ Mời bạn chơi cùng</b><small>Tính vào nhiệm vụ chia sẻ</small></button>
-        <button class="ebtn" data-gpack="50"><b>50 💎</b><small>20.000đ</small></button>
-        <button class="ebtn" data-gpack="160"><b>160 💎</b><small>50.000đ</small></button>
-        <button class="ebtn" data-gpack="350"><b>350 💎</b><small>100.000đ</small></button>
       </div>
       <div class="eggshop"><span class="eggi">🥚</span><div class="eggt"><b>Trứng thối</b><small>Ném vào bạn bè cho vui (hảo cảm −3). Đang có <b class="eggn">0</b></small></div><button class="btn primary" data-buyegg="1">1 quả · 10 🪙</button><button class="btn" data-buyegg="5">5 quả · 40 🪙</button></div>
-      <p class="demo">Bản chơi thử: video và nạp kim cương ở đây là mô phỏng, không trừ tiền thật.</p>
     </div>
   </section>
 
@@ -5775,51 +5747,77 @@ function remoteAsk(tp, payload, secs){
     };
   });
 }
-// ===== Máy chủ phòng riêng (Firebase Realtime Database), dùng y như room của Claude: join, emit, on, onPeers, peers, leave =====
+// ===== Bản local: không có máy chủ riêng. FBNET chỉ còn để các phần cũ hỏi "có máy chủ không?" và nhận câu trả lời là không =====
 const FBNET = (() => {
-  let dbp = null;
-  const load = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-  const sdk = async () => {
-    for(const base of ['vendor/', 'https://cdn.jsdelivr.net/npm/firebase@10.14.1/']){
-      try { if(!window.firebase) await load(base + 'firebase-app-compat.js'); if(!(window.firebase && firebase.database)) await load(base + 'firebase-database-compat.js'); if(!firebase.auth) await load(base + 'firebase-auth-compat.js'); if(window.firebase && firebase.database && firebase.auth) return; } catch(e) {}
+  const off = () => Promise.reject(Object.assign(new Error('offline'), {code:'bản local không có máy chủ'}));
+  return { ok: () => false, db: off, authed: off, uid: () => '', room: async () => PEERNET };
+})();
+// ===== Phòng chơi chung (PeerJS, như bản Cờ Tỷ Phú cũ): chủ phòng giữ ID phòng trên máy chủ trung gian PeerJS, máy khác nối thẳng vào chủ phòng (WebRTC; cùng wifi thì đi trong mạng nhà).
+// Chủ phòng chuyển tiếp mọi tin cho cả phòng. API giống room cũ: join, emit, on, onPeers, peers, leave; tin của chính mình cũng được nhận lại (isMe) =====
+const PEERNET = (() => {
+  const PFX = 'lendoi-local-v1-';
+  const fail = code => Object.assign(new Error(code), {code});
+  const lib = () => window.Peer ? Promise.resolve() : new Promise((ok, no) => { const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'; s.onload = ok; s.onerror = () => no(fail('không tải được thư viện kết nối')); document.head.appendChild(s); });
+  const open = id => new Promise((ok, no) => { const pr = id ? new Peer(id) : new Peer();
+    const t = setTimeout(() => { pr.destroy(); no(fail('hết giờ kết nối')); }, 12000);
+    pr.on('open', () => { clearTimeout(t); ok(pr); });
+    pr.on('error', e => { if(pr.open && e.type!=='unavailable-id') return; clearTimeout(t); pr.destroy(); no(fail(e.type==='unavailable-id' ? 'trùng ID phòng' : (e.type || 'lỗi kết nối'))); }); });
+  // role: 'host' tạo phòng (giữ ID), 'guest' vào phòng đã có
+  async function join(name, role){
+    await lib();
+    const hub = PFX + String(name).replace(/[^\w-]/g, '_'), hs = {}, pf = [], live = new Set(), backlog = [];
+    let gone = false, self = '';
+    const fire = (t, data, from) => { const fs = hs[t]; if(!fs) return; const m = {topic:t, data, peer:from, isMe:from===self, sameTab:from===self}; fs.forEach(f => { try { f(m); } catch(e) {} }); };
+    const pev = (j, l) => { if(!j.length && !l.length) return; const ev = {joined:j.map(peer => ({peer})), left:l.map(peer => ({peer}))};
+      if(!pf.length){ backlog.push(ev); return; } pf.forEach(f => { try { f(ev); } catch(e) {} }); };
+    const send = (c, m) => { try { if(c && c.open) c.send(m); } catch(e) {} };
+    const api = { on(t, f){ (hs[t] = hs[t] || []).push(f); }, onPeers(f){ pf.push(f); backlog.splice(0).forEach(ev => { try { f(ev); } catch(e) {} }); }, peers(){ return [...live].map(peer => ({peer})); } };
+    if(role==='host'){
+      const pr = await open(hub), conns = {}; self = hub; live.add(self); pev([self], []);
+      const all = m => Object.values(conns).forEach(c => send(c, m));
+      pr.on('connection', c => {
+        c.on('open', () => { const old = conns[c.peer]; conns[c.peer] = c; if(old && old!==c) try { old.close(); } catch(e) {}
+          const isNew = !live.has(c.peer); live.add(c.peer); send(c, {k:'hi', peers:[...live]}); if(isNew){ all({k:'pj', p:c.peer}); pev([c.peer], []); } });
+        c._seen = Date.now();
+        c.on('data', m => { c._seen = Date.now(); if(gone || !m || m.k!=='e') return; all({k:'e', t:m.t, d:m.d, p:c.peer}); fire(m.t, m.d, c.peer); });
+        const bye = () => { if(conns[c.peer]!==c) return; delete conns[c.peer]; live.delete(c.peer); all({k:'pl', p:c.peer}); pev([], [c.peer]); };
+        c._bye = bye; c.on('close', bye); c.on('error', bye);
+      });
+      // nhịp tim: đóng tab hiếm khi báo 'close' ngay, nên im lặng quá 7 giây là coi như đã rời phòng
+      const beat = setInterval(() => Object.values(conns).forEach(c => { if(Date.now() - c._seen > 7000){ c._bye(); try { c.close(); } catch(e) {} } else send(c, {k:'pi'}); }), 2000);
+      pr.on('disconnected', () => setTimeout(() => { try { if(!gone && pr.disconnected && !pr.destroyed) pr.reconnect(); } catch(e) {} }, 1500));
+      return Object.assign(api, { self,
+        emit(t, data){ if(gone) return Promise.resolve(); const d = data===undefined ? null : data; all({k:'e', t, d, p:self}); setTimeout(() => fire(t, d, self)); return Promise.resolve(); },
+        leave(){ if(gone) return; gone = true; clearInterval(beat); try { pr.destroy(); } catch(e) {} } });
     }
-    throw new Error('sdk');
-  };
-  // mỗi máy luôn có một tài khoản: đăng nhập Google, hoặc tài khoản ẩn danh tự tạo (người chơi không phải làm gì); luật dữ liệu dựa vào tài khoản này
-  let anonP = null;
-  const authed = async () => { await sdk(); if(!firebase.apps.length) firebase.initializeApp(window.FB_CFG); const a = firebase.auth();
-    if(!a.__ready) a.__ready = new Promise(r => { const off = a.onAuthStateChanged(() => { off(); r(); }); });
-    await a.__ready;
-    if(!a.currentUser){ if(!anonP) anonP = a.signInAnonymously().finally(() => { anonP = null; }); await anonP; }
-    return a; };
-  const uid = () => { try { return firebase.auth().currentUser.uid; } catch(e) { return ''; } };
-  const db = () => dbp || (dbp = (async () => { await authed(); return firebase.app().database(); })().catch(e => { dbp = null; throw e; }));
-  async function join(name){
-    const d = await db(), base = d.ref('rooms/' + String(name).replace(/[.#$\[\]\/]/g, '_')), evRef = base.child('ev'), pRef = base.child('peers');
-    const off = (await d.ref('.info/serverTimeOffset').once('value')).val() || 0, TS = firebase.database.ServerValue.TIMESTAMP;
-    const peer = Math.random().toString(36).slice(2, 9) + Date.now().toString(36), hs = {}, pf = [], live = new Set();
-    // dữ liệu gửi dạng chuỗi JSON để giữ nguyên mảng rỗng và ô trống
-    const q = evRef.orderByChild('at').startAt(Date.now() + off - 1500);
-    const onEv = s => { const v = s.val() || {}, fs = hs[v.t]; if(!fs) return; let data = null; try { data = JSON.parse(v.d); } catch(e) {} const m = {topic:v.t, data, peer:v.p, isMe:v.p===peer, sameTab:v.p===peer}; fs.forEach(f => { try { f(m); } catch(e) {} }); };
-    q.on('child_added', onEv);
-    const me = pRef.child(peer); await me.onDisconnect().remove(); await me.set({at:TS, u:uid()});
-    let gone = false;
-    const conRef = d.ref('.info/connected'), onCon = s => { if(s.val() && !gone){ me.onDisconnect().remove(); me.set({at:TS, u:uid()}).catch(() => {}); } }; conRef.on('value', onCon);
-    const pAdd = s => { if(live.has(s.key)) return; live.add(s.key); pf.forEach(f => f({joined:[{peer:s.key}], left:[]})); };
-    const pDel = s => { live.delete(s.key); pf.forEach(f => f({joined:[], left:[{peer:s.key}]})); };
-    pRef.on('child_added', pAdd); pRef.on('child_removed', pDel);
-    // dọn tin cũ hơn 20 giây cho nhẹ
-    const sweep = setInterval(() => { evRef.orderByChild('at').endAt(Date.now() + off - 20000).limitToFirst(300).once('value', s => { const up = {}; s.forEach(c => { up[c.key] = null; }); if(Object.keys(up).length) evRef.update(up).catch(() => {}); }); }, 15000);
-    return {
-      self: peer, base,
-      emit(t, data){ return gone ? Promise.resolve() : evRef.push({t, d:JSON.stringify(data === undefined ? null : data), p:peer, u:uid(), at:TS}); },
-      on(t, f){ (hs[t] = hs[t] || []).push(f); },
-      onPeers(f){ pf.push(f); },
-      peers(){ return [...live].map(p => ({peer:p})); },
-      leave(){ if(gone) return; gone = true; clearInterval(sweep); conRef.off('value', onCon); q.off('child_added', onEv); pRef.off('child_added', pAdd); pRef.off('child_removed', pDel); me.onDisconnect().cancel(); me.remove().catch(() => {}); }
+    const pr = await open(null); self = pr.id; let c = null, retry = 0, seen = 0;
+    const wire = cx => {
+      seen = Date.now();
+      cx.on('data', m => { if(gone || cx!==c || !m) return; seen = Date.now();
+        if(m.k==='hi'){ const add = m.peers.filter(x => !live.has(x)), rm = [...live].filter(x => !m.peers.includes(x)); add.forEach(x => live.add(x)); rm.forEach(x => live.delete(x)); pev(add, rm); }
+        else if(m.k==='pj'){ if(!live.has(m.p)){ live.add(m.p); pev([m.p], []); } }
+        else if(m.k==='pl'){ if(live.delete(m.p)) pev([], [m.p]); }
+        else if(m.k==='e') fire(m.t, m.d, m.p); });
+      // mất chủ phòng: báo cả phòng đã rời, rồi thử nối lại tới khi rời phòng
+      const lost = () => { if(gone || cx!==c) return; c = null; const l = [...live]; live.clear(); pev([], l); clearTimeout(retry); retry = setTimeout(reconnect, 2500); };
+      cx.on('close', lost); cx.on('error', lost); cx._lost = lost;
     };
+    const beat = setInterval(() => { if(!c) return; if(Date.now() - seen > 7000){ const cx = c; cx._lost(); try { cx.close(); } catch(e) {} } else send(c, {k:'pi'}); }, 2000);
+    const connect = () => new Promise((ok, no) => { const cx = pr.connect(hub, {reliable:true, serialization:'json'});
+      const t = setTimeout(() => { pr.off('error', er); no(fail('không tìm thấy phòng')); }, 9000);
+      const er = e => { if(e.type==='peer-unavailable'){ clearTimeout(t); pr.off('error', er); no(fail('không tìm thấy phòng')); } };
+      pr.on('error', er);
+      cx.on('open', () => { clearTimeout(t); pr.off('error', er); c = cx; wire(cx); ok(); }); });
+    const reconnect = () => { if(gone || c) return; try { if(pr.disconnected && !pr.destroyed) pr.reconnect(); } catch(e) {}
+      connect().catch(() => { if(!gone) retry = setTimeout(reconnect, 3000); }); };
+    try { await connect(); } catch(e) { clearInterval(beat); pr.destroy(); throw e; }
+    pr.on('disconnected', () => setTimeout(() => { try { if(!gone && pr.disconnected && !pr.destroyed) pr.reconnect(); } catch(e) {} }, 1500));
+    return Object.assign(api, { self,
+      emit(t, data){ if(gone) return Promise.resolve(); send(c, {k:'e', t, d:data===undefined ? null : data}); return Promise.resolve(); },
+      leave(){ if(gone) return; gone = true; clearTimeout(retry); clearInterval(beat); try { pr.destroy(); } catch(e) {} } });
   }
-  return { ok: () => !!window.FB_CFG, db, authed, uid, room: async () => { await db(); return {join}; } };
+  return {join};
 })();
 // ===== Nói chuyện bằng mic khi chơi với bạn (v129): gọi thoại trực tiếp giữa các máy (WebRTC), Firebase chỉ để các máy tìm nhau =====
 function micCast(){ if(NET && NET.me>=0) netEmit('mic', {p:NET.me, on:!!(VOICE.live() && VOICE.on())}); }
@@ -9785,7 +9783,7 @@ const COMIC = {
 // ===== CHIA SẺ: mời bạn nhận xu, rủ bạn tăng hảo cảm, chụp ảnh hồ sơ và khoảnh khắc trong ván =====
 const SHARE = (() => {
   if(HEADLESS) return {};
-  const URL0 = 'https://lendoi.web.app/', DAY = () => new Date().toDateString(), MAX = 3, COIN = 30, LOVE = 5;
+  const URL0 = location.origin + location.pathname, DAY = () => new Date().toDateString(), MAX = 3, COIN = 30, LOVE = 5;
   const ld = k => { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v && v.d===DAY() ? v : {d:DAY(), n:0, ids:[]}; } catch(e) { return {d:DAY(), n:0, ids:[]}; } };
   const sv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} };
   const toast = t => { if(window.palToast) window.palToast(t); };
@@ -9839,7 +9837,7 @@ const SHARE = (() => {
     let tt = ''; try { const w = TITLE.worn(); if(w) tt = w.n; } catch(e) {}
     c.fillStyle = '#2B3A67'; c.textAlign = 'center'; c.font = `900 84px ${BF}`; c.fillText(nm, 540, 1040);
     c.font = `800 46px ${BF}`; c.fillStyle = '#E0685C'; c.fillText(`Cấp ${lv}` + (tt ? ` · ${tt}` : ''), 540, 1120);
-    c.font = `700 36px ${BF}`; c.fillStyle = '#5B6680'; c.fillText('Chơi cùng mình tại lendoi.web.app', 540, 1200);
+    c.font = `700 36px ${BF}`; c.fillStyle = '#5B6680'; c.fillText('Chơi cùng mình trên Lên Đời', 540, 1200);
     await send(cv, `Hồ sơ Lên Đời của ${nm} 🎲`);
   }
   document.addEventListener('click', e => {
@@ -10050,16 +10048,6 @@ function showTile(i){
   }
   openModal(t.n, body, [{label:'Đóng', primary:true, fn: closeModal}], COMIC[t.k] ? 'cmdlg' : '');
 }
-// Quảng cáo xen giữa sau bảng xếp hạng (bản thử: mô phỏng, đếm 5 giây rồi cho đóng)
-function showAd(){
-  if(window.ADS_ && window.ADS_.on()){ window.ADS_.between('het-van'); return; }   // có quảng cáo thật thì dùng thật, không hiện quảng cáo mô phỏng
-  if(HEADLESS || document.getElementById('adFx')) return;
-  const ov = document.createElement('div'); ov.id = 'adFx';
-  ov.innerHTML = `<div class="adp"><small>QUẢNG CÁO · mô phỏng</small><div class="adbox"><span>🧋</span><b>Trà sữa Lên Đời</b><i>Mua 1 tặng 1 mỗi thứ Sáu</i></div><button class="btn primary" id="adClose" disabled>Bỏ qua sau 5</button></div>`;
-  document.body.appendChild(ov);
-  let n = 5; const b = document.getElementById('adClose'), iv = setInterval(() => { n--; if(n>0) b.textContent = 'Bỏ qua sau ' + n; else { clearInterval(iv); b.disabled = false; b.textContent = 'Đóng quảng cáo'; } }, 1000);
-  b.onclick = () => { clearInterval(iv); ov.remove(); };
-}
 function postGame(me, myRank, rank, rw){
   document.querySelectorAll('#pgFx').forEach(e => e.remove());
   const nw = netWorth(me), tot = rank.reduce((a,p) => a + Math.max(0, netWorth(p)), 0) || 1;
@@ -10142,7 +10130,6 @@ function showResult(){
   clearSave(); SFX.music('off'); SFX.play('podium'); if(rw && rw.lv1>rw.lv0) setTimeout(() => { if(document.getElementById('podium')) SFX.play('levelup'); }, 7500);
   document.getElementById('pdHome').onclick = () => { SFX.stop('podium'); askOpen = false; ov.remove(); document.querySelectorAll('#adFx').forEach(e => e.remove()); window.goHome(); };
   { const br = document.getElementById('pdRoom'); if(br) br.onclick = () => { SFX.stop('podium'); askOpen = false; ov.remove(); document.querySelectorAll('#adFx').forEach(e => e.remove()); window.backToRoom(); }; }
-  setTimeout(() => { if(document.getElementById('podium')) showAd(); }, 3500);
 }
 if(!HEADLESS){
   const slots = document.getElementById('slots');
@@ -10289,8 +10276,8 @@ if(!HEADLESS){
   const RNK = 'lendoi_rname', rnGet = () => { try { return localStorage.getItem(RNK) || ''; } catch(e) { return ''; } };
   ['cName','jName'].forEach(k => { const e = $(k); const v = rnGet() || STORE.name || ''; if(e && v && e.value==='Bạn') e.value = v.slice(0,14); });
   const roomName = (inp, err) => { let v = clean(STORE.name || '', ''); if(!v || v==='Bạn'){ v = clean($(inp).value, ''); if(!v || v==='Bạn') v = 'Khách ' + (100 + rnd(900)); }   /* tên lấy từ Hồ sơ, không cần nhập */ try { localStorage.setItem(RNK, v); } catch(e) {} ['cName','jName'].forEach(k => { if($(k)) $(k).value = v; }); return v; };
-  const netConnect = async () => { if(FBNET.ok()){ try { return await FBNET.room(); } catch(e) { return null; } } try { return (window.claude && window.claude.use) ? (await window.claude.use('room')) || null : null; } catch(e) { return null; } };
-  const NOROOM = FBNET.ok() ? 'Chưa kết nối được máy chủ phòng. Kiểm tra mạng rồi thử lại.' : 'Chưa kết nối được. Hãy mở trang này trong Claude (không phải bản xem trước), và nếu bạn không phải chủ trang thì cần được mời với quyền tương tác.';
+  const netConnect = async () => PEERNET;
+  const NOROOM = 'Chưa kết nối được. Kiểm tra mạng rồi thử lại.';
   const seatOf = peer => NET && NET.seats ? NET.seats.findIndex(x => x && x.peer===peer) : -1;
   // ===== Mất kết nối giữa ván (chủ phòng xử lý): cả bàn tạm dừng 15 giây; quá 15 giây máy chơi hộ; người đó vào lại thì trả quyền chơi =====
   const DC_SECS = 15;
@@ -10556,7 +10543,7 @@ if(!HEADLESS){
     setTimeout(() => { const lp = document.querySelector('#friend > .lp'), cp = $('crPanel'); if(lp && cp && cp.parentElement!==lp) lp.appendChild(cp); }, 600);
     return {reg, listen, paint};
   })();
-  const roomLink = () => (IS_APP ? 'https://lendoi.web.app/' : location.origin + location.pathname) + '?room=' + NET.id + '&pw=' + encodeURIComponent(NET.pw);
+  const roomLink = () => location.origin + location.pathname + '?room=' + NET.id + '&pw=' + encodeURIComponent(NET.pw);
   const copyLink = async () => { const u = roomLink(); try { await navigator.clipboard.writeText(u); palToast('Đã sao chép link phòng, dán gửi cho bạn bè nhé'); } catch(e) { window.prompt('Sao chép link này gửi cho bạn bè:', u); } };
   // mời bạn trong game: danh sách bạn bè, bấm Mời để gửi lời mời vào phòng
   const invited = new Set();
@@ -10658,7 +10645,7 @@ if(!HEADLESS){
     $('cErr').textContent = 'Đang kết nối...';
     const room = await netConnect(); if(!room){ $('cErr').textContent = NOROOM; return; }
     const id = String(10000 + rnd(90000)); let R;
-    try { R = await room.join('lendoi-' + id); } catch(e) { $('cErr').textContent = 'Không tạo được phòng (' + ((e && e.code) || 'lỗi kết nối') + '). Hãy thử lại.'; return; }
+    try { R = await room.join('lendoi-' + id, 'host'); } catch(e) { $('cErr').textContent = 'Không tạo được phòng (' + ((e && e.code) || 'lỗi kết nối') + '). Hãy thử lại.'; return; }
     netLeave();
     NET = {role:'host', live:false, R, id, pw, len:roomLen, me:0, seats:[{name, peer:null, av:(window.savedPick && window.savedPick()) || 0, fu:FBNET.uid() || '', fi:(window.FR_ && window.FR_.uid()) || ''}, null, null, null], rej:{}, askSeq:0, onAns:null};
     hostWire(R); lcWire(R); lcReset(); $('cErr').textContent = ''; renderLobby(); lobbyCast();
@@ -10683,7 +10670,7 @@ if(!HEADLESS){
     if(!/^\d{5}$/.test(id)){ $('jErr').textContent = 'ID phòng gồm đúng 5 chữ số.'; return; }
     $('jErr').textContent = 'Đang kết nối...';
     const room = await netConnect(); if(!room){ $('jErr').textContent = NOROOM; return; }
-    let R; try { R = await room.join('lendoi-' + id); } catch(e) { $('jErr').textContent = 'Không vào được phòng (' + ((e && e.code) || 'lỗi kết nối') + ').'; return; }
+    let R; try { R = await room.join('lendoi-' + id, 'guest'); } catch(e) { $('jErr').textContent = 'Không vào được phòng (' + ((e && e.code) || 'lỗi kết nối') + ').'; return; }
     netLeave();
     NET = {role:'client', R, id, pw, name, me:-1, hostPeer:null, myPeer:null, seats:[], doneId:0, doneVal:null, showId:0, lastDs:null, lgSeq:0, lastSt:Date.now(), t0:Date.now()};
     clientWire(R); lcWire(R); lcReset(); $('jErr').textContent = ''; renderLobby();
@@ -10828,7 +10815,7 @@ if(!HEADLESS){
     const create = async () => { SFX.play('click'); open(); $('rdId').textContent = '…'; $('rdNote').textContent = 'Đang tạo phòng…';
       const room = await netConnect(); if(!room){ $('rdNote').textContent = NOROOM; return; }
       const id = String(10000 + rnd(90000)), pw = String(1000 + rnd(9000)); let R0;
-      try { R0 = await room.join('lendoi-' + id); } catch(e) { $('rdNote').textContent = 'Không tạo được phòng, thử lại nhé.'; return; }
+      try { R0 = await room.join('lendoi-' + id, 'host'); } catch(e) { $('rdNote').textContent = 'Không tạo được phòng, thử lại nhé.'; return; }
       netLeave(); const name = clean(STORE.name || 'Bạn', 'Bạn');
       NET = {role:'host', live:false, rank:true, R:R0, id, pw, len:'l', me:0, seats:[{name, peer:null, av:savedPick() || 0, fu:FBNET.uid() || '', fi:(window.FR_ && window.FR_.uid()) || ''}, null, null, null], rej:{}, askSeq:0, onAns:null};
       hostWire(R0); lcWire(R0); lcReset(); lobbyCast(); NET.lobbyIv = setInterval(lobbyCast, 1000);
@@ -10930,15 +10917,15 @@ if(!HEADLESS){
     const STEPS = {v:[[5,50,3],[15,150,10],[30,300,20],[60,600,40],[100,1000,80]], s:[[1,50,0],[3,120,5],[10,400,20],[25,1000,50]]};
     const NAME = {v:'🎬 Xem video', s:'📤 Chia sẻ game'};
     const paint = () => { const box = document.getElementById('msBox'); if(!box) return; const d = ld();
-      box.innerHTML = '<div class="tag">🎯 Nhiệm vụ nhận quà</div>' + ['v','s'].map(t => `<div class="msgrp"><b class="msh">${NAME[t]} <small>(${d[t]} lần)</small></b>${STEPS[t].map(([n, xu, gem]) => { const id = t + n, got = d.got[id], ok = d[t] >= n;
+      box.innerHTML = '<div class="tag">🎯 Nhiệm vụ nhận quà</div>' + ['s'].map(t => `<div class="msgrp"><b class="msh">${NAME[t]} <small>(${d[t]} lần)</small></b>${STEPS[t].map(([n, xu, gem]) => { const id = t + n, got = d.got[id], ok = d[t] >= n;
         return `<div class="msrow ${got ? 'got' : ok ? 'ok' : ''}"><span class="msn">${n} lần</span><span class="msbar"><i style="width:${Math.min(100, d[t]/n*100).toFixed(0)}%"></i></span><span class="msr">🪙 ${xu}${gem ? ' · 💎 ' + gem : ''}</span>${!ok && !got ? `<button type="button" class="btn msdo" data-msdo="${t}">${t==='v' ? '▶ Xem video' : '📤 Chia sẻ'}</button>` : `<button type="button" class="btn ${ok && !got ? 'primary' : ''}" data-msget="${id}" ${ok && !got ? '' : 'disabled'}>${got ? '✓ Đã nhận' : 'Nhận'}</button>`}</div>`; }).join('')}</div>`).join(''); };
     document.addEventListener('click', e => { const dz = e.target.closest && e.target.closest('[data-msdo]'); if(dz){ if(dz.dataset.msdo==='v'){ const a = document.getElementById('adBtn'); if(a) a.click(); } else if(window.SHARE_) window.SHARE_.invite(); return; }
       const b = e.target.closest && e.target.closest('[data-msget]'); if(!b || b.disabled) return; const id = b.dataset.msget, t = id[0], n = +id.slice(1), st = STEPS[t].find(x => x[0]===n), d = ld();
       if(!st || d.got[id] || d[t] < n) return; d.got[id] = 1; sv(d); STORE.add(st[1]); if(st[2]) STORE.addGem(st[2]); SFX.play('coinbig'); palToast(`🎉 Nhận ${st[1]} xu${st[2] ? ' và ' + st[2] + ' kim cương' : ''}!`); paintCoins(); paint(); if(window.paintQDot) window.paintQDot(); if(document.querySelector('.dlg.qmini')) window.openQuests(); });
-    const qrows = () => { const d = ld(); return ['v','s'].map(t => { const st = STEPS[t].find(x => !d.got[t + x[0]]); if(!st) return ''; const [n, xu, gem] = st, ok = d[t] >= n, id = t + n;
+    const qrows = () => { const d = ld(); return ['s'].map(t => { const st = STEPS[t].find(x => !d.got[t + x[0]]); if(!st) return ''; const [n, xu, gem] = st, ok = d[t] >= n, id = t + n;
       return `<div class="q2"><div class="q2t"><b><span>${t==='v' ? '🎬 Xem ' + n + ' video quảng cáo' : '📤 Chia sẻ game ' + n + ' lần'}</span><em>${Math.min(d[t], n)}/${n}</em></b><span class="qbar"><i style="width:${Math.min(100, Math.round(d[t]/n*100))}%"></i></span></div>`
         + (ok ? `<button class="btn primary" data-msget="${id}">+${xu} 🪙${gem ? ' +' + gem + '💎' : ''}</button>` : `<button class="btn msdo" data-msdo="${t}">${t==='v' ? '▶ Xem' : '📤 Chia sẻ'}</button>`) + '</div>'; }).join(''); };
-    const ready = () => { const d = ld(); return ['v','s'].some(t => { const st = STEPS[t].find(x => !d.got[t + x[0]]); return st && d[t] >= st[0]; }); };
+    const ready = () => { const d = ld(); return ['s'].some(t => { const st = STEPS[t].find(x => !d.got[t + x[0]]); return st && d[t] >= st[0]; }); };
     return { qrows, ready, n: t => ld()[t] || 0, add(t){ const d = ld(); d[t] = (d[t]||0) + 1; sv(d); paint(); const nx = STEPS[t].find(x => !d.got[t + x[0]] && d[t] >= x[0]); if(nx) palToast(`🎯 Đạt mốc ${nx[0]} lần, vào Nhiệm vụ nhận thưởng!`); if(window.paintQDot) window.paintQDot(); if(document.querySelector('.dlg.qmini')) window.openQuests(); }, paint };
   })();
   const renderShop = () => {
@@ -11050,7 +11037,7 @@ if(!HEADLESS){
           try { const d = await FBNET.db(); await d.ref('likes/' + x.o + '/' + me).set(nv); } catch(err) {} return; }
         const f = e.target.closest('[data-pwf]'); if(f && !f.disabled && window.FR_){ f.disabled = true; SFX.play('pop'); try { if(window.FR_.st(id)==='in') await window.FR_.accept(id); else await window.FR_.request(id); } catch(err) {} setTimeout(fset, 400); return; } const b = e.target.closest('[data-phbig]'); if(b) big(b.querySelector('img').src); }; };
     /* khung Cá nhân trong Hồ sơ */
-    const pane = () => { if(!G()) return `<div class="pvacc3"><b>📷 Ảnh cá nhân</b><small>Đăng nhập Google để tải ảnh đại diện và tối đa 4 ảnh của bạn. Ảnh đại diện hiện ở bảng xếp hạng và trong ván.</small><button type="button" class="btn primary" data-gacc="in">Đăng nhập Google</button></div>`;
+    const pane = () => { if(!G()) return `<div class="pvacc3"><b>📷 Ảnh cá nhân</b><small>Bản local chưa có máy chủ nên chưa đăng ảnh được.</small></div>`;
       if(!mine){ mineGet().then(() => { if(window.__pvTab==='me' && !document.getElementById('modal').hidden) window.openProfile(); }); return '<p class="say">Đang tải ảnh…</p>'; }
       const m = mine, p = m.p || {};
       return `<div class="phme"><div class="phav"><span class="phva">${m.a ? `<img src="${m.a}" alt="">` : AV(savedPick() || 0, '')}</span><div><b>Ảnh đại diện</b><small>Thay con vật ở bảng xếp hạng và trong ván</small>
@@ -11059,11 +11046,11 @@ if(!HEADLESS){
         <div class="phgrid">${[0,1,2,3].map(k => p[k] ? `<div class="phs"><img src="${p[k]}" alt="" data-phbig="1"><button type="button" class="phx" data-phdel="${k}" aria-label="Xóa ảnh">✕</button></div>` : `<button type="button" class="phs add" data-phup="${k}">＋<small>Thêm ảnh</small></button>`).join('')}</div>
         <p class="pvnote">Ai xem hồ sơ của bạn cũng thấy các ảnh này. Đừng đăng ảnh nhạy cảm hay thông tin riêng tư.</p></div>`; };
     /* chọn file rồi tải lên */
-    const pick = slot => { if(!G()){ palToast('Đăng nhập Google để tải ảnh nhé'); return; } const f = document.createElement('input'); f.type = 'file'; f.accept = 'image/*'; f.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0'; document.body.appendChild(f);
+    const pick = slot => { if(!G()){ palToast('Bản local chưa đăng ảnh được'); return; } const f = document.createElement('input'); f.type = 'file'; f.accept = 'image/*'; f.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0'; document.body.appendChild(f);
       f.onchange = async () => { const file = f.files && f.files[0]; f.remove(); if(!file) return; palToast('Đang tải ảnh lên…');
         try { await up(slot, file); palToast('✅ Đã lưu ảnh'); } catch(e) { console.error('upload', e); palToast(e && e.message==='big' ? 'Ảnh quá nặng, thử ảnh khác nhé' : /decode|load|Image/i.test(String(e && (e.type || e.message) || '')) || (e && e.type==='error') ? 'Không đọc được ảnh này, thử ảnh JPG/PNG khác nhé' : 'Chưa lưu được ảnh, kiểm tra mạng rồi thử lại nhé'); } if(document.querySelector('.dlg.profv')) window.openProfile(); }; f.click(); };
     const face = () => { if(!G()) return ''; if(!mine){ mineGet().then(() => { if(mine && mine.a && document.querySelector('.dlg.profv')) window.openProfile(); }); return ''; } return mine.on ? (mine.a || '') : ''; };
-    const gal = () => { if(!G()) return `<div class="pgnone"><i>📷</i><b>Đăng nhập Google để đăng ảnh</b><small>Ảnh đại diện và tối đa 4 ảnh, ai xem hồ sơ của bạn cũng thấy.</small><button type="button" class="pwfb add" data-gacc="in"><i>G</i>Đăng nhập Google</button></div>`;
+    const gal = () => { if(!G()) return `<div class="pgnone"><i>📷</i><b>Chưa đăng ảnh được</b><small>Bản local chưa có máy chủ để lưu ảnh.</small></div>`;
       if(!mine){ mineGet().then(() => { if(window.__pvTab==='me' && !document.getElementById('modal').hidden) window.openProfile(); }); return '<p class="say">Đang tải ảnh…</p>'; }
       const p = mine.p || {};
       return `<div class="pgrid">${[0,1,2,3].map(k => p[k] ? `<div class="pgs"><img src="${p[k]}" alt="" data-phbig="1"><button type="button" class="phx" data-phdel="${k}" aria-label="Xóa ảnh">✕</button></div>` : `<button type="button" class="pgs add" data-phup="${k}"><i>＋</i><small>Thêm ảnh</small></button>`).join('')}</div>`; };
@@ -11210,7 +11197,7 @@ if(!HEADLESS){
       me: () => PH.gal(),
       title: () => `<div id="pvTitles"><div class="pvtag">Danh hiệu · ${TITLE.count()}/${TITLES.length}</div><div class="ttgrid">${TITLE.list().map(t => `<button type="button" class="ttm r${t.r} ${t.got ? '' : 'lock'} ${TITLE.worn() && TITLE.worn().id===t.id ? 'on' : ''}" data-ttl="${t.id}" aria-label="${t.n}"><span class="ttw"><span class="tl l"></span><span class="tl r"></span><span class="ttc">${t.i}</span></span><b>${t.n}</b>${t.got ? `<small>${RAR[t.r].n}</small>` : `<span class="ttp"><u style="width:${Math.round(t.v/t.g*100)}%"></u></span>`}</button>`).join('')}</div><div class="ttinfo" id="ttInfo">Chạm một huy chương để xem cách đạt.</div></div>`,
       acc: () => {
-        return MAIL.codeBox() + '<p class="pvnote">Dữ liệu được lưu trên máy này.</p>' + '<p class="pvnote"><a href="gioi-thieu.html" target="_blank" rel="noopener">Giới thiệu</a> · <a href="chinh-sach.html" target="_blank" rel="noopener">Chính sách quyền riêng tư</a></p>'; }
+        return '<p class="pvnote">Dữ liệu được lưu trên máy này.</p>'; }
     };
     const TABS = [['me','📷','Ảnh'],['av','🐯','Nhân vật'],['item','🎒','Vật phẩm'],['title','🏅','Danh hiệu'],['acc','👤','Tài khoản']];
     const tr = tierOf(STORE.rp), lv = lvOf(STORE.exp), myFace = PH.face(), gsex = (() => { try { return localStorage.getItem('lendoi_gender') || ''; } catch(e) { return ''; } })();
@@ -11270,7 +11257,7 @@ if(!HEADLESS){
     const dn = L.daily.filter(q => q.got).length, open = L.level.filter(q => !q.lock && !q.got).slice(0, 3), done = L.level.filter(q => q.got).length;
     openModal('🎯 Nhiệm vụ', `<div class="q2h"><b>Cấp ${lv.L}</b><span class="qbar"><i style="width:${Math.round(lv.cur/lv.need*100)}%"></i></span><small>${lv.max ? 'Tối đa' : lv.cur + '/' + lv.need}</small></div>
       <div class="q2s">Hôm nay ${dn}/${L.daily.length}</div>${L.daily.filter(q => !q.got).map(row).join('') || '<p class="say">🎉 Đã xong hết nhiệm vụ hôm nay!</p>'}
-      ${window.MS_ && window.MS_.qrows() ? '<div class="q2s">Xem video &amp; chia sẻ</div>' + window.MS_.qrows() : ''}
+      ${window.MS_ && window.MS_.qrows() ? '<div class="q2s">Chia sẻ</div>' + window.MS_.qrows() : ''}
       <div class="q2s">Theo cấp ${done}/30</div>${open.map(row).join('') || '<p class="say">Lên cấp để mở thêm nhiệm vụ.</p>'}<button type="button" class="q2l" id="qTitles">🏅 Danh hiệu ${TITLE.count()}/${TITLES.length} ›</button>`, [{label:'Xong', primary:true, fn: closeModal}], 'one sys qmini');
     document.getElementById('qTitles').onclick = () => window.openProfile(true);
     document.getElementById('mBody').onclick = e => { const b = e.target.closest('[data-claim]'); if(!b || b.disabled) return; const r = QUEST.claim(b.dataset.claim);
@@ -11489,7 +11476,7 @@ if(!HEADLESS){
     async function accept(id){ if(!d) await start(); if(!d) return; try { await d.ref().update({[`friends/${uid}/${id}`]:TS(), [`friends/${id}/${uid}`]:TS(), [`reqs/${uid}/${id}`]:null, [`reqs/${id}/${uid}`]:null}); prof[id] = reqs[id] || prof[id]; SFX.play('join'); palToast('Đã kết bạn'); } catch(e) { palToast('Không kết bạn được, thử lại sau'); } }
     async function decline(id){ if(d) try { await d.ref(`reqs/${uid}/${id}`).remove(); } catch(e) {} }
     async function unfriend(id){ if(!d || !confirm('Hủy kết bạn với ' + ((prof[id] || {}).n || 'người này') + '?')) return; try { await d.ref().update({[`friends/${uid}/${id}`]:null, [`friends/${id}/${uid}`]:null}); } catch(e) {} }
-    async function shareLink(){ SFX.play('click'); const u = 'https://lendoi.web.app/?add=' + uid, t = `Vào chiến hay sợ? 😏 Mã kết bạn của mình: ${uid}`;
+    async function shareLink(){ SFX.play('click'); const u = location.origin + location.pathname + '?add=' + uid, t = `Vào chiến hay sợ? 😏 Mã kết bạn của mình: ${uid}`;
       if(navigator.share){ try { await navigator.share({title:'Lên Đời', text:t, url:u}); } catch(e) {} return; }
       try { await navigator.clipboard.writeText(t + ' ' + u); palToast('Đã sao chép link kết bạn'); } catch(e) { window.prompt('Sao chép link này:', u); } }
     function checkLink(){
@@ -11808,24 +11795,6 @@ if(!HEADLESS){
     else if(x.t==='coins') STORE.add(x.v);
     else if(x.t==='loa') STORE.addLoa(x.v);
     STORE.addGem(-x.p); SFX.play('buy'); renderShop(); });
-  // quảng cáo thật: tắt tiếng game khi quảng cáo phát, xem hết mới có quà
-  const ADS = window.ADS_ = (() => {
-    const on = () => !!(window.ADS_CFG && window.ADS_CFG.client && window.adBreak && !IS_APP);
-    let mv = null; const mute = () => { if(mv==null){ mv = SFX.vol('master'); SFX.setVol('master', 0); } }, unmute = () => { if(mv!=null){ SFX.setVol('master', mv); mv = null; } };
-    const reward = (onGift, onNone) => { let shown = false;
-      window.adBreak({type:'reward', name:'xem-video', beforeAd: mute, afterAd: unmute,
-        beforeReward: show => { shown = true; show(); }, adViewed: () => onGift(), adDismissed: () => palToast('Xem hết video mới nhận được quà nhé'),
-        adBreakDone: info => { unmute(); if(!shown) onNone(info); } }); };
-    const between = name => { if(on()) window.adBreak({type:'next', name: name || 'chuyen-canh', beforeAd: mute, afterAd: unmute, adBreakDone: unmute}); };
-    return {on, reward, between};
-  })();
-  const giveVideoGift = () => { STORE.add(15); STORE.addGem(1); MS.add('v'); SFX.play('coinbig'); renderShop();
-    openModal('Quà xem video', `<p style="text-align:center;font-size:30px;margin:6px 0">🪙 +15 &nbsp; 💎 +1</p><p style="text-align:center;margin:0">Đã xem ${MS.n('v')} video. Xem mốc thưởng ở Nạp & quà nhé!</p>`, [{label:'Tuyệt', primary:true, fn: closeModal}]); };
-  document.getElementById('adBtn').onclick = () => {
-    if(ADS.on()){ ADS.reward(giveVideoGift, () => palToast('Hiện chưa có video, thử lại sau ít phút nhé')); return; }
-    openModal('Xem video nhận quà', '<p style="text-align:center;margin:6px 0">Video quảng cáo đang được Google duyệt, sắp có rồi! Quay lại sau nhé 🎬</p>', [{label:'Đã hiểu', primary:true, fn: closeModal}]);
-  };
-  document.querySelectorAll('[data-gpack]').forEach(b => b.onclick = () => window.PAY_ && window.PAY_.buy(+b.dataset.gpack));
   document.getElementById('bagBtn').onclick = openBag;
   document.getElementById('sndBtn').onclick = openSystem; document.getElementById('homeSnd').onclick = openSystem; 
   SYS.apply(); applyBright();
@@ -12310,136 +12279,11 @@ window.ONB = (() => {
   return { after, tour: () => when(() => tour(sk => { if(!sk) rules(); })) };
 })();
 </script>
-<button id="accBtn" type="button" hidden style="display:none">Đăng nhập Google</button>
-<nav id="siteFoot" aria-label="Thông tin"><a href="gioi-thieu.html">Giới thiệu</a> · <a href="chinh-sach.html">Quyền riêng tư</a></nav>
 <script>
-(() => {
-  if(!window.FB_CFG) return;
-  /* app iOS: popup Google không chạy trong WKWebView, lấy thẻ Google qua plugin native rồi đăng nhập Firebase bằng thẻ đó */
-  const NAUTH = () => (typeof IS_APP !== 'undefined' && IS_APP && window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.FirebaseAuthentication) || null;
-  const btn = document.getElementById('accBtn'), ld = src => new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
-  let au = null, user = null, tm = 0;
-  async function getAuth(){
-    if(au) return au;
-    await FBNET.authed();          // nạp thư viện và đảm bảo đã có tài khoản (ẩn danh nếu chưa đăng nhập Google)
-    return au = firebase.auth();
-  }
-  const paint = () => { btn.innerHTML = user ? (user.photoURL ? '<img alt="" src="' + user.photoURL + '">' : '') + '<span>' + (user.displayName || 'Tài khoản').split(' ').slice(-1)[0] + ' · Thoát</span>' : 'Đăng nhập Google'; };
-  const payload = () => JSON.stringify({s: STORE.dump(), av: (() => { try { return localStorage.getItem('lendoi_av'); } catch(e) { return null; } })(), fid: (() => { try { return localStorage.getItem('lendoi_uid'); } catch(e) { return null; } })()});
-  const push = async () => { if(!user) return; try { await firebase.database().ref('profiles/' + user.uid).set({data: payload(), at: firebase.database.ServerValue.TIMESTAMP}); } catch(e) {} };
-  let tmU = 0; window.__stSaved = () => { clearTimeout(tmU); tmU = setTimeout(() => { try { window.FR_ && window.FR_.touch(); } catch(e) {} }, 4000); if(!user) return; clearTimeout(tm); tm = setTimeout(push, 1500); };
-  async function sync(){
-    let isNew = false;
-    try {
-      const snap = await firebase.database().ref('profiles/' + user.uid).once('value'), v = snap.val(); isNew = !(v && v.data);
-      if(v && v.data){
-        const c = JSON.parse(v.data), cs = c.s || {};
-        /* mã kết bạn của tài khoản: máy này đang dùng mã khác thì đổi về mã của tài khoản rồi tải lại */
-        if(/^\d{8}$/.test(c.fid || '')){ let cur = ''; try { cur = localStorage.getItem('lendoi_uid') || ''; } catch(e) {} if(cur !== c.fid){ if(/^\d{8}$/.test(cur)){ try { if(window.FR_ && window.FR_.merge) await window.FR_.merge(cur, c.fid); } catch(e) {} try { await firebase.database().ref('users/' + cur).remove(); } catch(e) {} } try { localStorage.setItem('lendoi_uid', c.fid); } catch(e) {} if(!((cs.exp || 0) > (STORE.dump().exp || 0))){ location.reload(); return; } } }
-        const lo = STORE.dump(), cloudWins = (cs.exp || 0) > (lo.exp || 0) || ((cs.exp || 0)===(lo.exp || 0) && (cs.ts || 0) > (lo.ts || 0));   /* bản nhiều kinh nghiệm hơn, bằng nhau thì bản lưu sau cùng */
-        if(cloudWins && JSON.stringify(cs) !== JSON.stringify(lo)){
-          STORE.load(cs); try { if(c.av != null) localStorage.setItem('lendoi_av', c.av); } catch(e) {}
-          location.reload(); return;
-        }
-      }
-      if(!STORE.name && user.displayName) STORE.setName(user.displayName);
-      await push();
-    } catch(e) {}
-    try { window.FR_ && window.FR_.touch(); } catch(e) {}   /* đã đăng nhập: tạo hoặc cập nhật hồ sơ công khai */
-    try { window.ONB && window.ONB.after(isNew, user); } catch(e) {}
-  }
-  const pref = v => { try { if(v===undefined) return localStorage.getItem('lendoi_login') || ''; localStorage.setItem('lendoi_login', v); } catch(e) { return ''; } };
-  // đăng nhập Google: gắn vào tài khoản ẩn danh đang dùng để giữ nguyên dữ liệu; Google đã dùng ở máy khác thì chuyển sang tài khoản đó
-  const google = async () => { const a = await getAuth(), pv = new firebase.auth.GoogleAuthProvider(), N = NAUTH();
-    let cred = null;
-    if(N){ const r = await N.signInWithGoogle(), t = r && r.credential; if(!t || !t.idToken) throw new Error('google'); cred = firebase.auth.GoogleAuthProvider.credential(t.idToken, t.accessToken || null); }
-    const cu = a.currentUser;
-    if(cu && cu.isAnonymous){
-      try { const r = cred ? await cu.linkWithCredential(cred) : await cu.linkWithPopup(pv); onUser(r.user, false); return; }
-      catch(e){ const c2 = e && e.credential || cred; if(e && (e.code==='auth/credential-already-in-use' || e.code==='auth/email-already-in-use') && c2){ await a.signInWithCredential(c2); return; } throw e; }
-    }
-    if(cred) await a.signInWithCredential(cred); else await a.signInWithPopup(pv); };
-  const out = async () => { const a = await getAuth(); try { const N = NAUTH(); if(N) await N.signOut(); } catch(e) {} await a.signOut(); pref(''); };
-  window.AUTH_ = { user: () => user, login: google, logout: out };
-  document.addEventListener('click', async e => { const b = e.target.closest && e.target.closest('[data-gacc]'); if(!b) return;
-    try { if(b.dataset.gacc==='out'){ if(!confirm('Đăng xuất khỏi tài khoản Google?')) return; await window.AUTH_.logout(); } else await google(); } catch(err) { window.palToast && palToast('Chưa thực hiện được, thử lại nhé'); }
-    setTimeout(() => { if(window.openProfile && document.querySelector('.dlg.profv')) window.openProfile(); }, 400); });
-  btn.onclick = async () => {
-    try {
-      const a = await getAuth();
-      if(user){ if(confirm('Đăng xuất khỏi tài khoản Google?')) await out(); return; }
-      await google();
-    } catch(e) { window.palToast && palToast('Không đăng nhập được, thử lại nhé'); }
-  };
-  // bỏ đăng nhập: không còn màn chào đăng nhập, vào thẳng trang chính
-  const showLogin = window.showLogin = cb => { if(cb) cb(); };
-  window.needLogin = () => false;
-  const maybeLogin = () => {};
-  // user = tài khoản Google (bỏ qua tài khoản ẩn danh); mất tài khoản (đăng xuất) thì tự tạo lại tài khoản ẩn danh
-  function onUser(u0, first){ const u = u0 || null;   /* không đăng nhập: tài khoản ẩn danh tự tạo chính là tài khoản người chơi */ known = true; user = u; paint();
-    if(window.PAY_) window.PAY_.watch(u);
-    if(u){ sync(); pref('google'); document.querySelectorAll('#loginFx').forEach(x => { x.remove(); shown = false; const f = onDone; onDone = null; if(f) f(); }); if(first && !u.isAnonymous && window.palToast) setTimeout(() => palToast('Chào ' + ((u.displayName || 'bạn').split(' ').slice(-1)[0]) + '! 👋'), 600); }
-    else { if(!u0) FBNET.authed().catch(() => {}); maybeLogin(); } }
-  getAuth().then(a => { let first = true; a.onAuthStateChanged(u0 => { onUser(u0, first); first = false; }); }).catch(() => {});
-  paint();
-})();
+/* bản local: không đăng nhập; người mới vẫn được đặt tên rồi vào ván hướng dẫn */
+setTimeout(() => { try { window.ONB && window.ONB.after(!STORE.name || STORE.name==='Bạn', null); } catch(e) {} }, 0);
 </script>
 
-<script>
-// ===== NẠP KIM CƯƠNG THẬT: chuyển khoản VietQR -> đơn chờ trên Firebase -> chủ game xác nhận ở ?admin=1 -> kim cương tự cộng =====
-(() => {
-  if(typeof HEADLESS!=='undefined' && HEADLESS) return;
-  const PACKS = {50:20000, 160:50000, 350:100000};
-  const C = window.PAY_CFG || {}, ready = () => !!(C.bank && C.acc && window.FB_CFG && !(typeof IS_APP!=='undefined' && IS_APP));
-  const toast = t => window.palToast && window.palToast(t);
-  const db = () => firebase.database(), TS = () => firebase.database.ServerValue.TIMESTAMP;
-  const vnd = n => n.toLocaleString('vi-VN') + 'đ';
-  const code = () => 'LD' + Array.from({length:6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
-  const qr = (amt, ref) => `https://img.vietqr.io/image/${encodeURIComponent(C.bank)}-${encodeURIComponent(C.acc)}-compact2.png?amount=${amt}&addInfo=${encodeURIComponent(ref)}&accountName=${encodeURIComponent(C.name||'')}`;
-  async function buy(n){
-    const amt = PACKS[n]; if(!amt) return;
-    if(!ready()){ openModal(`Nạp ${n} 💎`, '<p class="bn" style="margin:0;text-align:center">Nạp kim cương bằng chuyển khoản sắp mở. Hẹn bạn sớm nhé! 💎</p>', [{label:'Đã hiểu', primary:true, fn: closeModal}]); return; }
-    const u = window.AUTH_ && window.AUTH_.user();
-    if(!u){ openModal(`Nạp ${n} 💎`, '<p class="bn" style="margin:0;text-align:center">Đăng nhập Google để kim cương được lưu vào tài khoản của bạn, đổi máy vẫn còn.</p>',
-      [{label:'Đăng nhập Google', primary:true, fn: async () => { closeModal(); try { await window.AUTH_.login(); buy(n); } catch(e) { toast('Chưa đăng nhập được, thử lại nhé'); } }}, {label:'Thôi', fn: closeModal}]); return; }
-    const ref = code();
-    try { await db().ref('orders/' + ref).set({uid:u.uid, name:(u.displayName||STORE.name||'').slice(0,30), gems:n, amount:amt, st:'cho', at:TS()}); }
-    catch(e){ toast('Không tạo được đơn, thử lại sau'); return; }
-    openModal(`Nạp ${n} 💎 · ${vnd(amt)}`, `<div class="payqr"><img src="${qr(amt, ref)}" alt="Mã QR chuyển khoản"><div class="payinfo">
-      <p>Quét mã bằng <b>app ngân hàng</b> hoặc <b>MoMo</b>.</p>
-      <div class="payrow"><span>Số tiền</span><b>${vnd(amt)}</b></div>
-      <div class="payrow"><span>Nội dung</span><b class="payref">${ref}</b></div>
-      <div class="payrow"><span>Người nhận</span><b>${C.name || ''}</b></div>
-      <p class="paynote">Giữ nguyên nội dung <b>${ref}</b> để hệ thống nhận ra đơn. Kim cương được cộng sau khi xác nhận, thường trong vài phút. Có thể đóng cửa sổ này.</p></div></div>`,
-      [{label:'Tôi đã chuyển khoản', primary:true, fn: () => { closeModal(); toast('Đã ghi nhận đơn ' + ref + '. Kim cương sẽ tự cộng khi xác nhận xong 💎'); }}, {label:'Hủy đơn', fn: async () => { closeModal(); try { await db().ref('orders/' + ref + '/st').set('huy'); } catch(e) {} }}]);
-  }
-  // nhận kim cương đã duyệt: mỗi phần thưởng chỉ cộng một lần rồi xóa
-  let watching = null;
-  function watch(u){
-    if(watching){ watching.off(); watching = null; } if(!u) return;
-    watching = db().ref('grants/' + u.uid); watching.on('child_added', async s => { const g = s.val() || {}; const n = +g.gems || 0; if(n<=0) return;
-      try { await s.ref.remove(); } catch(e) { return; }   // xóa được thì mới cộng, tránh cộng hai lần
-      STORE.addGem(n); SFX.play('coinbig'); toast(`💎 Đã cộng ${n} kim cương từ đơn ${s.key}. Cảm ơn bạn!`); try { renderShop && renderShop(); } catch(e) {} if(window.paintCoins) window.paintCoins(); });
-  }
-  window.PAY_ = {buy, watch};
-  // trang quản lý của chủ game: lendoi.web.app/?admin=1 (chỉ tài khoản quản trị mới đọc, ghi được theo luật cơ sở dữ liệu)
-  if(/[?&]admin=1/.test(location.search)) setTimeout(async () => {
-    const u = window.AUTH_ && window.AUTH_.user();
-    const box = document.createElement('div'); box.id = 'payAdmin'; document.body.appendChild(box);
-    if(!u || u.isAnonymous){ box.innerHTML = '<div class="pacard"><h3>Quản lý nạp</h3><p>Đăng nhập Google bằng tài khoản quản trị.</p><button class="btn primary" id="paLogin">Đăng nhập</button> <button class="btn" id="paClose">Đóng</button></div>';
-      box.querySelector('#paLogin').onclick = async () => { try { await window.AUTH_.login(); location.reload(); } catch(e) {} }; box.querySelector('#paClose').onclick = () => box.remove(); return; }
-    const paint = list => { box.innerHTML = `<div class="pacard"><h3>Đơn nạp đang chờ (${list.length})</h3><div class="palist">${list.length ? list.map(([k, o]) => `<div class="parow"><b>${k}</b><span>${(o.name||'').replace(/[<>&]/g,'')}</span><span>${o.gems} 💎</span><span>${vnd(+o.amount||0)}</span><span>${new Date(o.at||0).toLocaleString('vi-VN')}</span><button class="btn primary" data-ok="${k}">Đã nhận tiền</button><button class="btn" data-no="${k}">Hủy</button></div>`).join('') : '<p>Không có đơn chờ.</p>'}</div><button class="btn" id="paClose">Đóng</button></div>`;
-      box.querySelector('#paClose').onclick = () => box.remove(); };
-    const ref = db().ref('orders').orderByChild('st').equalTo('cho');
-    ref.on('value', s => { const l = []; s.forEach(c => { l.push([c.key, c.val()]); }); l.sort((a,b) => (b[1].at||0) - (a[1].at||0)); paint(l); }, e => { box.innerHTML = '<div class="pacard"><h3>Không có quyền</h3><p>Tài khoản này không phải tài khoản quản trị.</p><button class="btn" onclick="this.closest(\'#payAdmin\').remove()">Đóng</button></div>'; });
-    box.addEventListener('click', async e => { const ok = e.target.closest('[data-ok]'), no = e.target.closest('[data-no]');
-      if(ok){ const k = ok.dataset.ok, o = (await db().ref('orders/' + k).once('value')).val(); if(!o || o.st!=='cho') return;
-        if(!confirm(`Xác nhận đã nhận ${vnd(+o.amount)} cho đơn ${k}?`)) return;
-        await db().ref().update({[`grants/${o.uid}/${k}`]:{gems:o.gems, at:TS()}, [`orders/${k}/st`]:'xong', [`orders/${k}/done`]:TS()}); }
-      if(no){ const k = no.dataset.no; if(confirm('Hủy đơn ' + k + '?')) await db().ref('orders/' + k + '/st').set('huy'); } });
-  }, 2500);
-})();
-</script>
 <style>
 .payqr{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
 .payqr img{width:180px;height:auto;border:3px solid #2B3A67;border-radius:14px;background:#fff}
@@ -12459,11 +12303,6 @@ window.ONB = (() => {
 #shc-noel{margin-bottom:10px}
 .rcard.xmascard{background:radial-gradient(circle at 20% 15%,rgba(255,255,255,.9) 0 2px,transparent 3px) 0 0/22px 22px,linear-gradient(180deg,#FFF3F0,#EAF7EE) !important;border-color:#C9302C !important;box-shadow:0 4px 0 #2B3A67,0 0 0 2px #3FB76A inset}
 
-#siteFoot{position:fixed;right:10px;top:calc(6px + env(safe-area-inset-top));z-index:55;display:none;font:700 11px 'Be Vietnam Pro',sans-serif;color:rgba(255,253,246,.75)}
-#siteFoot a{color:rgba(255,253,246,.85);text-decoration:none} #siteFoot a:hover{text-decoration:underline}
-body[data-scr="home"]:not(.splash) #siteFoot{display:block}
-html.land:not(.app) body.rotp #siteFoot{display:none !important}
-html.app #siteFoot{display:none !important} /* app: hai trang này mở từ màn đăng nhập (bản trên mạng) */
 #loginFx .lglinks{margin:2px 0 0;text-align:center;font:700 11px 'Be Vietnam Pro',sans-serif} #loginFx .lglinks a{color:#FFFDF6;opacity:.85}
 .pvacc3{display:flex;flex-direction:column;gap:6px;padding:12px;border:2px solid #E3D9C2;border-radius:14px;background:#FFFDF6;color:#2B3A67}
 .pvacc3 b{font-size:15px} .pvacc3 span{font-size:13px;font-weight:700} .pvacc3 small{font-size:12px;opacity:.75} .pvacc3 .btn{align-self:flex-start;margin:4px 0 0;width:auto;min-height:36px;padding:0 16px}
