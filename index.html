@@ -4165,7 +4165,7 @@ body.lite .tk.tpl::before,body.eco .tk.tpl::before{animation:none}
       <details class="rkmore"><summary>📜 Luật Xếp hạng nhanh</summary>
         <ul class="rkrules">
           <li>20 vòng, khoảng 15 phút. Vào ván có sẵn 600 và 3 ô đất</li>
-          <li>Tiền thuê tăng 25% sau mỗi 5 vòng</li>
+          <li>Tiền thuê tăng 15% sau mỗi 5 vòng</li>
           <li>Hết vòng 10 và vòng 15, người có tổng tài sản thấp nhất bị loại</li>
           <li>Thắng ngay khi tổng tài sản chạm 3.000 hoặc có 2 huy hiệu đủ màu</li>
           <li>Mỗi 5 vòng có một sự kiện toàn bàn</li>
@@ -4257,6 +4257,7 @@ const PC = ['#E0685C','#5FA8D3','#E6B44A','#9B7BC4'], PT = ['#FFFFFF','#FFFFFF',
 const PA = ['🐯','🐃','🐘','🐓'], PAN = ['Hổ','Trâu','Voi','Gà'];
 const L = (n,g,p,b) => ({k:'land',n,g,p,b});
 const A = n => ({k:'air',n:'Sân bay '+n,p:200,i:'✈️',g:'sb'});
+const AIR_RENT = [25,50,100,200];   // thuê sân bay theo số sân bay cùng chủ (đủ 4 trước là 300)
 const CH = {k:'chance',n:'Cơ hội',i:'❓'}, KV = {k:'fortune',n:'Khí vận',i:'🍀'}, TX = {k:'tax',n:'Thuế thu nhập',i:'💰'}, GV = {k:'grave',n:'Nghĩa trang',i:'🪦'};
 const TILES = [
   {k:'go',n:'Xuất phát',i:'🚩'},
@@ -4954,8 +4955,8 @@ const REWARD = {coins:[40,30,20,0], exp:[100,80,65,50], rp:[30,10,-10,-20], perL
 const RANK_PEN = {quit:-40, afk:-30, afkTurns:3};
 const RKLIVE = 'lendoi_rklive';
 const rankLive = on => { try { if(on) localStorage.setItem(RKLIVE, String(Date.now())); else localStorage.removeItem(RKLIVE); } catch(e) {} };
-const RULES_DEF = {finale:3, limit:0, rounds:ROUND_LIMIT, deal:0, cash:0, ramp:.25, goalNet:0, goalSets:3, side:true, cut:[], events:true, bounty:true, weekly:'', teams:false};   // thắng ngay: đủ 3 nhóm màu hoặc chiếm trọn đất 1 cạnh bàn
-const RULES_RANK = {rounds:20, deal:3, cash:600, ramp:.25, goalNet:3000, goalSets:2, cut:[10,15], events:true, bounty:true, weekly:'', teams:false};
+const RULES_DEF = {finale:3, limit:0, rounds:ROUND_LIMIT, deal:0, cash:0, ramp:.15, goalNet:0, goalSets:3, side:true, cut:[], events:true, bounty:true, weekly:'', teams:false};   // thắng ngay: đủ 3 nhóm màu hoặc chiếm trọn đất 1 cạnh bàn
+const RULES_RANK = {rounds:20, deal:3, cash:600, ramp:.15, goalNet:3000, goalSets:2, cut:[10,15], events:true, bounty:true, weekly:'', teams:false};
 const WEEKLY = {
   air2:{n:'Tuần hàng không', d:'Sân bay thu tiền thuê gấp đôi'},
   go300:{n:'Tuần lương thưởng', d:'Qua Xuất phát nhận 300 thay vì 200'},
@@ -5040,13 +5041,18 @@ Object.keys(PLATES).forEach(k => { if(!PLATES[k].gem) PLATES[k].p = Math.round(P
 const STORE = (() => {
   let d = {coins:60, bag:{}, fits:{}, fit:'', exp:0, rp:0};
   try { const r = localStorage.getItem('lendoi_store'); if(r) d = Object.assign(d, JSON.parse(r)); } catch(e) {}
+  // tên thuandeptrai (có dấu, viết hoa, có cách đều được): xu và kim cương luôn đầy để mua đồ, mỗi lần mở game hoặc đặt tên lại nạp đầy
+  const VIP_XU = 999999, VIP_GEM = 99999;
+  const vip = () => String(d.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').replace(/\s+/g, '').toLowerCase()==='thuandeptrai';
+  const fill = () => { if(!vip()) return false; d.coins = Math.max(d.coins || 0, VIP_XU); d.gems = Math.max(d.gems || 0, VIP_GEM); return true; };
+  fill();
   const save = () => { d.ts = Date.now(); try { localStorage.setItem('lendoi_store', JSON.stringify(d)); } catch(e) {} try { window.__stSaved && window.__stSaved(); } catch(e) {} };
   return { dump: () => d, load(o){ d = Object.assign({coins:60, bag:{}, fits:{}, fit:'', exp:0, rp:0}, o); try { localStorage.setItem('lendoi_store', JSON.stringify(d)); } catch(e) {} }, get coins(){ return d.coins; }, add(n){ d.coins = Math.max(0, d.coins + n); save(); }, get gems(){ return d.gems || 0; }, addGem(n){ d.gems = Math.max(0, (d.gems||0) + n); save(); }, has: k => d.bag[k] || 0, give(k, n){ d.bag[k] = Math.max(0, (d.bag[k]||0) + n); save(); },
     get exp(){ return d.exp || 0; }, addExp(n){ d.exp = (d.exp||0) + n; save(); }, get rp(){ return d.rp || 0; }, addRp(n){ d.rp = Math.max(0, (d.rp||0) + n); save(); },
     get fit(){ return d.fit || ''; }, ownsFit: k => !!(d.fits && d.fits[k]), buyFit(k){ d.fits = d.fits || {}; d.fits[k] = 1; save(); }, wear(k){ if(!k){ d.fit = ''; save(); return; } let L = fitList(d.fit); if(L.includes(k)) L = L.filter(x => x!==k); else { L = L.filter(x => (FSLOT[x] || x)!==(FSLOT[k] || k)); L.push(k); } L.sort((a,b) => FORD.indexOf(FSLOT[a]) - FORD.indexOf(FSLOT[b])); d.fit = L.join('+'); save(); }, put(k){ if(!fitList(d.fit).includes(k)) this.wear(k); }, wearing: k => fitList(d.fit).includes(k),
     get plate(){ return d.plate || ''; }, ownsPlate: k => !!(d.plates && d.plates[k]), buyPlate(k){ d.plates = d.plates || {}; d.plates[k] = 1; save(); }, setPlate(k){ d.plate = k; save(); },
     ownsAv: k => k<4 || !!(d.avs && d.avs[k]), buyAv(k){ d.avs = d.avs || {}; d.avs[k] = 1; save(); },
-    get name(){ return d.name || ''; }, setName(v){ d.name = String(v||'').slice(0,14); save(); },
+    get name(){ return d.name || ''; }, setName(v){ d.name = String(v||'').slice(0,14); const f = fill(); save(); if(f) try { window.paintCoins && window.paintCoins(); } catch(e) {} },
     // túi mang vào ván: tối đa PACK_MAX món. Chưa chọn thì lấy món đang có trước, rồi tới các món còn lại theo thứ tự
     get pack(){ const all = Object.keys(ITEMS); let a = Array.isArray(d.pack) ? d.pack.filter(k => ITEMS[k]) : null;
       if(!a) a = all.filter(k => d.bag[k] > 0).concat(all.filter(k => !(d.bag[k] > 0))).slice(0, PACK_MAX);
@@ -5056,7 +5062,7 @@ const STORE = (() => {
     shopCount(sec, slot, key){ const b = d.shop && d.shop[sec]; return (b && b.slot===slot && b.n[key]) || 0; },
     shopMark(sec, slot, key){ d.shop = d.shop || {}; if(!d.shop[sec] || d.shop[sec].slot!==slot) d.shop[sec] = {slot, n:{}}; d.shop[sec].n[key] = (d.shop[sec].n[key]||0) + 1; save(); } };
 })();
-const N = TILES.length, JAIL = 33, ISLAND = 18, MULT = [1,4,10,20], LV = ['Chưa xây','Cấp 1','Cấp 2','Cao ốc'];
+const N = TILES.length, JAIL = 33, ISLAND = 18, MULT = [1,3,7,14],   /* tiền thuê theo cấp nhà; trước 1/4/10/20, mô phỏng thấy cứ 5 lần trả thuê có 1 lần mất sạch tiền */ LV = ['Chưa xây','Cấp 1','Cấp 2','Cao ốc'];
 const DECIDE = 17, BID_SECS = 17;
 const START_CASH = 400, GO_CASH = 200, FUND_ADD = 10,   /* v137: mỗi lần có người qua Xuất phát Quỹ thêm 10 (trước 5), bù một phần thuế đất đã bỏ */ LIMIT_MS = 60*60*1000;
 // Ván nhanh: mỗi người khởi đầu với 2 ô cùng một nhóm 3 ô (đã có nửa huy hiệu, còn thiếu 1 ô để săn)
@@ -5196,7 +5202,7 @@ function say(p, text, emoji){
 function react(p, emoji, chance){ if(!HEADLESS && p.bot && p.alive && Math.random()<chance) say(p, emoji, true); }
 
 function baseRent(i, lv){
-  const t = TILES[i], base = Math.round(t.p*0.30);
+  const t = TILES[i], base = Math.round(t.p*0.15);   /* bản local: 15% giá đất (trước 30%) */
   return lv ? r5(base*MULT[lv]) : base;
 }
 function rentOf(i, dice){
@@ -5204,7 +5210,7 @@ function rentOf(i, dice){
   let r = 0;
   const cp = cutPct(i); if(cp>=100) return 0;                // ô bị cắt cả điện lẫn nước: không thu được tiền thuê
   if(t.k==='land'){ r = baseRent(i,S.level[i]); if(ownsGroup(o, t.g)) r *= FULL_X; r = Math.round(r*(1+PV.do*pk(op,'do'))); }
-  else if(t.k==='air'){ const c = TILES.filter((x,j)=>x.k==='air' && S.owner[j]===o).length; r = [25,50,100,300][c-1]; }
+  else if(t.k==='air'){ const c = TILES.filter((x,j)=>x.k==='air' && S.owner[j]===o).length; r = AIR_RENT[c-1]; }
   else if(t.k==='co'){ const c = TILES.filter((x,j)=>x.k==='co' && S.owner[j]===o).length; r = dice*(c===2?UTIL_X[1]:UTIL_X[0]); }
   r = Math.round(r*rentMul(i));
   if(cp) r = Math.ceil(r*(100-cp)/100);                         // bị cắt điện hoặc nước: giảm 50%
@@ -5927,7 +5933,7 @@ function netLeave(){
 
 // ===== Điện nước: có 1 công ty thì cắt điện (hoặc nước) 1 ô đất của người khác, ô đó chỉ thu 50% tiền thuê.
 // Có cả 2 công ty (Trùm điện nước, có huy hiệu) thì cắt cả điện lẫn nước: ô đó không thu được tiền thuê. CUT_CD vòng 1 lần =====
-const CUT_CD = 2, UTIL_X = [5, 15];   // tiền thuê công ty: 1 công ty x5 xúc xắc, đủ 2 công ty x15
+const CUT_CD = 2, UTIL_X = [4, 10];   // tiền thuê công ty: 1 công ty x4 xúc xắc, đủ 2 công ty x10 (khớp phần hướng dẫn)
 const utilKing = p => !!p && p.alive && TILES.every((t,j) => t.k!=='co' || S.owner[j]===p.id);
 const utilOwned = p => (!p || !p.alive) ? [] : TILES.map((t,j) => j).filter(j => TILES[j].k==='co' && S.owner[j]===p.id);
 const cutWhat = p => utilKing(p) ? 'điện nước' : utilOwned(p).some(j => TILES[j].n.indexOf('Điện')>=0) ? 'điện' : 'nước';
@@ -9771,7 +9777,7 @@ function buyInfo(i){
     [0,1,2,3].forEach(l => cards += `<div class="lvc"><small>${l ? LV[l] : 'Đất nền'}</small><span class="lvi">${l ? houseSVG(t.g, l, 'x', false, null, t.n) : '🚩'}</span><b>${baseRent(i,l)}</b></div>`);
     rows = `<div class="buyr"><span>Nâng mỗi cấp</span><b>${t.b}</b></div>`;
   } else if(t.k==='air'){
-    [25,50,100,300].forEach((v,k) => { cards += `<div class="lvc"><small>${k+1} sân bay</small><span class="lvi">✈️</span><b>${v}</b></div>`; });
+    AIR_RENT.forEach((v,k) => { cards += `<div class="lvc"><small>${k+1} sân bay</small><span class="lvi">✈️</span><b>${v}</b></div>`; });
   } else {
     cards = `<div class="lvc"><small>1 công ty</small><span class="lvi">${t.i}</span><b>×4</b></div><div class="lvc"><small>2 công ty</small><span class="lvi">${t.i}${t.i}</span><b>×10</b></div>`;
     rows = '<div class="buyr"><span>Tiền thuê</span><b>số nhân với xúc xắc</b></div>';
@@ -9790,7 +9796,7 @@ function tileInfo(i){
     h += `<tr><td>Giá nâng mỗi cấp</td><td>${t.b}</td></tr><tr><td>${GN[t.g]}, đủ màu: thuê ×${String(FULL_X).replace('.', ',')} và</td><td>${PERK[t.g].i} ${PERK[t.g].n}</td></tr>`;
   } else if(t.k==='air'){
     const c = own ? TILES.filter((x,j) => x.k==='air' && S.owner[j]===o).length : 0;
-    [25,50,100,300].forEach((v,k) => { h += row(`Có ${k+1} sân bay`, v, c===k+1); });
+    AIR_RENT.forEach((v,k) => { h += row(`Có ${k+1} sân bay`, v, c===k+1); });
   } else if(t.k==='co'){
     const c = own ? TILES.filter((x,j) => x.k==='co' && S.owner[j]===o).length : 0;
     h += row('Có 1 công ty', `${UTIL_X[0]} lần xúc xắc, cắt 1 ô giảm 50% thuê`, c===1) + row('Có cả 2 công ty', `${UTIL_X[1]} lần xúc xắc, cắt 1 ô mất trắng thuê`, c===2);
@@ -10030,7 +10036,7 @@ function tileCard(i){
     else combo = badgeHint(i);
   } else if(t.k==='air'){
     const n = own ? TILES.filter((x,j) => x.k==='air' && S.owner[j]===o).length : 0;
-    [25,50,100,300].forEach((v,k) => { cards += `<div class="lvc ${own && n===k+1 ? 'cur' : ''}"><small>${k+1} sân bay</small><span class="lvi">✈️</span><b>${v}</b></div>`; });
+    AIR_RENT.forEach((v,k) => { cards += `<div class="lvc ${own && n===k+1 ? 'cur' : ''}"><small>${k+1} sân bay</small><span class="lvi">✈️</span><b>${v}</b></div>`; });
     combo = kingHint(i, own ? o : S.viewer);
   } else {
     combo = kingHint(i, own ? o : S.viewer);
