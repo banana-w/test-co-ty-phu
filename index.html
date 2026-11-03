@@ -4074,16 +4074,16 @@ body.lite .tk.tpl::before,body.eco .tk.tpl::before{animation:none}
     <h1>Chơi với bạn</h1>
     <div id="friendForm" style="max-width:520px">
       <div class="panel" id="crPanel">
-        <div class="crhd"><i>🎲</i><span><b>Tạo phòng riêng</b><small>Đặt mật khẩu rồi mời bạn bè vào chơi</small></span></div>
+        <div class="crhd"><i>🎲</i><span><b>Tạo phòng riêng</b><small>Bạn bè bấm ⚡ Vào nhanh là vào phòng luôn</small></span></div>
         <h2>Tạo phòng</h2>
         <label class="fl" hidden>Tên của bạn<input class="inp2" id="cName" maxlength="14" value="Bạn"></label>
-        <div class="fl">Mật khẩu<div class="rlen rpwm"><button type="button" data-rpw="1" class="on">🔒 Có mật khẩu</button><button type="button" data-rpw="0">🔓 Không mật khẩu</button></div></div>
-        <label class="fl" id="cPwL">Mật khẩu phòng<input class="inp2" id="cPw" maxlength="12" inputmode="numeric" placeholder="Ít nhất 2 số"></label>
+        <div class="fl">Mật khẩu<div class="rlen rpwm"><button type="button" data-rpw="1">🔒 Có mật khẩu</button><button type="button" data-rpw="0" class="on">🔓 Không mật khẩu</button></div></div>
+        <label class="fl" id="cPwL" hidden>Mật khẩu phòng<input class="inp2" id="cPw" maxlength="12" inputmode="numeric" placeholder="Ít nhất 2 số"></label>
         <div class="fl">Chế độ<div class="rlen"><button type="button" data-rlen="l" class="on">🏛️ Ván dài<small>60 vòng</small></button><button type="button" data-rlen="q">⚡ Ván nhanh<small>20 vòng</small></button></div></div>
         <p class="err" id="cErr"></p>
         <button class="btn primary" id="createRoom" style="width:100%">Tạo phòng</button>
       </div>
-      <div class="panel rbrowse" id="roomBrowse"><div class="rbh"><b>🏠 Phòng đang mở</b><input class="inp2" id="rbQ" placeholder="Tìm ID phòng hoặc tên chủ phòng…" autocomplete="off"><button type="button" class="rbref" id="rbRef" aria-label="Tải lại">↻</button></div><div id="rbList"><p class="say">Đang tải danh sách phòng…</p></div></div>
+      <div class="panel rbrowse" id="roomBrowse"><div class="rbh"><b>🏠 Phòng đang mở</b><input class="inp2" id="rbQ" placeholder="ID phòng hoặc tên chủ phòng…" autocomplete="off"><button type="button" class="rbref" id="rbRef" aria-label="Tìm lại">↻</button><button type="button" class="rbquick" id="rbQuick">⚡ Vào nhanh</button></div><div id="rbList"><p class="say">Đang tải danh sách phòng…</p></div></div>
       <div class="panel" id="joinPanel" style="margin-top:10px" hidden>
         <h2>Vào phòng</h2>
         <label class="fl" hidden>Tên của bạn<input class="inp2" id="jName" maxlength="14" value="Bạn"></label>
@@ -5818,7 +5818,36 @@ const PEERNET = (() => {
       emit(t, data){ if(gone) return Promise.resolve(); send(c, {k:'e', t, d:data===undefined ? null : data}); return Promise.resolve(); },
       leave(){ if(gone) return; gone = true; clearTimeout(retry); clearInterval(beat); try { pr.destroy(); } catch(e) {} } });
   }
-  return {join};
+  // ===== Phòng đang mở, không cần máy chủ: phòng chờ giữ thêm một "đèn hiệu" ở 1 trong SLOTS ID cố định;
+  // máy đang tìm phòng gõ cửa cả SLOTS ID cùng lúc, đèn hiệu nào có người thì trả lời thông tin phòng rồi ngắt =====
+  const SLOTS = 12, slotId = k => PFX + 'slot-' + k;
+  // info() trả về thông tin phòng mới nhất mỗi lần có người hỏi; trả về hàm tắt đèn hiệu
+  function beacon(info){
+    let pr = null, off = false, t = 0;
+    const order = [...Array(SLOTS).keys()].sort(() => Math.random() - .5);
+    const claim = async i => { if(off) return; if(i >= SLOTS){ t = setTimeout(() => claim(0), 10000); return; }   /* đủ 12 phòng: chờ chỗ trống */
+      try { await lib(); pr = await open(slotId(order[i])); } catch(e) { pr = null; if(!off) claim(i + 1); return; }
+      if(off){ pr.destroy(); return; }
+      pr.on('connection', c => c.on('open', () => { try { c.send({k:'room', v:info()}); } catch(e) {} setTimeout(() => { try { c.close(); } catch(e) {} }, 1500); }));
+      pr.on('disconnected', () => setTimeout(() => { try { if(!off && pr.disconnected && !pr.destroyed) pr.reconnect(); } catch(e) {} }, 1500)); };
+    claim(0);
+    return () => { off = true; clearTimeout(t); if(pr) try { pr.destroy(); } catch(e) {} };
+  }
+  async function scan(ms = 5000){
+    await lib(); const pr = await open(null), found = {};
+    await new Promise(done => {
+      let left = SLOTS; const t = setTimeout(done, ms), ends = {};
+      const end = k => { if(!ends[k]) return; delete ends[k]; if(--left <= 0){ clearTimeout(t); done(); } };
+      // đèn hiệu không có ai: máy chủ PeerJS báo lỗi peer-unavailable kèm ID
+      pr.on('error', e => { const m = String(e && e.message || ''); for(const k in ends) if(m.endsWith(slotId(k))) end(k); });
+      for(let k = 0; k < SLOTS; k++){ ends[k] = 1; const c = pr.connect(slotId(k), {reliable:true, serialization:'json'});
+        c.on('data', m => { if(m && m.k==='room' && m.v && /^\d{5}$/.test(String(m.v.id))) found[m.v.id] = m.v; end(k); });
+        c.on('close', () => end(k)); c.on('error', () => end(k)); }
+    });
+    try { pr.destroy(); } catch(e) {}
+    return Object.values(found);
+  }
+  return {join, beacon, scan};
 })();
 // ===== Nói chuyện bằng mic khi chơi với bạn (v129): gọi thoại trực tiếp giữa các máy (WebRTC), Firebase chỉ để các máy tìm nhau =====
 function micCast(){ if(NET && NET.me>=0) netEmit('mic', {p:NET.me, on:!!(VOICE.live() && VOICE.on())}); }
@@ -5889,7 +5918,7 @@ const VOICE = (() => {
 function netLeave(){
   VOICE.stop();
   if(!NET) return;
-  try { if(NET.regIv) clearInterval(NET.regIv); if(NET.regRef){ NET.regRef.onDisconnect().cancel(); NET.regRef.remove().catch(() => {}); } } catch(e) {}
+  try { if(NET.regIv) clearInterval(NET.regIv); if(NET.beaconOff) NET.beaconOff(); } catch(e) {}
   ['lobbyIv','hb','helloIv','watch'].forEach(k => { if(NET[k]) clearInterval(NET[k]); });
   try { if(NET.R) NET.R.leave(); } catch(e) {}
   NET = null;
@@ -10515,19 +10544,28 @@ if(!HEADLESS){
   })();
   const ROOMS = window.ROOMS_ = (() => {
     let L = {}, ref0 = null, q = '';
-    const reg = async () => { if(!NET || NET.role!=='host' || NET.rank) return; try { const d = await FBNET.db(), r = d.ref('lobby/' + NET.id); NET.regRef = r; r.onDisconnect().remove();
-        const put = () => { if(!NET || NET.role!=='host'){ return; } if(NET.live){ r.remove().catch(() => {}); clearInterval(NET.regIv); NET.regIv = null; return; }
-          r.set({n:String(NET.seats[0] && NET.seats[0].name || 'Chủ phòng').slice(0, 20), av:+(NET.seats[0] && NET.seats[0].av) || 0, f:String(NET.seats[0] && NET.seats[0].fu || '').slice(0, 40), c:NET.seats.filter(Boolean).length, len:NET.len==='q' ? 'q' : 'l', o:NET.pw ? 0 : 1, u:FBNET.uid(), at:firebase.database.ServerValue.TIMESTAMP}).catch(() => {}); };
-        put(); NET.regIv = setInterval(put, 8000); } catch(e) {} };
+    let scanning = false, lastScan = 0;
+    // phòng chờ của mình: bật đèn hiệu để máy khác tìm thấy; vào ván rồi thì tắt
+    const reg = () => { if(!NET || NET.role!=='host' || NET.rank) return; const id0 = NET.id;
+      NET.beaconOff = PEERNET.beacon(() => ({id:NET.id, n:String(NET.seats[0] && NET.seats[0].name || 'Chủ phòng').slice(0, 20), av:+(NET.seats[0] && NET.seats[0].av) || 0, c:NET.seats.filter(Boolean).length, len:NET.len==='q' ? 'q' : 'l', o:NET.pw ? 0 : 1}));
+      NET.regIv = setInterval(() => { if(!NET || NET.id!==id0 || NET.live){ if(NET && NET.id===id0){ clearInterval(NET.regIv); NET.regIv = null; if(NET.beaconOff){ NET.beaconOff(); NET.beaconOff = null; } } } }, 2000); };
+    const scanNow = async () => { if(scanning) return; scanning = true; paint();
+      try { const list = await PEERNET.scan(), now = Date.now(); L = {}; list.forEach(v => { L[v.id] = Object.assign({}, v, {at:now}); }); } catch(e) {}
+      scanning = false; lastScan = Date.now(); paint(); };
     const paint = () => { const el = $('rbList'); if(!el) return; const now = Date.now(), qq = q.trim().toLowerCase();
-      const BR = (() => { if(typeof BOTPOOL==='undefined' || !BOTPOOL.length) return []; const w = Math.floor(now/6e5); let sd = (w * 7919) % 233280; const r = () => (sd = (sd*9301 + 49297) % 233280) / 233280;   /* phòng của bot: đổi mỗi 10 phút */
+      const BR = (() => { return [];   /* bản local: không bày phòng giả của bot */ const w = Math.floor(now/6e5); let sd = (w * 7919) % 233280; const r = () => (sd = (sd*9301 + 49297) % 233280) / 233280;   /* phòng của bot: đổi mỗi 10 phút */
         const out = [], used = new Set(); for(let i=0; i<7 + (w % 5); i++){ const bi = Math.floor(r()*BOTPOOL.length); if(used.has(bi)) continue; used.add(bi);
           out.push({id:String(10000 + Math.floor(r()*89999)), n:BOTPOOL[bi][0], pa:BOTPOOL_IMG[bi] || '', av:bi % 7, c:1 + Math.floor(r()*3), len:r() < .5 ? 'q' : 'l', at:now - Math.floor(r()*30000), bot:1, o:bi % 3 ? 0 : 1}); } window.__botRooms = out; return out; })();
       const A = Object.entries(L).map(([id, v]) => Object.assign({id}, v)).concat(BR).filter(v => v.at && now - v.at < 45000 && (!qq || v.id.includes(qq) || String(v.n || '').toLowerCase().includes(qq))).sort((a,b) => (b.at||0) - (a.at||0));
       el.innerHTML = A.length ? `<div class="rbgrid">${A.map(v => { const ph = v.pa || (v.f && window.PH_ ? window.PH_.src(v.f) : ''); const keep = AVMAP; AVMAP = null; const av = AV(+v.av || 0, ''); AVMAP = keep;
           return `<button type="button" class="rbc ${v.c>=4 ? 'full' : ''}" data-rbid="${esc(v.id)}"><span class="rbav">${ph ? `<img src="${ph}" alt="">` : av}</span><span class="rbi"><b>Phòng ${esc(v.id)}</b><small>👑 ${esc(v.n || 'Chủ phòng')}</small><em>${v.len==='q' ? '⚡ Ván nhanh' : '🏛️ Ván dài'}</em></span><span class="rbn"><b>${v.c || 1}/4</b><i>${v.o ? '🔓' : '🔒'}</i></span></button>`; }).join('')}</div>`
-        : `<div class="rbnone"><i>🏠</i><b>${qq ? 'Không tìm thấy phòng nào' : 'Chưa có phòng nào đang mở'}</b><small>Tạo phòng ở bên trái rồi mời bạn bè vào nhé.</small></div>`; };
-    const listen = async () => { if(ref0) return; try { const d = await FBNET.db(); ref0 = d.ref('lobby').orderByChild('at').limitToLast(40); ref0.on('value', sn => { L = sn.val() || {}; paint(); }); } catch(e) { const el = $('rbList'); if(el) el.innerHTML = '<p class="say">Chưa kết nối được máy chủ.</p>'; } };
+        : `<div class="rbnone"><i>${scanning ? '🔎' : '🏠'}</i><b>${scanning ? 'Đang tìm phòng…' : qq ? 'Không tìm thấy phòng nào' : 'Chưa có phòng nào đang mở'}</b><small>${scanning ? 'Đang hỏi các máy đang mở phòng.' : 'Tạo phòng ở bên trái, hoặc gõ đủ 5 số ID phòng rồi bấm Enter để vào thẳng.'}</small></div>`; };
+    const listen = () => { if(!NET) scanNow(); };
+    // vào nhanh: tìm rồi vào ngay phòng mở (không mật khẩu, còn ghế) mới nhất
+    const quick = async () => { SFX.play('click'); await scanNow();
+      const v = Object.values(L).filter(x => x.o && (x.c || 1) < 4)[0];
+      if(v){ $('jId').value = v.id; $('jPw').value = ''; $('joinRoom').click(); }
+      else palToast(Object.keys(L).length ? 'Các phòng đang mở đều có mật khẩu hoặc đã đủ người' : 'Chưa thấy phòng nào đang mở'); };
     const join = id => { const bv = !L[id] && (window.__botRooms || []).find(x => x.id===id);
       if(bv){ SFX.play('pop'); BLOBBY.open(bv); return; }
       const v = L[id]; if(!v) return; if(v.c>=4){ palToast('Phòng ' + id + ' đã đủ 4 người'); return; } SFX.play('pop');
@@ -10537,9 +10575,13 @@ if(!HEADLESS){
       setTimeout(() => { const i = $('rbPw'); if(i && !SOFTKB) i.focus(); }, 100); };
     $('rbList').addEventListener('click', e => { const b = e.target.closest('[data-rbid]'); if(b) join(b.dataset.rbid); });
     $('rbQ').addEventListener('input', e => { q = e.target.value || ''; paint(); });
-    $('rbRef').onclick = () => { SFX.play('click'); paint(); palToast('Đã làm mới danh sách phòng'); };
+    // gõ đủ 5 số ID rồi Enter: vào thẳng phòng đó, như bản cũ
+    $('rbQ').addEventListener('keydown', e => { const id = String(e.target.value || '').trim(); if(e.key!=='Enter' || !/^\d{5}$/.test(id)) return; e.preventDefault();
+      if(L[id] && !L[id].o){ join(id); return; } $('jId').value = id; $('jPw').value = ''; $('joinRoom').click(); });
+    $('rbRef').onclick = () => { SFX.play('click'); scanNow(); };
+    $('rbQuick').onclick = quick;
     document.addEventListener('click', e => { if(e.target.closest('[data-go="friend"]')) setTimeout(listen, 100); }, true);
-    setInterval(() => { if(document.body.dataset.scr==='friend') paint(); }, 10000);
+    setInterval(() => { if(document.body.dataset.scr==='friend' && !NET && !document.hidden && Date.now() - lastScan > 7000) scanNow(); }, 2000);
     // màn ngang: khung Tạo phòng nằm cột trái dưới tiêu đề
     setTimeout(() => { const lp = document.querySelector('#friend > .lp'), cp = $('crPanel'); if(lp && cp && cp.parentElement!==lp) lp.appendChild(cp); }, 600);
     return {reg, listen, paint};
@@ -10637,7 +10679,7 @@ if(!HEADLESS){
   $('lcForm').addEventListener('submit', () => { const t = ($('lcText').value || '').trim(); if(!t || !NET || NET.live || document.documentElement.lang==='en' || typeof botSmartReply!=='function') return;
     const B = (NET.role==='host' ? NET.seats : []).filter(x => x && x.bot); if(!B.length) return; const b = B[Math.floor(Math.random()*B.length)], r = botSmartReply(t, 'game');
     setTimeout(() => { if(NET && !NET.live) lcAdd(b.name, typeof botStyleText==='function' ? botStyleText(b.name, r.text) : r.text, false); }, 1500 + Math.random()*2000); }, true);
-  let ROOMPW = 1;   /* 1 = phòng có mật khẩu, 0 = phòng mở */
+  let ROOMPW = 0;   /* 1 = phòng có mật khẩu, 0 = phòng mở (mặc định: vào một chạm như bản cũ) */
   document.querySelectorAll('[data-rpw]').forEach(b => b.onclick = () => { ROOMPW = +b.dataset.rpw; SFX.play('click');
     document.querySelectorAll('[data-rpw]').forEach(x => x.classList.toggle('on', x===b)); $('cPwL').hidden = !ROOMPW; $('cErr').textContent = ''; });
   $('createRoom').onclick = async () => {
@@ -10650,7 +10692,7 @@ if(!HEADLESS){
     netLeave();
     NET = {role:'host', live:false, R, id, pw, len:roomLen, me:0, seats:[{name, peer:null, av:(window.savedPick && window.savedPick()) || 0, fu:FBNET.uid() || '', fi:(window.FR_ && window.FR_.uid()) || ''}, null, null, null], rej:{}, askSeq:0, onAns:null};
     hostWire(R); lcWire(R); lcReset(); $('cErr').textContent = ''; renderLobby(); lobbyCast();
-    NET.lobbyIv = setInterval(lobbyCast, 1000); ROOMS.reg(); if(!pw) AUTOBOT();
+    NET.lobbyIv = setInterval(lobbyCast, 1000); ROOMS.reg();   /* bản local: không cho máy tự vào ghế trống, chừa chỗ cho bạn bè */
     NET.hb = setInterval(() => { if(netHost() && S){ netLgSeq = -1; netSync(true); } }, 1000);
   };
   $('startRoom').onclick = () => {
@@ -13405,6 +13447,8 @@ html.land #friend .rp #friendForm:not([hidden]){display:flex !important;flex-dir
 .rbrowse{display:flex;flex-direction:column;gap:8px;flex:1 1 auto;min-height:0;margin:0 !important}
 .rbh{display:flex;align-items:center;gap:8px}.rbh b{white-space:nowrap;font-size:15px}
 .rbh .inp2{flex:1;min-width:0;min-height:36px;margin:0}
+.rbquick{flex:none;height:36px;min-height:0;padding:0 12px;border:2px solid #2B3A67;border-radius:18px;background:linear-gradient(180deg,#FFE27A,#F4B43C);color:#2B3A67;font:800 13px/1 'Be Vietnam Pro',sans-serif;white-space:nowrap;cursor:pointer;box-shadow:0 3px 0 #2B3A67}
+.rbquick:active{transform:translateY(2px);box-shadow:0 1px 0 #2B3A67}
 .rbref{width:36px;height:36px;min-height:0;padding:0;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#FFFDF6;font-size:18px;font-weight:900;cursor:pointer}
 #rbList{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .rbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
