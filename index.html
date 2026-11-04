@@ -9,14 +9,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Lên Đời">
+<meta name="apple-mobile-web-app-title" content="Lên Voi Xuống Chó">
 <meta name="theme-color" content="#1B1F4A">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <meta name="description" content="Cờ tỷ phú Việt Nam: gieo xúc xắc, mua đất, xây nhà, làm tỷ phú cùng bạn bè. Vào chơi cùng mình nhé!">
 <script>/* IS_APP: đang chạy trong app iOS (Capacitor); thêm ?app=1 để thử trên trình duyệt */window.IS_APP=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())||/[?&]app=1/.test(location.search);if(window.IS_APP)document.documentElement.classList.add('app');/* không phóng to kiểu gì cả: Safari bỏ qua user-scalable=no nên chặn luôn cử chỉ chụm 2 ngón và chạm 2 lần (ô nhập chữ nhỏ thì maximum-scale=1 đã chặn) */['gesturestart','gesturechange','gestureend'].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault();},{passive:false});});document.addEventListener('touchmove',function(e){if(e.touches.length>1||(e.scale&&e.scale!==1))e.preventDefault();},{passive:false});document.addEventListener('dblclick',function(e){e.preventDefault();},{passive:false});/* Safari vẫn phóng to khi chạm 2 lần nhanh dù đã có touch-action: lần chạm thứ hai trong 350ms thì chặn mặc định (chính là zoom) rồi tự bấm lại, như bản cũ. Ngón tay có kéo thì không tự bấm */var lastTap=0,tx=0,ty=0;window.addEventListener('touchstart',function(e){if(e.touches.length===1){tx=e.touches[0].clientX;ty=e.touches[0].clientY;}},{passive:true,capture:true});window.addEventListener('touchend',function(e){var now=Date.now(),t=e.target,c=e.changedTouches[0];if(now-lastTap<350&&e.changedTouches.length===1&&!e.touches.length&&t.closest&&!t.closest('input,textarea,select,label,[contenteditable]')){e.preventDefault();if(Math.abs(c.clientX-tx)<10&&Math.abs(c.clientY-ty)<10)t.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window,clientX:c.clientX,clientY:c.clientY,screenX:c.screenX,screenY:c.screenY}));}lastTap=now;},{passive:false,capture:true});/* land: mọi màn hình dùng bố cục ngang (app iOS và điện thoại cảm ứng; cầm dọc thì cả trang xoay 90 độ) */if(window.IS_APP||/[?&]land=1/.test(location.search)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches))document.documentElement.classList.add('land');</script>
-<title>Lên Đời</title>
+<title>Lên Voi Xuống Chó</title>
 <script>/* font: trong app dùng file nhúng sẵn (fonts/), trên web tải từ Google Fonts */document.write('<link rel="stylesheet" href="'+(window.IS_APP?'fonts/fonts.css':'https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&family=Be+Vietnam+Pro:wght@400;600;700;800&family=Oswald:wght@500;700&family=Josefin+Sans:wght@600;700&family=Barlow+Condensed:wght@600;700&display=swap')+'">');</script>
 <style>
 :root{
@@ -3548,11 +3548,12 @@ html body #mid #rollBtn.orb.roll{width:72px;height:72px;font-size:18px}
 #coach p{font-size:12.5px !important}
 /* quân đang chạy: tạm dừng cảnh vật để máy dồn sức vẽ quân cờ */
 body.mv .smoke,body.mv .wave,body.mv .drop,body.mv .sway,body.mv .swayw2,body.mv .bird,body.mv .flap,body.mv .bob,body.mv .nod,body.mv .lf,body.mv .gust,body.mv .star,body.mv .foam,body.mv .flow,body.mv .spk,body.mv .cop,body.mv .spin,body.mv .spin6,body.mv .run,body.mv .pace,body.mv .qsh{animation-play-state:paused !important}
-/* ===== Logo LÊN ĐỜI: chữ sạch nét =====
+/* ===== Logo LÊN VOI XUỐNG CHÓ: chữ sạch nét =====
    - viền vẽ dưới lớp màu (paint-order) nên không lộ các đường nét chồng bên trong chữ Đ, Ê, Ờ
    - bỏ hiệu ứng filter nhấp nháy: filter làm logo thành ảnh chụp cỡ nhỏ, khi phóng to ở màn mở đầu thì chữ bị vỡ răng cưa
-   - dòng ĐỜI lùi xuống một chút để dấu huyền không đè vào chữ N */
+   - dòng XUỐNG CHÓ lùi xuống một chút để dấu trên chữ Ố không đè vào dòng trên */
 html body .logo{-webkit-text-stroke:.1em #0E1330 !important;paint-order:stroke fill;animation:none !important;filter:none !important}
+html body .logo span{white-space:nowrap}
 html body .logo span:last-child{margin-top:.3em}
 /* bỏ quầng sáng vàng 26px làm logo bị lóa, nhòe; thay bằng bóng tối gọn để chữ nổi mà vẫn sắc */
 body:is([data-scr="home"],[data-scr="pick"],[data-scr="friend"],[data-scr="setup"]) .logo span:first-child{text-shadow:.07em .07em 0 #F0508C,.07em .12em .1em rgba(8,10,30,.55)}
@@ -4000,7 +4001,7 @@ body.lite .tk.tpl::before,body.eco .tk.tpl::before{animation:none}
   <section id="home">
     <div class="cm">
       <header class="cmtop">
-        <div class="logo" aria-label="Lên Đời"><span>LÊN</span><span>ĐỜI</span></div>
+        <div class="logo" aria-label="Lên Voi Xuống Chó"><span>LÊN VOI</span><span>XUỐNG CHÓ</span></div>
         <div class="topr"><span class="lvpill" aria-label="Cấp độ">Cấp <b class="lvv">1</b><i><u class="lvbar"></u></i><small class="lvt">0/100</small></span>
         <div class="r2"><button class="coinpill sndpill" id="homeLb" data-go="lbd" aria-label="Bảng xếp hạng">🏆</button><button class="coinpill sndpill" id="homeDaily" aria-label="Điểm danh hằng ngày">📅<i class="qdot" hidden></i></button><button class="coinpill sndpill" id="homeQuest" aria-label="Nhiệm vụ">🎯<i class="qdot" hidden></i></button><button class="coinpill sndpill" id="homePals" data-go="pals" aria-label="Bạn bè">👥</button><button class="coinpill sndpill" id="homeFs" aria-label="Toàn màn hình" hidden>⛶</button><button class="coinpill sndpill" id="homeSnd" aria-label="Hệ thống">⚙️</button><button class="coinpill sndpill mailpill" id="homeMail" aria-label="Hộp thư">✉️<i class="mdot" hidden>0</i></button><button class="coinpill walpill" data-go="shop" aria-label="Xu và kim cương, mở cửa hàng">🪙 <b class="coinv">0</b><u></u>💎 <b class="gemv">0</b><i>+</i></button></div></div>
       </header>
@@ -4880,11 +4881,11 @@ function micUI(){
   const h = document.getElementById('homeMic'); if(h){ h.textContent = v ? '🎙️' : '🔇'; h.classList.toggle('on', v); h.setAttribute('aria-label', v ? 'Tắt mic' : 'Bật mic'); }
   const st = document.getElementById('micSt'); if(st) st.textContent = v ? (VOICE.live() ? 'Mic đang bật, mọi người trong phòng nghe được bạn' : 'Mic đang bật: vào Chơi với bạn là nói chuyện được ngay') : 'Mic đang tắt';
 }
-// chưa cấp quyền micro: trong app thì nhảy thẳng sang Cài đặt của iPhone (mục Lên Đời) để người dùng tự bật
+// chưa cấp quyền micro: trong app thì nhảy thẳng sang Cài đặt của iPhone (mục Lên Voi Xuống Chó) để người dùng tự bật
 function micDenied(e){
   const n = e && e.name;
   if(n==='NotFoundError'){ window.palToast && palToast('Không tìm thấy micro trên máy'); return; }
-  if(IS_APP){ try { localStorage.setItem('lendoi_micwant', '1'); } catch(err) {} window.palToast && palToast('Hãy bật Micro cho Lên Đời trong Cài đặt'); setTimeout(() => { const M = NMIC(); if(M) M.openSettings().catch(() => {}); else location.href = 'app-settings:'; }, 700);
+  if(IS_APP){ try { localStorage.setItem('lendoi_micwant', '1'); } catch(err) {} window.palToast && palToast('Hãy bật Micro cho Lên Voi Xuống Chó trong Cài đặt'); setTimeout(() => { const M = NMIC(); if(M) M.openSettings().catch(() => {}); else location.href = 'app-settings:'; }, 700);
   } else if(typeof openModal==='function') openModal('🎙️ Trình duyệt đang chặn micro', `<p>Trang web không tự mở được Cài đặt của máy, bạn bật giúp micro cho <b>${esc(location.host || 'trang này')}</b>:</p><ul class="mhelp"><li><b>iPhone, Safari:</b> bấm <b>aA</b> ở thanh địa chỉ → <b>Cài đặt trang web</b> → <b>Micro</b> → <b>Cho phép</b>. Hoặc Cài đặt iPhone → Safari → Micro → Cho phép.</li><li><b>Chrome:</b> bấm biểu tượng bên trái địa chỉ → <b>Quyền</b> → <b>Micro</b> → <b>Cho phép</b>.</li><li><b>Mở từ Messenger, Zalo:</b> mở bằng Safari hoặc Chrome rồi thử lại.</li></ul><p>Xong thì bấm <b>Thử lại</b>.</p>`,
       [{label:'Đóng', fn: closeModal}, {label:'Thử lại', primary:true, fn: () => { closeModal(); micSet(true); }}]);
   else window.palToast && palToast('Trình duyệt đang chặn micro. Hãy cho phép micro cho trang này rồi bật lại.');
@@ -9827,7 +9828,7 @@ const SHARE = (() => {
   const paintLeft = () => { const v = ld('lendoi_share'); document.querySelectorAll('.shleft').forEach(e => { e.textContent = Math.max(0, MAX - v.n); }); };
   async function link(text, url){
     url = url || URL0;
-    if(navigator.share){ try { await navigator.share({title:'Lên Đời', text, url}); return true; } catch(e) { return false; } }
+    if(navigator.share){ try { await navigator.share({title:'Lên Voi Xuống Chó', text, url}); return true; } catch(e) { return false; } }
     try { await navigator.clipboard.writeText(text + ' ' + url); toast('Đã sao chép lời mời, dán gửi cho bạn bè nhé'); return true; } catch(e) { return false; }
   }
   async function invite(){
@@ -9850,7 +9851,7 @@ const SHARE = (() => {
   const rr = (c, x, y, w, h, r) => { c.beginPath(); c.moveTo(x+r, y); c.arcTo(x+w, y, x+w, y+h, r); c.arcTo(x+w, y+h, x, y+h, r); c.arcTo(x, y+h, x, y, r); c.arcTo(x, y, x+w, y, r); c.closePath(); };
   const fit = (c, i, x, y, w, h) => { if(!i) return; const k = Math.min(w/i.width, h/i.height), dw = i.width*k, dh = i.height*k; c.drawImage(i, x + (w-dw)/2, y + (h-dh), dw, dh); };
   const TF = "'Fz Heavitas','Be Vietnam Pro',sans-serif", BF = "'Be Vietnam Pro',system-ui,sans-serif";
-  const logo = (c, x, y, sz) => { c.save(); c.font = `${sz}px ${TF}`; c.textAlign = 'center'; c.lineJoin = 'round'; c.lineWidth = sz*.16; c.strokeStyle = '#2B3A67'; c.strokeText('LÊN ĐỜI', x, y); c.fillStyle = '#FFE27A'; c.fillText('LÊN ĐỜI', x, y); c.restore(); };
+  const logo = (c, x, y, sz) => { c.save(); c.font = `${sz}px ${TF}`; c.textAlign = 'center'; c.lineJoin = 'round'; c.lineWidth = sz*.16; c.strokeStyle = '#2B3A67'; c.strokeText('LÊN VOI XUỐNG CHÓ', x, y); c.fillStyle = '#FFE27A'; c.fillText('LÊN VOI XUỐNG CHÓ', x, y); c.restore(); };
   async function send(cv, text){
     const b = await new Promise(r => cv.toBlob(r, 'image/png')); if(!b) return;
     const f = new File([b], 'lendoi.png', {type:'image/png'});
@@ -9874,8 +9875,8 @@ const SHARE = (() => {
     let tt = ''; try { const w = TITLE.worn(); if(w) tt = w.n; } catch(e) {}
     c.fillStyle = '#2B3A67'; c.textAlign = 'center'; c.font = `900 84px ${BF}`; c.fillText(nm, 540, 1040);
     c.font = `800 46px ${BF}`; c.fillStyle = '#E0685C'; c.fillText(`Cấp ${lv}` + (tt ? ` · ${tt}` : ''), 540, 1120);
-    c.font = `700 36px ${BF}`; c.fillStyle = '#5B6680'; c.fillText('Chơi cùng mình trên Lên Đời', 540, 1200);
-    await send(cv, `Hồ sơ Lên Đời của ${nm} 🎲`);
+    c.font = `700 36px ${BF}`; c.fillStyle = '#5B6680'; c.fillText('Chơi cùng mình trên Lên Voi Xuống Chó', 540, 1200);
+    await send(cv, `Hồ sơ Lên Voi Xuống Chó của ${nm} 🎲`);
   }
   document.addEventListener('click', e => {
     const t = e.target.closest && e.target.closest('.shareEarn, #pvSnap, [data-invf]'); if(!t) return;
@@ -10015,7 +10016,7 @@ function PDBG(){
   const tower = x => `<path d="M${x} 300V70" stroke="#2B3A67" stroke-width="7"/><rect x="${x-40}" y="34" width="80" height="40" rx="6" fill="#C9D3DC" ${K}/>` + [0,1,2,3].map(k => `<circle cx="${x-27+k*18}" cy="54" r="7" fill="#FFF6C2" stroke="#2B3A67" stroke-width="2"/>`).join('');
   let cf = ''; for(let k=0;k<26;k++) cf += `<i class="pdcf" style="left:${(k*37)%100}%;background:${C[k % C.length]};animation-duration:${3.2 + (k*7)%30/10}s;animation-delay:-${(k*13)%40/10}s"></i>`;
   return `<svg class="pdbg" viewBox="0 0 1000 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="pdBm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6C2" stop-opacity=".55"/><stop offset="1" stop-color="#FFF6C2" stop-opacity="0"/></linearGradient></defs>
-    <path d="M-20 130Q500 70 1020 130V262H-20Z" fill="#1D2650" ${K}/>${crowd}<path d="M-20 262H1020V282H-20Z" fill="#E0685C" ${K}/><text x="500" y="277" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFDF6" letter-spacing="6">LÊN ĐỜI · CHUNG KẾT</text>
+    <path d="M-20 130Q500 70 1020 130V262H-20Z" fill="#1D2650" ${K}/>${crowd}<path d="M-20 262H1020V282H-20Z" fill="#E0685C" ${K}/><text x="500" y="277" text-anchor="middle" font-size="15" font-weight="900" fill="#FFFDF6" letter-spacing="6">LÊN VOI XUỐNG CHÓ · CHUNG KẾT</text>
     ${[0,1,2,3,4,5,6].map(k => `<path d="M${k*160-60} 282L${k*160+20} 282L${k*160+120} 560L${k*160+20} 560Z" fill="#48A867"/>`).join('')}
     <ellipse cx="300" cy="470" rx="250" ry="46" fill="none" stroke="#FFFDF6" stroke-opacity=".5" stroke-width="4"/>
     <path class="beam" d="M90 60L210 60L420 560L120 560Z" fill="url(#pdBm)"/><path class="beam b2" d="M790 60L910 60L520 560L240 560Z" fill="url(#pdBm)"/>${tower(150)}${tower(850)}</svg>${cf}`;
@@ -10626,7 +10627,7 @@ if(!HEADLESS){
     setTimeout(add, 1800 + Math.random()*1500); };
   $('shareRoom').onclick = async () => { if(!NET) return; SFX.play('click');
     const u = roomLink(), text = NET.pw ? `Vào chiến hay sợ? 😏 Phòng ${NET.id}, mật khẩu ${NET.pw}` : `Vào chiến hay sợ? 😏 Phòng ${NET.id}, vào thẳng không cần mật khẩu`;
-    if(navigator.share){ try { await navigator.share({title:'Lên Đời', text, url:u}); } catch(e) {} } else copyLink(); };
+    if(navigator.share){ try { await navigator.share({title:'Lên Voi Xuống Chó', text, url:u}); } catch(e) {} } else copyLink(); };
   { const q = new URLSearchParams(location.search), rid = q.get('room'), rpw = q.get('pw');
     if(/^\d{5}$/.test(rid || '')){ try { history.replaceState(null, '', location.pathname); } catch(e) {}
       setTimeout(() => { show('friend'); $('jId').value = rid; if(rpw) $('jPw').value = rpw;
@@ -11160,7 +11161,7 @@ if(!HEADLESS){
     const paint = () => { const mb = document.getElementById('mBody'); if(!mb) return; const L = list(); if(!sel || !L.some(x => x.kind + x.k===sel)) sel = L[0] ? L[0].kind + L[0].k : null;
       const cur = L.find(x => x.kind + x.k===sel);
       mb.innerHTML = `<div class="mbx"><div class="mbl"><b class="mbh">✉️ Hộp thư</b>${L.length ? L.map(x => `<button type="button" class="mbi ${x.kind + x.k===sel ? 'on' : ''} ${x.rd && !(x.g && !x.got) ? '' : 'new'}" data-mbs="${x.kind + x.k}"><i>${x.kind==='n' ? '📢' : x.g ? (x.got ? '📭' : '🎁') : '✉️'}</i><span><b>${esc(x.t || 'Thư')}</b><small>${when(x.at)}</small></span></button>`).join('') : '<p class="mbnone">Chưa có thư nào</p>'}</div>
-        <div class="mbr">${cur ? `<div class="mbt"><i>${cur.kind==='n' ? '📢' : '🎁'}</i><div><b>${esc(cur.t || 'Thư')}</b><small>${cur.kind==='n' ? 'Thông báo từ Lên Đời' : 'Hệ thống'} · ${when(cur.at)}</small></div></div><div class="mbb">${esc(cur.b || '').replace(/\n/g, '<br>')}</div>
+        <div class="mbr">${cur ? `<div class="mbt"><i>${cur.kind==='n' ? '📢' : '🎁'}</i><div><b>${esc(cur.t || 'Thư')}</b><small>${cur.kind==='n' ? 'Thông báo từ Lên Voi Xuống Chó' : 'Hệ thống'} · ${when(cur.at)}</small></div></div><div class="mbb">${esc(cur.b || '').replace(/\n/g, '<br>')}</div>
           ${cur.g ? `<div class="mbg"><span>Quà kèm theo</span><div>${gchips(cur.g)}</div>${cur.got ? '<button type="button" class="pwfb fr" disabled>✓ Đã nhận</button>' : `<button type="button" class="pwfb add" data-mbget="${cur.k}"><i>🎁</i>Nhận quà</button>`}</div>` : ''}`
           : '<div class="mbempty"><i>📭</i><b>Hộp thư trống</b><small>Nhập mã quà ở Hồ sơ › Tài khoản, quà sẽ gửi về đây.</small></div>'}</div>
         <button type="button" class="pwx" data-pwx="1" aria-label="Đóng">✕</button></div>`;
@@ -11180,7 +11181,7 @@ if(!HEADLESS){
         if(!v){ say('Mã không tồn tại'); return; } if(v.exp && Date.now() > v.exp){ say('Mã đã hết hạn'); return; }
         if((await d.ref('redeem/' + c + '/' + u).once('value')).exists()){ say('Bạn đã dùng mã này rồi'); return; }
         await d.ref('redeem/' + c + '/' + u).set(firebase.database.ServerValue.TIMESTAMP);
-        await d.ref('mail/' + u).push({t:'🎁 Quà từ mã ' + c, b:String(v.msg || 'Cảm ơn bạn đã chơi Lên Đời! Quà của bạn đây.').slice(0, 500), g:{xu:+v.xu || 0, gem:+v.gem || 0}, at:firebase.database.ServerValue.TIMESTAMP, code:c});
+        await d.ref('mail/' + u).push({t:'🎁 Quà từ mã ' + c, b:String(v.msg || 'Cảm ơn bạn đã chơi Lên Voi Xuống Chó! Quà của bạn đây.').slice(0, 500), g:{xu:+v.xu || 0, gem:+v.gem || 0}, at:firebase.database.ServerValue.TIMESTAMP, code:c});
         SFX.play('coinbig'); say('✓ Thành công! Quà đã gửi vào Hộp thư ✉️', true); start(); const i = document.getElementById('gcIn'); if(i) i.value = '';
       } catch(e) { say('Mã không dùng được lúc này'); } };
     const codeBox = () => `<div class="gcbox"><b>🎟️ Nhập mã quà tặng</b><div class="gcrow"><input id="gcIn" maxlength="20" placeholder="Nhập mã…" autocomplete="off" autocapitalize="characters"><button type="button" class="pwfb add" data-gcgo="1">Nhận</button></div><small id="gcMsg" class="gcmsg">Quà sẽ được gửi vào Hộp thư ✉️ ngoài màn chính</small></div>`;
@@ -11535,7 +11536,7 @@ if(!HEADLESS){
     async function decline(id){ if(d) try { await d.ref(`reqs/${uid}/${id}`).remove(); } catch(e) {} }
     async function unfriend(id){ if(!d || !confirm('Hủy kết bạn với ' + ((prof[id] || {}).n || 'người này') + '?')) return; try { await d.ref().update({[`friends/${uid}/${id}`]:null, [`friends/${id}/${uid}`]:null}); } catch(e) {} }
     async function shareLink(){ SFX.play('click'); const u = location.origin + location.pathname + '?add=' + uid, t = `Vào chiến hay sợ? 😏 Mã kết bạn của mình: ${uid}`;
-      if(navigator.share){ try { await navigator.share({title:'Lên Đời', text:t, url:u}); } catch(e) {} return; }
+      if(navigator.share){ try { await navigator.share({title:'Lên Voi Xuống Chó', text:t, url:u}); } catch(e) {} return; }
       try { await navigator.clipboard.writeText(t + ' ' + u); palToast('Đã sao chép link kết bạn'); } catch(e) { window.prompt('Sao chép link này:', u); } }
     function checkLink(){
       let q = null; try { q = new URLSearchParams(location.search).get('add'); } catch(e) {}
@@ -11628,7 +11629,7 @@ if(!HEADLESS){
     const L = [], KIND = {rank1:{i:'🏆', t:'tuyển người leo Xếp hạng đơn', go:'rank'}, rank2:{i:'🤝', t:'tuyển đồng đội Xếp hạng đôi', go:'rank'}, room:{i:'🎲', t:'tuyển 3 người chơi phòng riêng', go:'friend'}};
     const SYS = [n => `🎉 ${n} vừa nổ hũ Quỹ`, n => `✈️ ${n} vừa thành Ông trùm hàng không`, n => `💍 ${n} vừa kết hôn`, n => `🥇 ${n} vừa lên hạng Vàng`, n => `🏙️ ${n} vừa xây cao ốc thứ 10`, n => `⚡ ${n} vừa cắt điện nước đối thủ`];
     const push = m => { m.at = Date.now(); L.unshift(m); if(L.length > 20) L.pop(); };
-    const fake = () => { if(!L.length) push({k:'sys', who:'', text:'🎲 Chào mừng tới Lên Đời! Chạm vào đây để chat với mọi người'}); return; const n = PALS.rndName() + ' 🤖'; /* người chơi máy: luôn gắn nhãn 🤖 */ if(Math.random() < .55){ const ks = (IS_APP && !window.FB_CFG) ? ['rank1','rank2'] : ['rank1','rank2','room'], k = ks[Math.floor(Math.random()*ks.length)]; push({k, who:n, text:`${KIND[k].i} ${n} ${KIND[k].t}`}); } else push({k:'sys', who:n, text:SYS[Math.floor(Math.random()*SYS.length)](n)}); };
+    const fake = () => { if(!L.length) push({k:'sys', who:'', text:'🎲 Chào mừng tới Lên Voi Xuống Chó! Chạm vào đây để chat với mọi người'}); return; const n = PALS.rndName() + ' 🤖'; /* người chơi máy: luôn gắn nhãn 🤖 */ if(Math.random() < .55){ const ks = (IS_APP && !window.FB_CFG) ? ['rank1','rank2'] : ['rank1','rank2','room'], k = ks[Math.floor(Math.random()*ks.length)]; push({k, who:n, text:`${KIND[k].i} ${n} ${KIND[k].t}`}); } else push({k:'sys', who:n, text:SYS[Math.floor(Math.random()*SYS.length)](n)}); };
     for(let k=0;k<2;k++) fake();
     return { L, KIND, fake, say(who, text){ push({k:'sys', who, mine:1, text:`📣 ${who}: ${text}`}); }, post(k){ const n = STORE.name || 'Bạn'; push({k, who:n, mine:1, text:`${KIND[k].i} ${n} ${KIND[k].t}`}); } };
   })();
@@ -11645,7 +11646,7 @@ if(!HEADLESS){
     const WORLD = ['Ai chơi Xếp hạng đôi không?', 'Vừa nổ hũ 500, sướng quá', 'Hôm nay cửa hàng có Rồng kìa', 'Cho xin vía Ông trùm hàng không', 'Thua 3 ván liền rồi huhu', 'Kết bạn với mình đi mọi người', 'Mới lên cấp 10 nè', 'Có ai bị cắt điện nước hoài như tui không 😂', 'Rút trúng thẻ Mổ trĩ, cười xỉu', 'Tối nay ai leo hạng chung không?'];
     const REPLY = ['Ok nha!', 'Vào chơi một ván không?', 'Haha 😆', 'Đợi xíu mình vào liền', 'Tặng hoa cho mình đi 🌹', 'Tối nay leo hạng nhé', 'Chơi phòng riêng đi, mình tạo phòng', 'Đang ăn cơm, lát nha'];
     d.world = [];   /* kênh Thế giới thật (Firebase: world/) + người chơi máy trò chuyện chỉ hiện trên máy mình */
-    const BW = ["Ai leo hạng tối nay không, mình đang Vàng 2 😭", "Vừa nổ hũ Quỹ, hên dữ thần", "Có ai bị cắt điện nước hoài như tui không 😂", "Mua được Hoàn Kiếm rồi, giàu rồi ae ơi", "Thua 3 ván liền, chắc đi ngủ thôi", "Rút trúng thẻ vào tù 2 lần liên tiếp, đời 🥲", "Ai chỉ mình cách gom đủ 4 sân bay với", "Sáng nay trời Hà Nội se se lạnh ghê", "Trưa nay ăn bún bò, chiều chơi 2 ván cho tiêu cơm", "Mới lên cấp 12, vui quá trời", "Ai bán rẻ cho mình ô Đà Lạt hông 😆", "Ván nhanh 20 vòng là chân ái", "Hôm nay sếp đi vắng, làm 1 ván đã 🤫", "Có ai Sài Gòn mưa to không", "Xúc xắc hôm nay ghét tui ghê", "Kết bạn với mình đi mọi người ơi", "Cuối tuần rảnh quá, ai rủ đi cà phê không 😅", "Đang chờ xe buýt, làm 1 ván cho đỡ chán", "Vừa xây cao ốc ở Hạ Long, ai dừng là toang", "Ai còn thức không, mất ngủ quá", "Trà sữa full topping + Lên Đời = cuối tuần hoàn hảo", "Mèo nhà mình vừa đạp đổ ly cà phê lên bàn phím 🙀", "Bị Cao thủ cắt điện 3 lần một ván, ức ghê", "Ai đánh Xếp hạng đôi không, mình hơi gà nhưng chăm", "Lương về rồi, mua liền gói trang phục mới", "Có ai gặp Tỷ Phú Tương Lai chưa, chơi khôn dữ", "Mai thi rồi mà vẫn ngồi đây 😭", "Chúc cả nhà buổi tối vui vẻ nha", "Mẹ kêu đi ngủ mà còn 3 vòng nữa", "Bạn nào ở Đà Nẵng không, giao lưu chút", "Vừa thắng ván dài 60 vòng, mỏi tay luôn", "Có ai thấy thẻ Khí vận hôm nay keo kiệt không", "Đậu xe sai chỗ bị phạt, giống y vào ô Thuế 😂", "Hôm nay mưa, ở nhà chơi game là nhất", "Mình mới chơi, có mẹo gì không mọi người", "Ai tạo phòng cho mình vào với 🙏"], BC = [["Có ai biết mua ô nào lời nhất không?", "Gom đủ nhóm màu trước, có huy hiệu là lời liền"], ["Ủa sao mình vào tù hoài vậy 😭", "Do xúc xắc ghét bạn á, mình cũng vậy"], ["Ăn tối chưa mọi người?", "Vừa ăn cơm tấm xong, giờ làm ván nè"], ["Ai rảnh vào phòng mình không?", "Gửi ID đi, mình vào liền"], ["Hôm nay ai thắng nhiều nhất vậy?", "Mình thắng 2 thua 4 😅"], ["Trời nóng quá trời luôn", "Bật quạt chơi game thôi chứ biết sao"], ["Có nên vay ngân hàng mua đất không?", "Vay ít thôi, nhớ trả kẻo bị siết nợ đó"], ["Sao mấy ô sân bay đắt vậy", "Đủ 3 cái là bay đi đâu cũng được, đáng lắm"], ["Mai đi làm sớm mà giờ chưa ngủ", "Một ván cuối thôi rồi ngủ nha 😂"], ["Ai ở Huế không?", "Mình nè, Huế mưa suốt luôn"], ["Ván nhanh hay ván dài vui hơn?", "Ván nhanh, có sẵn 2 ô đất nên vào việc liền"], ["Cuối tuần này có sự kiện gì không ta", "Nghe nói sắp có sự kiện mới, hóng quá"], ["Mình vừa bị phá sản 😭", "Không sao, ván sau gỡ lại, mình phá sản 3 lần rồi"], ["Có ai nuôi mèo không?", "Nuôi 2 bé, ngồi chơi game là nằm đè lên tay"], ["Xin vía nổ hũ với ạ", "Vía đây, chúc bạn nổ to 🍀"], ["Cao ốc nào thu tiền thuê nhiều nhất vậy?", "Hoàn Kiếm với Nguyễn Huệ, dừng là khóc"]], BR2 = ["Chào bạn nha 👋", "Hello, vào chơi một ván không?", "Haha đúng rồi đó", "Đồng ý luôn", "Bạn ở đâu vậy?", "Ok nha bạn", "Gửi ID phòng đi mình vào", "Chuẩn luôn 😂", "Kết bạn với mình nha"];
+    const BW = ["Ai leo hạng tối nay không, mình đang Vàng 2 😭", "Vừa nổ hũ Quỹ, hên dữ thần", "Có ai bị cắt điện nước hoài như tui không 😂", "Mua được Hoàn Kiếm rồi, giàu rồi ae ơi", "Thua 3 ván liền, chắc đi ngủ thôi", "Rút trúng thẻ vào tù 2 lần liên tiếp, đời 🥲", "Ai chỉ mình cách gom đủ 4 sân bay với", "Sáng nay trời Hà Nội se se lạnh ghê", "Trưa nay ăn bún bò, chiều chơi 2 ván cho tiêu cơm", "Mới lên cấp 12, vui quá trời", "Ai bán rẻ cho mình ô Đà Lạt hông 😆", "Ván nhanh 20 vòng là chân ái", "Hôm nay sếp đi vắng, làm 1 ván đã 🤫", "Có ai Sài Gòn mưa to không", "Xúc xắc hôm nay ghét tui ghê", "Kết bạn với mình đi mọi người ơi", "Cuối tuần rảnh quá, ai rủ đi cà phê không 😅", "Đang chờ xe buýt, làm 1 ván cho đỡ chán", "Vừa xây cao ốc ở Hạ Long, ai dừng là toang", "Ai còn thức không, mất ngủ quá", "Trà sữa full topping + Lên Voi Xuống Chó = cuối tuần hoàn hảo", "Mèo nhà mình vừa đạp đổ ly cà phê lên bàn phím 🙀", "Bị Cao thủ cắt điện 3 lần một ván, ức ghê", "Ai đánh Xếp hạng đôi không, mình hơi gà nhưng chăm", "Lương về rồi, mua liền gói trang phục mới", "Có ai gặp Tỷ Phú Tương Lai chưa, chơi khôn dữ", "Mai thi rồi mà vẫn ngồi đây 😭", "Chúc cả nhà buổi tối vui vẻ nha", "Mẹ kêu đi ngủ mà còn 3 vòng nữa", "Bạn nào ở Đà Nẵng không, giao lưu chút", "Vừa thắng ván dài 60 vòng, mỏi tay luôn", "Có ai thấy thẻ Khí vận hôm nay keo kiệt không", "Đậu xe sai chỗ bị phạt, giống y vào ô Thuế 😂", "Hôm nay mưa, ở nhà chơi game là nhất", "Mình mới chơi, có mẹo gì không mọi người", "Ai tạo phòng cho mình vào với 🙏"], BC = [["Có ai biết mua ô nào lời nhất không?", "Gom đủ nhóm màu trước, có huy hiệu là lời liền"], ["Ủa sao mình vào tù hoài vậy 😭", "Do xúc xắc ghét bạn á, mình cũng vậy"], ["Ăn tối chưa mọi người?", "Vừa ăn cơm tấm xong, giờ làm ván nè"], ["Ai rảnh vào phòng mình không?", "Gửi ID đi, mình vào liền"], ["Hôm nay ai thắng nhiều nhất vậy?", "Mình thắng 2 thua 4 😅"], ["Trời nóng quá trời luôn", "Bật quạt chơi game thôi chứ biết sao"], ["Có nên vay ngân hàng mua đất không?", "Vay ít thôi, nhớ trả kẻo bị siết nợ đó"], ["Sao mấy ô sân bay đắt vậy", "Đủ 3 cái là bay đi đâu cũng được, đáng lắm"], ["Mai đi làm sớm mà giờ chưa ngủ", "Một ván cuối thôi rồi ngủ nha 😂"], ["Ai ở Huế không?", "Mình nè, Huế mưa suốt luôn"], ["Ván nhanh hay ván dài vui hơn?", "Ván nhanh, có sẵn 2 ô đất nên vào việc liền"], ["Cuối tuần này có sự kiện gì không ta", "Nghe nói sắp có sự kiện mới, hóng quá"], ["Mình vừa bị phá sản 😭", "Không sao, ván sau gỡ lại, mình phá sản 3 lần rồi"], ["Có ai nuôi mèo không?", "Nuôi 2 bé, ngồi chơi game là nằm đè lên tay"], ["Xin vía nổ hũ với ạ", "Vía đây, chúc bạn nổ to 🍀"], ["Cao ốc nào thu tiền thuê nhiều nhất vậy?", "Hoàn Kiếm với Nguyễn Huệ, dừng là khóc"]], BR2 = ["Chào bạn nha 👋", "Hello, vào chơi một ván không?", "Haha đúng rồi đó", "Đồng ý luôn", "Bạn ở đâu vậy?", "Ok nha bạn", "Gửi ID phòng đi mình vào", "Chuẩn luôn 😂", "Kết bạn với mình nha"];
     const bwho = () => { const i = Math.floor(Math.random()*BOTPOOL.length); return {who:BOTPOOL[i][0], pa:BOTPOOL_IMG[i] || '', k:i % 7}; };
     const bpost = (b, text, at) => { if(window.__bstyle) text = window.__bstyle(b.who, text); const bi = BOTPOOL.findIndex(x => x[0]===b.who), m = {who:b.who, text,at:at || Date.now(), me:0, k:b.k, ft:'', pa:b.pa, bot:1, r:bi < 0 ? 0 : botRows('rp')[bi].v, hr:1}; d.world.push(m); d.world.sort((x,y) => x.at - y.at); if(d.world.length > 40) d.world.shift(); if(!at && Math.random() < .5) FEED.say(m.who, m.text); try { window.__worldChanged && window.__worldChanged(); } catch(e) {} };
     const BT3 = [["Có ai thức không, buồn quá", "Tui nè, mất ngủ", "Vô làm ván đi hai ông", "Ok vô"], ["Ủa sao nay mua đất toàn bị người ta mua trước", "Chậm tay thì chịu thôi", "Lần sau gieo lẹ lên 😂"], ["Vừa bị ném trứng thối, ai ném tui vậy 😤", "Không phải tui nha", "Tui đó, ai biểu hôm qua giành đất tui 😏", "Đợi đó 😤"], ["Leo rank khó quá trời", "Đánh đấu đôi dễ lên hơn", "Ghép với cao thủ là bay rank luôn"], ["Nay sinh nhật tui nè", "Chúc mừng sinh nhật nha 🎂", "HPBD, tặng quà đi mọi người", "Để tui tặng bó hoa 🌹"], ["Ai ở Sài Gòn mưa không", "Mưa quá trời, ngập tới gối", "Ở nhà chơi game là chuẩn bài"], ["Ăn gì giờ này ta", "Mì gói thần thánh", "Bánh tráng trộn nha", "Đói mà nghèo, thôi uống nước 😂"], ["Sắp lương về rồi ae", "Lương về là nạp kim cương hả 😆", "Lương về là trả nợ ông ơi"], ["Có ai biết cách gom 4 sân bay không", "Gặp là mua liền, đừng tiếc tiền", "Có 3 cái là bay đâu cũng được rồi"], ["Mới lên Bạc nè ae", "Chúc mừng, tui kẹt Đồng cả tuần", "Ráng lên, Vàng đang chờ đó"], ["Ông nào vừa giành Hạ Long của tui ra đây", "Không phải tui 😇", "Tui đó, sao 😏", "Ván sau biết tay 😤"], ["Có ai chơi đấu đôi không, thiếu 1 người", "Tui nè", "Cho tui theo với"], ["Mấy bà nuôi chó hay mèo", "Mèo, lười như chủ", "Chó, sáng nào cũng kêu dậy đi làm", "Nuôi cá cho đỡ mệt 😂"], ["Hôm qua thắng 5 ván liền nè", "Xạo quá 😂", "Thiệt mà, có ảnh làm chứng", "Cho xin vía đi"]], BTH = ["Cảm ơn nha 🥰", "Ui quà nè, thương quá", "Ghê, được tặng quà luôn", "Cảm ơn nha, mai tặng lại"], BEG = ["Ai ném tui đó 😤", "Ê thôi nha 😤", "Trứng thối hôi quá trời 🤢", "Đợi đó, ném lại liền"];
@@ -13693,7 +13694,7 @@ window.TUTM = (() => {
     const one = k => { const i = TILES.findIndex(x => x.k===k); return i>=0 ? () => [cell(i)] : null; }, all = (...ks) => () => ks.flatMap(cellsOf).map(cell);
     const g0 = TILES.find(x => x.k==='land').g, land = () => TILES.map((x,i) => x.k==='land' && x.g===g0 ? cell(i) : null);
     const L = [
-      T('👋 Chào mừng tới Lên Đời!', 'Đây là <b>ván hướng dẫn</b>. Mục tiêu: mua đất, xây nhà, thu tiền thuê. Hết ván, ai có <b>tổng tài sản lớn nhất</b> thì thắng. Cùng xem từng ô trên bàn cờ nhé!', null, {wide:true}),
+      T('👋 Chào mừng tới Lên Voi Xuống Chó!', 'Đây là <b>ván hướng dẫn</b>. Mục tiêu: mua đất, xây nhà, thu tiền thuê. Hết ván, ai có <b>tổng tài sản lớn nhất</b> thì thắng. Cùng xem từng ô trên bàn cờ nhé!', null, {wide:true}),
       T('🙋 Đây là bạn', 'Khung của bạn: <b>tiền mặt</b>, số ô đất đang có và <b>thứ hạng</b> trong ván.', () => [document.querySelector(`.pc[data-p="${S.viewer}"]`)]),
       one('go') && T('🚩 Xuất phát', 'Mỗi lần đi qua ô này bạn nhận <b>200</b>.', one('go')),
       T('🏠 Ô đất', 'Số trên ô là <b>giá mua</b>. Dừng ở ô trống thì được mua. Ai dừng ở đất của bạn phải <b>trả tiền thuê</b> cho bạn. Mỗi màu là một nhóm: gom đủ nhóm được <b>huy hiệu</b> và tiền thuê tăng mạnh.', land),
@@ -13766,7 +13767,7 @@ window.FS_ = (() => {
     const share = '<i class="fsico">⬆️</i>';
     const body = inApp
       ? `<p class="fsp">Bạn đang mở game trong ứng dụng ${/Zalo/i.test(ua) ? 'Zalo' : /Instagram/i.test(ua) ? 'Instagram' : /TikTok|musical_ly|Bytedance/i.test(ua) ? 'TikTok' : 'Facebook'}, ở đây không bật được toàn màn hình.</p><ol class="fsg">${step(1, 'Bấm nút <b>⋯</b> hoặc <b>⋮</b> ở góc màn hình')}${step(2, `Chọn <b>Mở bằng ${iOS ? 'Safari' : 'Chrome'}</b> (hoặc "Mở trong trình duyệt")`)}${step(3, iOS ? 'Trong Safari, làm theo hướng dẫn thêm game vào Màn hình chính' : 'Trong Chrome, bấm ⛶ để chơi toàn màn hình')}</ol>`
-      : `<p class="fsp">iPhone không cho trang web tự bật toàn màn hình. Thêm game vào <b>Màn hình chính</b> một lần, sau đó mở từ biểu tượng là chơi toàn màn hình như app.</p><ol class="fsg">${step(1, `Bấm nút <b>Chia sẻ</b> ${share} ở thanh dưới của Safari`)}${step(2, 'Kéo xuống, chọn <b>Thêm vào MH chính</b>')}${step(3, 'Bấm <b>Thêm</b>, rồi mở game bằng biểu tượng <b>Lên Đời</b> trên màn hình')}</ol>`;
+      : `<p class="fsp">iPhone không cho trang web tự bật toàn màn hình. Thêm game vào <b>Màn hình chính</b> một lần, sau đó mở từ biểu tượng là chơi toàn màn hình như app.</p><ol class="fsg">${step(1, `Bấm nút <b>Chia sẻ</b> ${share} ở thanh dưới của Safari`)}${step(2, 'Kéo xuống, chọn <b>Thêm vào MH chính</b>')}${step(3, 'Bấm <b>Thêm</b>, rồi mở game bằng biểu tượng <b>Lên Voi Xuống Chó</b> trên màn hình')}</ol>`;
     openModal(inApp ? '🌐 Mở bằng trình duyệt' : '📲 Chơi toàn màn hình', body, [{label:'Đã hiểu', primary:true, fn:closeModal}], 'one fsdlg');
   }
   function toggle(){ if(on() && !app()){ exit(); return; } if(app()) return; if(can() && !inApp) enter(); else guide(); }
