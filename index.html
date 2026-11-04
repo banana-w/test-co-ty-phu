@@ -2890,8 +2890,9 @@ html.land #home .lob .ldock #homeQuest .qdot{position:absolute !important;left:a
 /* bốn thẻ người chơi: góc màn hình không có tai thỏ nên chỉ chừa góc bo tròn (--plx/--prx đặt trong fit) */
 html.app #stage .pc.q0,html.app #stage .pc.q1{left:calc(8px + var(--plx,0px)) !important}
 html.app #stage .pc.q2,html.app #stage .pc.q3{right:calc(8px + var(--prx,0px)) !important}
-html.app body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html.app input,html.app textarea{-webkit-user-select:text;user-select:text}
+/* không cho bôi đen chữ trong game (cả trên trình duyệt), trừ ô nhập */
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text}
 /* các màn ngoài ván: chừa chỗ cho tai thỏ / Dynamic Island và thanh Home */
 html.land body:not(.ingame) #app{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));padding-bottom:max(10px,env(safe-area-inset-bottom))}
 
