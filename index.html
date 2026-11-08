@@ -2153,6 +2153,8 @@ body.lowfx .pvs,body.lowfx .pvburst::before{animation:none}
 #questBtn .qdot{top:-4px;right:-4px}
 #lbd{color:#FFFDF6}
 body[data-scr="lbd"]{background:radial-gradient(120% 52% at 50% 0%,rgba(244,197,66,.45) 0%,rgba(255,110,60,.18) 36%,rgba(14,19,48,0) 68%),linear-gradient(180deg,#151B44 0%,#251B4E 58%,#10143A 100%) !important;background-attachment:fixed !important}
+/* v150: nền tối phải có màu đặc ở dưới lớp gradient: Safari trên iPhone lấy màu nền trang để tô vùng thanh trạng thái, nền trong suốt thì ra một vạch trắng ở trên cùng */
+body:not([data-scr]),body:is([data-scr="home"],[data-scr="pick"],[data-scr="friend"],[data-scr="setup"],[data-scr="lbd"]){background-color:#151B44 !important}
 #lbd .lbx{max-width:640px;margin:0 auto;padding:4px 0 24px;font-family:'Be Vietnam Pro',system-ui,sans-serif}
 #lbd .lbback{background:none;border:0;color:#FFD9A0;font-weight:800;font-size:17px;padding:8px 0;min-height:44px}
 #lbd .lbhero{position:relative;overflow:hidden;border:3px solid #FFFDF6;border-radius:20px;padding:14px 14px 16px;text-align:center;box-shadow:0 8px 0 rgba(0,0,0,.3);
