@@ -291,7 +291,7 @@ table.t td:last-child{text-align:right;font-weight:600}
 /* quân cờ đứng thẳng */
 .tk{position:absolute;left:0;top:0;width:var(--tk);height:var(--tk);margin:calc(var(--tk)*-.86) 0 0 calc(var(--tk)*-.5);border-radius:50%;display:flex;align-items:center;justify-content:center;
   font-size:calc(var(--tk)*.62);line-height:1;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.75),rgba(255,255,255,0) 46%),var(--c);border:2.5px solid #fff;
-  box-shadow:0 2px 0 rgba(0,0,0,.35),0 6px 8px rgba(0,0,0,.45);transition:left .24s ease-in-out,top .24s ease-in-out}
+  box-shadow:0 2px 0 rgba(0,0,0,.35),0 6px 8px rgba(0,0,0,.45);transition:translate .24s ease-in-out;will-change:translate}
 .tk::after{content:"";position:absolute;left:18%;right:18%;bottom:-22%;height:16%;border-radius:50%;background:rgba(0,0,0,.38);filter:blur(2px);z-index:-1}
 .tk.cur{box-shadow:0 0 0 3px #FFD766,0 0 14px 4px rgba(255,215,102,.85),0 6px 8px rgba(0,0,0,.45)}
 .tk.dead{display:none}
@@ -685,9 +685,9 @@ body.ingame #islandFx .isl{background:#F8F2E2;color:#2B3A67;border:2.5px solid #
 .hs2.pop{animation:hspop .55s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--nd,0ms)}
 @keyframes hspop{0%{transform:translateY(-100%) scale(.15)}100%{transform:translateY(-100%) scale(1)}}
 /* quầng sáng dưới chân, theo màu nhân vật */
-.feet{position:absolute;width:calc(var(--tk)*2.3);height:calc(var(--tk)*1.05);margin:calc(var(--tk)*-.44) 0 0 calc(var(--tk)*-1.15);border-radius:50%;opacity:.8;
+.feet{position:absolute;left:0;top:0;width:calc(var(--tk)*2.3);height:calc(var(--tk)*1.05);margin:calc(var(--tk)*-.44) 0 0 calc(var(--tk)*-1.15);border-radius:50%;opacity:.8;
   background:radial-gradient(closest-side,rgba(255,255,255,.95) 0%,var(--c) 36%,color-mix(in srgb,var(--c) 55%,transparent) 66%,transparent 100%);
-  transition:left .24s ease-in-out,top .24s ease-in-out;animation:feet 1.9s ease-in-out infinite}
+  transition:translate .24s ease-in-out;animation:feet 1.9s ease-in-out infinite}
 .feet.cur{opacity:1;animation-duration:1.1s}
 .feet.dead{display:none}
 @keyframes feet{0%,100%{transform:scale(.82)}50%{transform:scale(1.15)}}
@@ -1244,15 +1244,15 @@ body:not(.ingame) .dlg.sys #mBody{max-height:72vh}
 #board .band.rent{font-size:1.05em}
 #board .cell[aria-label="Cơ hội"] .nmw,#board .cell[aria-label="Khí vận"] .nmw{display:none}
 #board .cell[aria-label="Cơ hội"] .ic,#board .cell[aria-label="Khí vận"] .ic{flex:1 1 auto;font-size:2.3em !important}
-.tk{transition:left .46s linear,top .46s linear}
+.tk{transition:translate .46s linear}
 #cam{transition:transform .5s linear}
 #stash{z-index:2}
 #board .s-b .nm,#board .s-t .nm{font-size:.8em;overflow-wrap:normal;word-break:keep-all}
 #board .s-b .nmw,#board .s-t .nmw{overflow:visible}
 /* ===== mô hình nổi, nhà 3D, hiệu ứng xây ===== */
 #stash{z-index:4}
-.tk{transition:left .24s linear,top .24s linear}
-.tk.me{transition:left .46s linear,top .46s linear}
+.tk{transition:translate .24s linear}
+.tk.me{transition:translate .46s linear}
 .cm3{position:absolute;pointer-events:none;filter:drop-shadow(0 5px 3px rgba(43,58,103,.3))}
 #board .cell.cn .ic{visibility:hidden}
 #board .cell.cn{justify-content:flex-start}
@@ -1437,7 +1437,7 @@ body:not(.ingame) .dlg.sys #mBody{max-height:72vh}
 .t3 circle,.t3 ellipse,.t3 polygon,.t3 rect{transform-box:fill-box}
 /* ===== tối ưu: lớp mô hình giữ nguyên, chế độ nhẹ tự bật khi máy yếu ===== */
 #models{position:absolute;inset:0;pointer-events:none}
-.tk{will-change:left,top}
+.tk{will-change:translate}
 body.lite .cm3,body.lite .t3,body.lite .hs2,body.lite .stash .msvg{filter:none !important}
 body.lite .smoke,body.lite .wave,body.lite .drop,body.lite .sway,body.lite .swayw2,body.lite .bird,body.lite .flap,body.lite .bob,body.lite .nod,body.lite .lf,body.lite .gust,body.lite .star,body.lite .foam,body.lite .flow,body.lite .spk,body.lite .cop,body.lite .spin,body.lite .spin6,body.lite .hop,body.lite .run,body.lite .pace,body.lite .qsh{animation:none !important}
 body.lite #cam{transition:transform .3s linear}
@@ -1470,7 +1470,7 @@ body.lowfx .cell.full,body.lowfx .cell.full .band,body.lowfx .spk,body.lowfx .fe
 .cm3.k-center{filter:none}
 #board .cell .ic.hit2{animation:flathit 2.2s ease-out both}
 @keyframes flathit{0%{transform:scale(1) rotate(0);filter:drop-shadow(0 0 0 #FFE27A)}10%{transform:scale(1.5) rotate(-16deg)}22%{transform:scale(1.55) rotate(14deg);filter:drop-shadow(0 0 6px #FFE27A) drop-shadow(0 0 10px #FFC53D)}34%{transform:scale(1.45) rotate(-11deg)}46%{transform:scale(1.4) rotate(8deg)}60%{transform:scale(1.3) rotate(-5deg);filter:drop-shadow(0 0 6px #FFE27A) drop-shadow(0 0 10px #FFC53D)}100%{transform:scale(1) rotate(0);filter:drop-shadow(0 0 0 #FFE27A)}}
-.tk.me{transition:left .24s linear,top .24s linear}
+.tk.me{transition:translate .24s linear}
 #cam{transition:transform .28s linear}
 #rim{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
 #rim i{position:absolute;box-sizing:border-box;background:var(--o);border:2px solid #2B3A67;border-radius:4px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4)}
@@ -2208,10 +2208,13 @@ body.lowfx .t3.t-grave .gb,body.lowfx .t3.t-grave .glamp,body.lowfx .t3.t-grave 
 /* Đủ nhóm màu: nhấp nháy miếng viền sở hữu phía ngoài ô, phần giá đứng yên */
 .cell.full .band,.cell.half .band{animation:none !important}
 .cell.full{animation:none !important;box-shadow:inset 0 0 0 2.5px var(--o),inset 0 0 10px color-mix(in srgb,var(--g) 70%,transparent)}
-#rim i.full{z-index:1;animation:rimp 1.8s ease-in-out infinite}
-@keyframes rimp{0%,100%{background:var(--o);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.4),0 0 0 0 transparent}50%{background:color-mix(in srgb,var(--o) 68%,#fff);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.75),0 0 5px 1px color-mix(in srgb,var(--o) 70%,transparent)}}
-body.lowfx #rim i.full,body.perf #rim i.full{animation:none}
-@media (prefers-reduced-motion: reduce){ #rim i.full{animation:none} }
+/* v150: nhịp sáng của viền đủ nhóm chỉ đổi độ mờ của một lớp phủ (GPU tự làm), không bắt máy vẽ lại nền và bóng mỗi khung hình */
+#rim i.full{z-index:1}
+#rim i.full::after{content:"";position:absolute;inset:0;border-radius:2px;background:rgba(255,255,255,.32);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5),0 0 5px 3px color-mix(in srgb,var(--o) 70%,transparent);opacity:0;pointer-events:none;animation:rimp 1.8s ease-in-out infinite}
+@keyframes rimp{0%,100%{opacity:0}50%{opacity:1}}
+html.notl .tk,html.notl .tsh,html.notl .feet{transition:left .24s linear,top .24s linear}
+body.lowfx #rim i.full::after,body.perf #rim i.full::after{animation:none}
+@media (prefers-reduced-motion: reduce){ #rim i.full::after{animation:none} }
 
 #board .cell.s-r[aria-label="Cơ hội"] .ic,#board .cell.s-r[aria-label="Khí vận"] .ic,#board .cell.s-l[aria-label="Cơ hội"] .ic,#board .cell.s-l[aria-label="Khí vận"] .ic{position:absolute !important;left:50%;top:50%;width:39.5% !important;height:253% !important;flex:none !important;padding:3.6% !important;transform:translate(-50%,-50%) rotate(-90deg)}
 
@@ -2697,15 +2700,15 @@ body.wide .dlg:has(#trBox) #mOpts .btn.primary{flex:2.2 1 0 !important}
 
 /* ===== CẢM GIÁC 3D (v116): bóng đổ trên mặt bàn (nắng từ góc trên trái), quân nảy theo từng bước, rung khi tiền lớn ===== */
 .tk::after{display:none}
-.tsh{position:absolute;left:0;top:0;width:calc(var(--tk)*1.02);height:calc(var(--tk)*.46);margin:calc(var(--tk)*-.12) 0 0 calc(var(--tk)*-.38);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(30,42,80,.5) 0,rgba(30,42,80,.34) 45%,rgba(30,42,80,0) 72%);pointer-events:none;transition:left .24s linear,top .24s linear;will-change:left,top}
+.tsh{position:absolute;left:0;top:0;width:calc(var(--tk)*1.02);height:calc(var(--tk)*.46);margin:calc(var(--tk)*-.12) 0 0 calc(var(--tk)*-.38);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(30,42,80,.5) 0,rgba(30,42,80,.34) 45%,rgba(30,42,80,0) 72%);pointer-events:none;transition:translate .24s linear;will-change:translate}
 .tsh.dead{display:none}
 .tk.hop,.tk.landq{transform-origin:50% 100%}
 .tk.hop,body.lite .tk.hop{animation:tkhop .25s both !important}
 .tk.landq{animation:tkland .36s ease-out both}
 .tsh.hop,body.lite .tsh.hop{animation:tshhop .25s both !important}
 .tsh.landq{animation:tshland .36s ease-out both}
-@keyframes tkhop{0%{translate:0 0;scale:1.07 .9;animation-timing-function:cubic-bezier(.2,.7,.4,1)}48%{translate:0 calc(var(--tk)*-.5);scale:.95 1.06;animation-timing-function:cubic-bezier(.6,0,.9,.5)}100%{translate:0 0;scale:1 1}}
-@keyframes tkland{0%{scale:1 1}28%{scale:1.2 .78}60%{scale:.94 1.08}100%{scale:1 1}}
+@keyframes tkhop{0%{transform:translate(0,0) scale(1.07,.9);animation-timing-function:cubic-bezier(.2,.7,.4,1)}48%{transform:translate(0,calc(var(--tk)*-.5)) scale(.95,1.06);animation-timing-function:cubic-bezier(.6,0,.9,.5)}100%{transform:translate(0,0) scale(1,1)}}
+@keyframes tkland{0%{transform:scale(1,1)}28%{transform:scale(1.2,.78)}60%{transform:scale(.94,1.08)}100%{transform:scale(1,1)}}
 @keyframes tshhop{0%,100%{scale:1;opacity:1}48%{scale:.62;opacity:.55}}
 @keyframes tshland{0%,100%{scale:1}28%{scale:1.22}}
 .hs2::before{content:"";position:absolute;left:6%;right:-18%;bottom:4%;height:31%;border-radius:50%;background:radial-gradient(ellipse at 50% 50%,rgba(30,42,80,.4) 0,rgba(30,42,80,.26) 45%,rgba(30,42,80,0) 72%);z-index:-1;pointer-events:none}
@@ -9321,6 +9324,10 @@ function renderModels(){
     el.onclick = () => showTile(TILES.findIndex(t => t.k===(ch ? 'chance' : 'fortune')));
     box.appendChild(el); MOD.dk[id] = el; });
 }
+/* v150: đặt quân, bóng, quầng sáng bằng translate; trình duyệt quá cũ không có translate thì dùng left/top như trước */
+const TK_TL = typeof CSS!=='undefined' && CSS.supports && CSS.supports('translate', '1px 1px');
+if(typeof document!=='undefined' && !TK_TL) document.documentElement.classList.add('notl');
+function tkPlace(e, x, y){ if(TK_TL) e.style.translate = x + 'px ' + y + 'px'; else { e.style.left = x + 'px'; e.style.top = y + 'px'; } }
 function renderOver(){
   // nhà lego đứng trên ô
   let h = '';
@@ -9341,7 +9348,7 @@ function renderOver(){
     if(!ft){ ft = document.createElement('div'); ft.dataset.p = p.id; ft.style.setProperty('--c', p.color); glow.appendChild(ft); }
     const fc = tokenPt(p);
     ft.className = 'feet' + (p.alive ? '' : ' dead') + (p.id===S.cur && !S.over ? ' cur' : '');
-    if(fc){ ft.style.left = fc[0] + 'px'; ft.style.top = fc[1] + 'px'; }   /* v131: trượt lớp có sẵn, không bắt máy tính lại bố cục và vẽ lại bàn */
+    if(fc) tkPlace(ft, fc[0], fc[1]);   /* v131: trượt lớp có sẵn, không bắt máy tính lại bố cục và vẽ lại bàn */
     let el = layer.querySelector(`.tk[data-p="${p.id}"]`);
     if(!el){ el = document.createElement('div'); el.className = 'tk'; el.dataset.p = p.id; el.style.setProperty('--c', p.color); layer.appendChild(el); }
     const rg = ringSVG(p), key = rg ? 'r' + S.ring.start : '';
@@ -9350,9 +9357,9 @@ function renderOver(){
     let sd = glow.querySelector(`.tsh[data-p="${p.id}"]`);
     if(!sd){ sd = document.createElement('div'); sd.className = 'tsh'; sd.dataset.p = p.id; glow.appendChild(sd); }
     sd.classList.toggle('dead', !p.alive || !!(p.rideUntil && Date.now()<p.rideUntil));
-    if(c){ sd.style.left = c[0] + 'px'; sd.style.top = c[1] + 'px'; }
+    if(c) tkPlace(sd, c[0], c[1]);   /* v150: trượt bằng translate (GPU), không bắt máy tính lại bố cục và vẽ lại bàn cờ mỗi khung hình */
     el.className = 'tk' + (S.plate && p.id===S.plateSeat ? ' tpl tplate-' + S.plate : '') + (p.alive ? '' : ' dead') + (p.id===S.viewer && !p.bot ? ' me' : '') + (p.id===S.cur && !S.over ? ' cur' : '') + (p.hitAt && Date.now()-p.hitAt<650 ? ' ouch' : '') + (p.rideUntil && Date.now()<p.rideUntil ? ' riding' : '') + ['sob','rage','joy','hop','hop2','landq','hopR','hopL','hopF','hopB','flying'].map(k => el.classList.contains(k) ? ' ' + k : '').join('');
-    if(c){ el.style.left = c[0] + 'px'; el.style.top = c[1] + 'px'; el.style.zIndex = Math.round(c[1]) + 1; }
+    if(c){ tkPlace(el, c[0], c[1]); el.style.zIndex = Math.round(c[1]) + 1; }
   });
   layer.querySelectorAll('.tk').forEach(el => { if(+el.dataset.p >= S.players.length) el.remove(); });
   glow.querySelectorAll('.feet,.tsh').forEach(el => { if(+el.dataset.p >= S.players.length) el.remove(); });
@@ -13532,15 +13539,15 @@ body.eco #sky .stars{display:none}
 body.eco #sky .sun,body.eco #sky .sun.set,body.eco #sky .moon{box-shadow:none !important;transition:none !important;will-change:auto !important}
 body.eco #sky>div{will-change:auto !important;transform:none !important}
 /* 4. ô đủ bộ, nhà cấp 3: viền sáng đứng yên */
-body.eco .cell.full,body.eco .cell.full *,body.eco .cell.full::before,body.eco .cell.full::after,body.eco .hs2.shine svg,body.eco .hs2.shine i,body.eco #rim i.full,body.eco .bdg::after{animation:none !important}
+body.eco .cell.full,body.eco .cell.full *,body.eco .cell.full::before,body.eco .cell.full::after,body.eco .hs2.shine svg,body.eco .hs2.shine i,body.eco #rim i.full::after,body.eco .bdg::after{animation:none !important}
 /* 5. kính mờ thành nền màu đặc */
 body.eco .panel,body.eco #pauseFx{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
 body.eco:is([data-scr="home"],[data-scr="pick"],[data-scr="friend"],[data-scr="setup"]) .panel{background:rgba(43,52,92,.92) !important}
 /* 6. đang mở hộp thoại hoặc khung chat: mọi chuyển động phía sau tạm dừng */
 body.eco.mdlon #app section *,body.eco.chaton #cam *,body.eco.chaton #sky *{animation-play-state:paused !important}   /* v132: thay body:has(...) bằng lớp mdlon/chaton (body:has bắt trình duyệt tính lại kiểu cả trang mỗi lần vẽ, làm quân đi giật) */
 
-@keyframes tkhop{0%{translate:0 0;scale:1.07 .9;animation-timing-function:cubic-bezier(.2,.7,.4,1)}48%{translate:0 calc(var(--tk)*-.5);scale:.95 1.06;animation-timing-function:cubic-bezier(.6,0,.9,.5)}100%{translate:0 0;scale:1 1}}
-@keyframes tkhop2{0%{translate:0 0;scale:1.07 .9;animation-timing-function:cubic-bezier(.2,.7,.4,1)}48%{translate:0 calc(var(--tk)*-.5);scale:.95 1.06;animation-timing-function:cubic-bezier(.6,0,.9,.5)}100%{translate:0 0;scale:1 1}}
+@keyframes tkhop{0%{transform:translate(0,0) scale(1.07,.9);animation-timing-function:cubic-bezier(.2,.7,.4,1)}48%{transform:translate(0,calc(var(--tk)*-.5)) scale(.95,1.06);animation-timing-function:cubic-bezier(.6,0,.9,.5)}100%{transform:translate(0,0) scale(1,1)}}
+@keyframes tkhop2{0%{transform:translate(0,0) scale(1.07,.9);animation-timing-function:cubic-bezier(.2,.7,.4,1)}48%{transform:translate(0,calc(var(--tk)*-.5)) scale(.95,1.06);animation-timing-function:cubic-bezier(.6,0,.9,.5)}100%{transform:translate(0,0) scale(1,1)}}
 @keyframes tshhop2{0%,100%{scale:1;opacity:1}48%{scale:.62;opacity:.55}}
 .tk.hop,body.lite .tk.hop{animation:tkhop .26s both !important}
 .tk.hop2,body.lite .tk.hop2{animation:tkhop2 .26s both !important}
